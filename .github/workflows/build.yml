@@ -34,11 +34,11 @@ jobs:
         with:
           registry: ghcr.io
           username: ${{ github.actor }}
-          password: ${{ secrets.GITHUB_TOKEN }}
+          password: ${{ secrets.LMS_TOKEN }}
           
       - name: Set Branch
         run: |
-          export APPS_JSON='[{"url": "https://github.com/frappe/lms","branch": "main"}]'
+          export APPS_JSON='[{"url": "https://github.com/Ph0en1XXX/lms","branch": "main"}]'
           echo "APPS_JSON_BASE64=$(echo $APPS_JSON | base64 -w 0)" >> $GITHUB_ENV
           echo "FRAPPE_BRANCH=version-15" >> $GITHUB_ENV
 
