@@ -10,6 +10,16 @@
             <label class="form-label sr-only" for="signup_email"> {{ _("Email") }} </label>
             <input type="email" id="signup_email" class="form-control"
             placeholder="{{ _('jane@example.com') }}" required>
+            <label class="form-label sr-only"> {{ _("Test select") }} </label>
+            <div class="control-input-wrapper">
+                <div class="control-input flex align-center">
+                    <select type="text" id="user_category" data-fieldname="user_category" style="color: var(--text-muted)"
+                    class="input-with-feedback form-control ellipsis" data-fieldtype="Select" required>
+                        <option value=""> {{ _("Test option") }} </option>
+                        <option value=""> {{ _("Test option 2") }} </option>
+                    </select>
+                </div>
+            </div>
         </div>
 
         {% if frappe.db.get_single_value("LMS Settings", "user_category") %}
