@@ -13,10 +13,10 @@
             <label class="form-label sr-only"> {{ _("Test select") }} </label>
             <div class="control-input-wrapper">
                 <div class="control-input flex align-center">
-                    <select type="text" id="user_category" data-fieldname="user_category" style="color: var(--text-muted)"
+                    <select type="text" id="user_role" data-fieldname="user_role" style="color: var(--text-muted)"
                     class="input-with-feedback form-control ellipsis" data-fieldtype="Select" required>
-                        <option value=""> {{ _("Test option") }} </option>
-                        <option value=""> {{ _("Test option 2") }} </option>
+                        <option value="LMS Student"> {{ _("Student") }} </option>
+                        <option value="Course Creator"> {{ _("Course Creator") }} </option>
                     </select>
                 </div>
             </div>
@@ -100,7 +100,8 @@
                 "email": email,
                 "full_name": full_name,
                 "verify_terms": $("#signup-terms").prop("checked") ? 1 : 0,
-                "user_category": $("#user_category").length ?  $("#user_category").val() : ""
+                "user_category": $("#user_category").length ?  $("#user_category").val() : "",
+                "user_role": $("#user_role").length ? $("#user_role").val() : "" // Role 
             },
             statusCode: login.login_handlers
         })

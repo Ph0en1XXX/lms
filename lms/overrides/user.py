@@ -189,7 +189,7 @@ def get_palette(full_name):
 
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(email, full_name, verify_terms, user_category):
+def sign_up(email, full_name, verify_terms, user_category, user_role):
 	if is_signup_disabled():
 		frappe.throw(_("Sign Up is disabled"), _("Not Allowed"))
 
@@ -231,7 +231,13 @@ def sign_up(email, full_name, verify_terms, user_category):
 	if default_role:
 		user.add_roles(default_role)
 
-	user.add_roles("LMS Student")
+	# set Role
+	if user_role:
+    	user.add_roles(user_role)  # Если роль передана, добавляем её
+	else:
+    	user.add_roles("LMS Student")  # Иначе добавляем роль по умолчанию
+
+	#user.add_roles("LMS Student")
 	set_country_from_ip(None, user.name)
 
 	if user.flags.email_sent:
