@@ -233,9 +233,9 @@ def sign_up(email, full_name, verify_terms, user_category, user_role):
 
 	# set Role
 	if user_role:
-        user.add_roles(user_role)  # Если роль передана, добавляем её
+		user.add_roles(user_role)  # Если роль передана, добавляем её
 	else:
-        user.add_roles("LMS Student")  # Иначе добавляем роль по умолчанию
+		user.add_roles("LMS Student")  # Иначе добавляем роль по умолчанию
 
 	#user.add_roles("LMS Student")
 	set_country_from_ip(None, user.name)
