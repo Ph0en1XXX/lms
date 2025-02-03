@@ -18,7 +18,7 @@ class CustomUser(User):
 
 	def after_insert(self):
 		super().after_insert()
-		self.add_roles("LMS Student")
+		#self.add_roles("LMS Student")
 
 	def validate_username_duplicates(self):
 		while not self.username or self.username_exists():
@@ -230,9 +230,7 @@ def sign_up(email, full_name, verify_terms, user_category, user_role):
 	default_role = frappe.db.get_value("Portal Settings", None, "default_role")
 	if default_role:
 		user.add_roles(default_role)
-
-	# set Role
-	if user_role:
+	elif user_role: # set Role
 		user.add_roles(user_role)  # Если роль передана, добавляем её
 	else:
 		user.add_roles("LMS Student")  # Иначе добавляем роль по умолчанию

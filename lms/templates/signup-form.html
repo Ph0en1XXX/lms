@@ -10,32 +10,20 @@
             <label class="form-label sr-only" for="signup_email"> {{ _("Email") }} </label>
             <input type="email" id="signup_email" class="form-control"
             placeholder="{{ _('jane@example.com') }}" required>
-            <label class="form-label sr-only"> {{ _("Test select") }} </label>
-            <div class="control-input-wrapper">
-                <div class="control-input flex align-center">
-                    <select type="text" id="user_role" data-fieldname="user_role" style="color: var(--text-muted)"
-                    class="input-with-feedback form-control ellipsis" data-fieldtype="Select" required>
-                        <option value="LMS Student"> {{ _("Student") }} </option>
-                        <option value="Course Creator"> {{ _("Course Creator") }} </option>
-                    </select>
-                </div>
-            </div>
         </div>
 
         {% if frappe.db.get_single_value("LMS Settings", "user_category") %}
         <div class="form-group">
-            <label class="form-label sr-only"> {{ _("User Category") }} </label>
+            <label class="form-label sr-only"> {{ _("Role") }} </label>
             <div class="control-input-wrapper">
                 <div class="control-input flex align-center">
-                    <select type="text" id="user_category" data-fieldname="user_category" style="color: var(--text-muted)"
+                    <select type="text" id="user_role" data-fieldname="user_role" style="color: var(--text-muted)"
                     class="input-with-feedback form-control ellipsis" data-fieldtype="Select" required>
-                        <option value=""> {{ _("Category") }} </option>
-                        <option value="Business Owner"> {{ _("Business Owner") }} </option>
-                        <option value="Manager (Sales/Marketing/Customer)"> {{ _("Manager (Sales/Marketing/Customer)") }} </option>
-                        <option value="Employee"> {{ _("Employee") }} </option>
-                        <option value="Student"> {{ _("Student") }} </option>
-                        <option value="Freelancer/Just looking"> {{ _("Freelancer/Just looking") }} </option>
-                        <option value="Others"> {{ _("Others") }} </option>
+                        <option value=""> {{ _("Role") }} </option>
+                        <option value="LMS Student"> {{ _("Student") }} </option>
+                        <option value="LMS Schoolchild"> {{ _("Schoolchild") }} </option>
+                        <option value="Content Creator"> {{ _("Content Creator") }} </option>
+                        <option value="Parent"> {{ _("Parent") }} </option>
                     </select>
                 </div>
             </div>
