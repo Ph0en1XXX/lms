@@ -250,7 +250,7 @@ def create_live_class(
 		return class_details"""
 
 @frappe.whitelist()
-def create_live_class(batch_name, title, duration, date, time, timezone, auto_recording, description=None):
+def create_live_class(batch_name, title, date, time, timezone, auto_recording, description=None, duration=None):
 	frappe.only_for("Moderator")
 	
 	meeting_id = title.replace(" ", "_").lower()
@@ -266,6 +266,7 @@ def create_live_class(batch_name, title, duration, date, time, timezone, auto_re
 		"time": time,
 		"batch_name": batch_name,
 		"description": description,
+		"duration":duration,
 		"auto_recording": auto_recording,
 	}
 
