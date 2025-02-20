@@ -268,6 +268,7 @@ def create_live_class(batch_name, title, date, time, timezone, auto_recording, d
 		"description": description,
 		"duration":duration,
 		"auto_recording": auto_recording,
+		"timezone": timezone
 	}
 
 	class_details = frappe.get_doc(payload)
