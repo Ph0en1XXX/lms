@@ -14,7 +14,7 @@
         <div class="form-group">
             <label class="form-label sr-only" for="signup_phone"> {{ _("Phone") }} </label>
             <input type="phone" id="signup_phone" class="form-control"
-            placeholder="{{ _('jane@example.com') }}" required>
+            placeholder="{{ _('+79990009900') }}" required>
         </div>
 
         {% if frappe.db.get_single_value("LMS Settings", "user_category") %}
