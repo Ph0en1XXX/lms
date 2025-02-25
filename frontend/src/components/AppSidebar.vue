@@ -138,13 +138,21 @@ onMounted(() => {
 	)
 
 	sidebarLinks.value.push({
-		label: 'Google',
-		icon: 'Globe',
-		to: 'https://www.google.com',
+		label: 'Leader Board',
+		icon: 'Trophy',
+		to: 'leaderboardsample',
 		external: true,
 		activeFor: [],
 	})
-	
+
+	sidebarLinks.value.push({
+		label: 'Forms',
+		icon: 'ClipboardList',
+		to: 'form-page',
+		external: true,
+		activeFor: [],
+	})
+
 })
 
 const unreadNotifications = createResource({
