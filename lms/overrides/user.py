@@ -189,7 +189,7 @@ def get_palette(full_name):
 
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(email, full_name, verify_terms, user_category, user_role):
+def sign_up(email, full_name, verify_terms, user_category, user_role, phone):
 	if is_signup_disabled():
 		frappe.throw(_("Sign Up is disabled"), _("Not Allowed"))
 
@@ -213,6 +213,7 @@ def sign_up(email, full_name, verify_terms, user_category, user_role):
 		{
 			"doctype": "User",
 			"email": email,
+			"phone": escape_html(phone),
 			"first_name": escape_html(full_name),
 			"verify_terms": verify_terms,
 			"user_category": user_category,
