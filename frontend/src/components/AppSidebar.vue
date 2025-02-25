@@ -136,6 +136,15 @@ onMounted(() => {
 			},
 		}
 	)
+
+	sidebarLinks.value.push({
+		label: 'Google',
+		icon: 'Globe',
+		to: 'https://www.google.com',
+		external: true,
+		activeFor: [],
+	})
+	
 })
 
 const unreadNotifications = createResource({
