@@ -277,14 +277,14 @@ watch(userResource, () => {
 		isInstructor.value = userResource.data.is_instructor
 
 		const roles = userResource.data?.roles || []
-        let courseURL = '/lms/courses' // По умолчанию обычные курсы
+        let courseURL = 'lms/courses' // По умолчанию обычные курсы
 
         if (roles.includes('Course Creator')) {
-            courseURL = '/lms/courses?category=Курсы+для+преподавателей'
+            courseURL = 'lms/courses?category=Курсы+для+преподавателей'
         } else if (roles.includes('LMS Student')) {
-            courseURL = '/lms/courses?category=Курсы+для+студентов'
+            courseURL = 'lms/courses?category=Курсы+для+студентов'
         } else if (roles.includes('LMS Schoolchild')) {
-            courseURL = '/lms/courses?category=Курсы+для+школьников'
+            courseURL = 'lms/courses?category=Курсы+для+школьников'
 		}
 
         sidebarLinks.value.push({
