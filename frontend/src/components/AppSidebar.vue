@@ -137,7 +137,7 @@ onMounted(() => {
             courseURL = 'lms/courses?category=Курсы+для+школьников'
 		}
 
-        sidebarLinks.value.push({
+        sidebarLinks.value.unshift({
             label: 'Courses',
             icon: 'Book',
             to: courseURL,
