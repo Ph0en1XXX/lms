@@ -124,7 +124,26 @@ onMounted(() => {
 	addNotifications()
 
 	sidebarLinks.value = getSidebarLinks().filter(link => link.label !== 'Courses')
+
 	
+	const roles = userResource.data?.roles || []
+        let courseURL = 'lms/courses' // По умолчанию обычные курсы
+
+        if (roles.includes('Course Creator')) {
+            courseURL = 'lms/courses?category=Курсы+для+преподавателей'
+        } else if (roles.includes('LMS Student')) {
+            courseURL = 'lms/courses?category=Курсы+для+студентов'
+        } else if (roles.includes('LMS Schoolchild')) {
+            courseURL = 'lms/courses?category=Курсы+для+школьников'
+		}
+
+        sidebarLinks.value.push({
+            label: 'Courses',
+            icon: 'Book',
+            to: courseURL,
+            activeFor: ['Courses', 'CourseDetail', 'Lesson'],
+        })
+
 	sidebarSettings.reload(
 		{},
 		{
@@ -278,24 +297,6 @@ watch(userResource, () => {
 	if (userResource.data) {
 		isModerator.value = userResource.data.is_moderator
 		isInstructor.value = userResource.data.is_instructor
-
-		const roles = userResource.data?.roles || []
-        let courseURL = 'lms/courses' // По умолчанию обычные курсы
-
-        if (roles.includes('Course Creator')) {
-            courseURL = 'lms/courses?category=Курсы+для+преподавателей'
-        } else if (roles.includes('LMS Student')) {
-            courseURL = 'lms/courses?category=Курсы+для+студентов'
-        } else if (roles.includes('LMS Schoolchild')) {
-            courseURL = 'lms/courses?category=Курсы+для+школьников'
-		}
-
-        sidebarLinks.value.push({
-            label: 'Courses',
-            icon: 'Book',
-            to: courseURL,
-            activeFor: ['Courses', 'CourseDetail', 'Lesson'],
-        })
 
 		addPrograms()
 		addQuizzes()
