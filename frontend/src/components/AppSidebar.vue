@@ -122,6 +122,9 @@ onMounted(() => {
 		unreadNotifications.reload()
 	})
 	addNotifications()
+
+	sidebarLinks.value = getSidebarLinks().filter(link => link.label !== 'Courses')
+	
 	sidebarSettings.reload(
 		{},
 		{
