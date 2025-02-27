@@ -117,30 +117,6 @@ const pageToEdit = ref(null)
 const showWebPages = ref(false)
 const settingsStore = useSettings()
 
-const updateCoursesLink = () => {
-    const roles = userResource.data?.roles || []
-    let courseURL = 'lms/courses' // По умолчанию обычные курсы
-
-    if (roles.includes('Course Creator')) {
-        courseURL = 'lms/courses?category=Курсы+для+преподавателей'
-    } else if (roles.includes('LMS Student')) {
-        courseURL = 'lms/courses?category=Курсы+для+студентов'
-    } else if (roles.includes('LMS Schoolchild')) {
-        courseURL = 'lms/courses?category=Курсы+для+школьников'
-    }
-
-    // Удаляем старую запись Courses, если она есть
-    sidebarLinks.value = sidebarLinks.value.filter(link => link.label !== 'Courses')
-
-    // Добавляем Courses на первое место
-    sidebarLinks.value.unshift({
-        label: 'Courses',
-        icon: 'Book',
-        to: courseURL,
-        activeFor: ['Courses', 'CourseDetail', 'Lesson'],
-    })
-}
-
 onMounted(() => {
 	socket.on('publish_lms_notifications', (data) => {
 		unreadNotifications.reload()
@@ -148,6 +124,25 @@ onMounted(() => {
 	addNotifications()
 
 	sidebarLinks.value = getSidebarLinks().filter(link => link.label !== 'Courses')
+
+	
+	const roles = userResource.data?.roles || []
+        let courseURL = 'lms/courses' // По умолчанию обычные курсы
+
+        if (roles.includes('Course Creator')) {
+            courseURL = 'lms/courses?category=Курсы+для+преподавателей'
+        } else if (roles.includes('LMS Student')) {
+            courseURL = 'lms/courses?category=Курсы+для+студентов'
+        } else if (roles.includes('LMS Schoolchild')) {
+            courseURL = 'lms/courses?category=Курсы+для+школьников'
+		}
+
+        sidebarLinks.value.push({
+            label: 'Courses',
+            icon: 'Book',
+            to: courseURL,
+            activeFor: ['Courses', 'CourseDetail', 'Lesson'],
+        })
 
 	sidebarSettings.reload(
 		{},
