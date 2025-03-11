@@ -182,6 +182,43 @@ const unreadNotifications = createResource({
 	auto: user ? true : false,
 })
 
+const addMyPoints = () => {
+	const roles = userResource.data?.roles || []
+	if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
+		sidebarLinks.value.push({
+			label: 'My points',
+			icon: 'Bar-chart-2',
+			to: 'my_points',
+			external: true,
+			activeFor: [],
+		})
+	}
+}
+
+const addChatGPT = () => {
+	const roles = userResource.data?.roles || []
+	let URL = ''
+	let nameLabel = ''
+	if (roles.includes('LMS Schoolchild')) {
+		URL = 'gpt'
+		nameLabel = 'ChatGPT for Schooles'
+	} else if (roles.includes('LMS Schoolchild')) {
+		URL = 'gpt'
+		nameLabel = 'ChatGPT for Students'
+	} else if (roles.includes('LMS Schoolchild')) {
+		URL = 'gpt'
+		nameLabel = 'ChatGPT for Teachers'
+	}
+
+	sidebarLinks.value.push({
+			label: nameLabel,
+			icon: 'Cpu',
+			to: URL,
+			external: true,
+			activeFor: [],
+	})
+}
+
 const addNotifications = () => {
 	if (user) {
 		sidebarLinks.value.push({
@@ -300,6 +337,8 @@ watch(userResource, () => {
 		addPrograms()
 		addQuizzes()
 		addAssignments()
+		addMyPoints()
+		addChatGPT()
 	}
 })
 
