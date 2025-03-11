@@ -141,7 +141,7 @@ onMounted(() => {
 	)
 
 	sidebarLinks.value.push({
-		label: 'Leader Board',
+		label: __('Leader Board'),
 		icon: 'Trophy',
 		to: 'leaderboardsample',
 		external: true,
@@ -149,7 +149,7 @@ onMounted(() => {
 	})
 
 	sidebarLinks.value.push({
-		label: 'Forms',
+		label: __('Forms'),
 		icon: 'ClipboardList',
 		to: 'form-page',
 		external: true,
@@ -186,8 +186,8 @@ const addMyPoints = () => {
 	const roles = userResource.data?.roles || []
 	if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
 		sidebarLinks.value.push({
-			label: 'My points',
-			icon: 'Bar-chart',
+			label: __('My points'),
+			icon: 'Award',
 			to: 'my_points',
 			external: true,
 			activeFor: [],
@@ -201,13 +201,13 @@ const addChatGPT = () => {
 	let nameLabel = ''
 	if (roles.includes('LMS Schoolchild')) {
 		URL = 'gpt'
-		nameLabel = 'ChatGPT for Schooles'
-	} else if (roles.includes('LMS Stunedts')) {
+		nameLabel = __('ChatGPT for Schoolers')
+	} else if (roles.includes('LMS Student')) {
 		URL = 'gpt'
-		nameLabel = 'ChatGPT for Students'
+		nameLabel = __('ChatGPT for Students')
 	} else if (roles.includes('Course Creator')) {
 		URL = 'gpt'
-		nameLabel = 'ChatGPT for Teachers'
+		nameLabel = __('ChatGPT for Teachers')
 	}
 
 	sidebarLinks.value.push({
@@ -276,7 +276,7 @@ const addPrograms = () => {
 
 	if (canAddProgram) {
 		sidebarLinks.value.splice(index, 0, {
-			label: 'Programs',
+			label: __('Programs'),
 			icon: 'Route',
 			to: 'Programs',
 			activeFor: activeFor,

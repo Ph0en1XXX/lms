@@ -3209,6 +3209,34 @@ msgstr "Понедельник"
 msgid "More"
 msgstr "Больше"
 
+#: frontend/src/components/AppSidebar.vue:150
+msgid "Leader Board"
+msgstr "Таблица лидеров"
+
+#: frontend/src/components/AppSidebar.vue:155
+msgid "Forms"
+msgstr "Формы"
+
+#: frontend/src/components/AppSidebar.vue:200
+msgid "My points"
+msgstr "Мои баллы"
+
+#: frontend/src/components/AppSidebar.vue:220
+msgid "ChatGPT for Schoolers"
+msgstr "ChatGPT для школьников"
+
+#: frontend/src/components/AppSidebar.vue:225
+msgid "ChatGPT for Students"
+msgstr "ChatGPT для студентов"
+
+#: frontend/src/components/AppSidebar.vue:230
+msgid "ChatGPT for Teachers"
+msgstr "ChatGPT для преподавателей"
+
+#: frontend/src/components/AppSidebar.vue:250
+msgid "Programs"
+msgstr "Программы"
+
 #. Label of the multiple (Check) field in DocType 'LMS Question'
 #: lms/lms/doctype/lms_question/lms_question.json
 msgid "Multiple Correct Answers"
