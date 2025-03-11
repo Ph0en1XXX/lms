@@ -187,7 +187,7 @@ const addMyPoints = () => {
 	if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
 		sidebarLinks.value.push({
 			label: 'My points',
-			icon: 'Bar-chart-2',
+			icon: 'Bar-chart',
 			to: 'my_points',
 			external: true,
 			activeFor: [],
@@ -202,10 +202,10 @@ const addChatGPT = () => {
 	if (roles.includes('LMS Schoolchild')) {
 		URL = 'gpt'
 		nameLabel = 'ChatGPT for Schooles'
-	} else if (roles.includes('LMS Schoolchild')) {
+	} else if (roles.includes('LMS Stunedts')) {
 		URL = 'gpt'
 		nameLabel = 'ChatGPT for Students'
-	} else if (roles.includes('LMS Schoolchild')) {
+	} else if (roles.includes('Course Creator')) {
 		URL = 'gpt'
 		nameLabel = 'ChatGPT for Teachers'
 	}
