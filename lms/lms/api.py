@@ -1189,3 +1189,42 @@ def prepare_heatmap_data(start_date, number_of_days, date_count):
 def get_week_difference(start_date, current_date):
 	diff_in_days = date_diff(current_date, start_date)
 	return diff_in_days // 7
+
+@frappe.whitelist()
+def store_chat_message(sender=None, message=None, chat_history=None, session_name=None):
+    # Генерируем session_name, если не передан
+    if not session_name:
+        username = frappe.session.user
+        timestamp = now().replace(" ", "").replace(":", "").replace("-", "")[:14]
+        session_name = f"user-{username}-{timestamp}"
+
+    # Проверяем, существует ли сессия
+    if not frappe.db.exists("Chat Session", {"session_name": session_name}):
+        session_doc = frappe.get_doc({
+            "doctype": "Chat Session",
+            "session_name": session_name,
+            "created_at": frappe.utils.now(),
+            "messages": []
+        })
+        session_doc.insert()
+    else:
+        session_doc = frappe.get_doc("Chat Session", {"session_name": session_name})
+
+    # Добавляем сообщение в дочернюю таблицу
+    session_doc.append("messages", {
+        "sender": sender,
+        "message": message,
+        "chat_history": chat_history if chat_history else "[]",
+        "timestamp": frappe.utils.now()
+    })
+    session_doc.save()
+
+    frappe.db.commit()
+    return {"status": "success", "message": "Сообщение и история сохранены", "session_name": session_name}
+
+@frappe.whitelist()
+def get_chat_history(session_name):
+    if frappe.db.exists("Chat Session", {"session_name": session_name}):
+        session_doc = frappe.get_doc("Chat Session", {"session_name": session_name})
+        return session_doc.messages  # Возвращаем дочернюю таблицу messages
+    return []

@@ -200,13 +200,13 @@ const addChatGPT = () => {
 	let URL = ''
 	let nameLabel = ''
 	if (roles.includes('LMS Schoolchild')) {
-		URL = 'gpt'
+		URL = 'chatgpt-schoolchild'
 		nameLabel = __('ChatGPT for Schoolers')
 	} else if (roles.includes('LMS Student')) {
-		URL = 'gpt'
+		URL = 'chatgpt-schoolchild'
 		nameLabel = __('ChatGPT for Students')
 	} else if (roles.includes('Course Creator')) {
-		URL = 'gpt'
+		URL = 'chatgpt-schoolchild'
 		nameLabel = __('ChatGPT for Teachers')
 	}
 
