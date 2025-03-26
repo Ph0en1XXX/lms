@@ -582,12 +582,7 @@ updateDocumentTitle(pageMeta)
 	line-height: 1.7;
 }
 
-iframe {
-	border-top: 3px solid theme('colors.gray.700');
-	border-bottom: 3px solid theme('colors.gray.700');
-}
-
 .tc-table {
-	border-left: 1px solid #e8e8eb;
+	border-left: solid #e8e8eb;
 }
 </style>

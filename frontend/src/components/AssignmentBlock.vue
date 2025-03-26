@@ -43,4 +43,3 @@ const submission = createResource({
 	},
 	auto: true,
 })
-</script>

@@ -69,7 +69,7 @@
 						:data-chapter="chapter.name"
 					>
 						<template #item="{ element: lesson }">
-							<div class="outline-lesson pl-8 py-2 pr-4">
+							<div class="outline-lesson pl-8 py-2 pr-4 text-ink-gray-9" :class=" isActiveLesson(lesson.number) ? 'bg-surface-gray-3' : '' ">
 								<router-link
 									:to="{
 										name: allowEdit ? 'LessonForm' : 'Lesson',
