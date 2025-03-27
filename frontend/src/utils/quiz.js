@@ -4,6 +4,7 @@ import { createApp, h } from 'vue'
 import { usersStore } from '../stores/user'
 import translationPlugin from '../translation'
 import { CircleHelp } from 'lucide-vue-next'
+import router from '@/router'
 
 export class Quiz {
 	constructor({ data, api, readOnly }) {
@@ -45,7 +46,7 @@ export class Quiz {
 			this.wrapper.innerHTML = `<iframe src="/lms/quiz/${quiz}?fromLesson=1" class="w-full h-[500px]"></iframe>`
 			return
 		}
-		this.wrapper.innerHTML = `<div class='border rounded-md p-10 text-center bg-gray-50 mb-2'>
+		this.wrapper.innerHTML = `<div class='border rounded-md p-10 text-center bg-surface-menu-bar mb-2'>
             <span class="font-medium">
                 Quiz: ${quiz}
             </span>

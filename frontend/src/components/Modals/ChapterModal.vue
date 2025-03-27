@@ -47,19 +47,19 @@
 					<div v-else class="">
 						<div class="flex items-center">
 							<div class="border rounded-md p-2 mr-2">
-								<FileText class="h-5 w-5 stroke-1.5 text-gray-700" />
+								<FileText class="h-5 w-5 stroke-1.5 text-ink-gray-7" />
 							</div>
 							<div class="flex flex-col">
 								<span>
 									{{ chapter.scorm_package.file_name }}
 								</span>
-								<span class="text-sm text-gray-500 mt-1">
+								<span class="text-sm text-ink-gray-4 mt-1">
 									{{ getFileSize(chapter.scorm_package.file_size) }}
 								</span>
 							</div>
 							<X
 								@click="() => (chapter.scorm_package = null)"
-								class="bg-gray-200 rounded-md cursor-pointer stroke-1.5 w-5 h-5 p-1 ml-4"
+								class="bg-surface-gray-3 rounded-md cursor-pointer stroke-1.5 w-5 h-5 p-1 ml-4"
 							/>
 						</div>
 					</div>
@@ -77,15 +77,15 @@ import {
 	FormControl,
 	Switch,
 } from 'frappe-ui'
-import { defineModel, reactive, watch } from 'vue'
+import { reactive, watch } from 'vue'
 import { showToast, getFileSize } from '@/utils/'
 import { capture } from '@/telemetry'
 import { FileText, X } from 'lucide-vue-next'
-import { useSettings } from '@/stores/settings'
+import { useOnboarding } from 'frappe-ui/frappe'
 
 const show = defineModel()
 const outline = defineModel('outline')
-const settingsStore = useSettings()
+const { updateOnboardingStep } = useOnboarding('learning')
 
 const props = defineProps({
 	course: {
@@ -140,14 +140,12 @@ const addChapter = async (close) => {
 			},
 			onSuccess: (data) => {
 				capture('chapter_created')
+				updateOnboardingStep('create_first_chapter')
 				chapterReference.submit(
 					{ name: data.name },
 					{
 						onSuccess(data) {
 							cleanChapter()
-							if (!settingsStore.onboardingDetails.data?.is_onboarded) {
-								settingsStore.onboardingDetails.reload()
-							}
 							outline.value.reload()
 							showToast(
 								__('Success'),

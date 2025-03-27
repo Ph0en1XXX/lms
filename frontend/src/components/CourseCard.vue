@@ -1,7 +1,7 @@
 <template>
 	<div
 		v-if="course.title"
-		class="flex flex-col h-full rounded-md shadow-md text-base overflow-auto"
+		class="flex flex-col h-full rounded-md border-2 overflow-auto"
 		style="min-height: 350px"
 	>
 		<div
@@ -15,14 +15,13 @@
 				<Badge v-if="course.featured" variant="subtle" theme="green" size="md">
 					{{ __('Featured') }}
 				</Badge>
-				<Badge
-					variant="subtle"
-					theme="gray"
-					size="md"
-					v-for="tag in course.tags"
+				<div
+					v-if="course.tags"
+					v-for="tag in course.tags?.split(', ')"
+					class="text-xs bg-white text-gray-800 px-2 py-0.5 rounded-md"
 				>
 					{{ tag }}
-				</Badge>
+				</div>
 			</div>
 			<div v-if="!course.image" class="image-placeholder">
 				{{ course.title[0] }}
@@ -32,8 +31,8 @@
 			<div class="flex items-center justify-between mb-2">
 				<div v-if="course.lessons">
 					<Tooltip :text="__('Lessons')">
-						<span class="flex items-center">
-							<BookOpen class="h-4 w-4 stroke-1.5 text-gray-700 mr-1" />
+						<span class="flex items-center text-ink-gray-7">
+							<BookOpen class="h-4 w-4 stroke-1.5 mr-1" />
 							{{ course.lessons }}
 						</span>
 					</Tooltip>
@@ -41,8 +40,8 @@
 
 				<div v-if="course.enrollments">
 					<Tooltip :text="__('Enrolled Students')">
-						<span class="flex items-center">
-							<Users class="h-4 w-4 stroke-1.5 text-gray-700 mr-1" />
+						<span class="flex items-center text-ink-gray-7">
+							<Users class="h-4 w-4 stroke-1. mr-1" />
 							{{ course.enrollments }}
 						</span>
 					</Tooltip>
@@ -50,8 +49,8 @@
 
 				<div v-if="course.rating">
 					<Tooltip :text="__('Average Rating')">
-						<span class="flex items-center">
-							<Star class="h-4 w-4 stroke-1.5 text-gray-700 mr-1" />
+						<span class="flex items-center text-ink-gray-7">
+							<Star class="h-4 w-4 stroke-1.5 mr-1" />
 							{{ course.rating }}
 						</span>
 					</Tooltip>
@@ -68,11 +67,11 @@
 				</div>
 			</div>
 
-			<div class="text-xl font-semibold leading-6">
+			<div class="text-xl font-semibold leading-6 text-ink-gray-9">
 				{{ course.title }}
 			</div>
 
-			<div class="short-introduction text-gray-700 text-sm">
+			<div class="short-introduction text-ink-gray-7 text-sm">
 				{{ course.short_introduction }}
 			</div>
 
@@ -81,7 +80,10 @@
 				:progress="course.membership.progress"
 			/>
 
-			<div v-if="user && course.membership" class="text-sm mb-4">
+			<div
+				v-if="user && course.membership"
+				class="text-sm text-ink-gray-7 mt-2 mb-4"
+			>
 				{{ Math.ceil(course.membership.progress) }}% completed
 			</div>
 
@@ -99,8 +101,14 @@
 					<CourseInstructors :instructors="course.instructors" />
 				</div>
 
-				<div class="font-semibold">
+				<div v-if="course.paid_course" class="font-semibold">
 					{{ course.price }}
+				</div>
+				<div
+					v-if="course.paid_certificate || course.enable_certification"
+					class="text-xs text-ink-blue-3 bg-surface-blue-1 py-0.5 px-1 rounded-md"
+				>
+					{{ __('Certification') }}
 				</div>
 			</div>
 		</div>

@@ -1,6 +1,6 @@
 <template>
 	<header
-		class="sticky flex items-center justify-between top-0 z-10 border-b bg-white px-3 py-2.5 sm:px-5"
+		class="sticky flex items-center justify-between top-0 z-10 border-b bg-surface-white px-3 py-2.5 sm:px-5"
 	>
 		<Breadcrumbs :items="breadcrumbs" />
 		<router-link
@@ -22,16 +22,22 @@
 		<div
 			class="flex flex-col lg:flex-row space-y-4 lg:space-y-0 lg:items-center justify-between mb-5"
 		>
-			<div class="text-lg font-semibold">
+			<div class="text-lg text-ink-gray-9 font-semibold">
 				{{ __('All Batches') }}
 			</div>
 			<div
-				class="flex flex-col space-y-2 lg:space-y-0 lg:flex-row lg:items-center lg:space-x-2"
+				class="flex flex-col space-y-2 lg:space-y-0 lg:flex-row lg:items-center lg:space-x-4"
 			>
 				<TabButtons
 					v-if="user.data"
 					:buttons="batchTabs"
 					v-model="currentTab"
+				/>
+				<FormControl
+					v-model="certification"
+					:label="__('Certification')"
+					type="checkbox"
+					@change="updateBatches()"
 				/>
 				<div class="grid grid-cols-2 gap-2">
 					<FormControl
@@ -66,9 +72,9 @@
 		</div>
 		<div
 			v-else-if="!batches.list.loading"
-			class="flex flex-col items-center justify-center text-sm text-gray-600 italic mt-48"
+			class="flex flex-col items-center justify-center text-sm text-ink-gray-5 mt-48"
 		>
-			<BookOpen class="size-10 mx-auto stroke-1 text-gray-500" />
+			<BookOpen class="size-10 mx-auto stroke-1 text-ink-gray-4" />
 			<div class="text-lg font-medium mb-1">
 				{{ __('No batches found') }}
 			</div>
@@ -111,8 +117,10 @@ const pageLength = ref(20)
 const categories = ref([])
 const currentCategory = ref(null)
 const title = ref('')
+const certification = ref(false)
 const filters = ref({})
-const currentTab = ref(user.data?.is_student ? 'All' : 'Upcoming')
+const is_student = computed(() => user.data?.is_student)
+const currentTab = ref(is_student.value ? 'All' : 'Upcoming')
 const orderBy = ref('start_date')
 
 onMounted(() => {
@@ -130,6 +138,7 @@ const setFiltersFromQuery = () => {
 	let queries = new URLSearchParams(location.search)
 	title.value = queries.get('title') || ''
 	currentCategory.value = queries.get('category') || null
+	certification.value = queries.get('certification') || false
 }
 
 const batches = createListResource({
@@ -161,6 +170,7 @@ const updateBatches = () => {
 const updateFilters = () => {
 	updateCategoryFilter()
 	updateTitleFilter()
+	updateCertificationFilter()
 	updateTabFilter()
 	updateStudentFilter()
 	setQueryParams()
@@ -182,17 +192,25 @@ const updateTitleFilter = () => {
 	}
 }
 
+const updateCertificationFilter = () => {
+	if (certification.value) {
+		filters.value['certification'] = 1
+	} else {
+		delete filters.value['certification']
+	}
+}
+
 const updateTabFilter = () => {
 	orderBy.value = 'start_date'
 	if (!user.data) {
 		return
 	}
-	if (currentTab.value == 'Enrolled' && user.data?.is_student) {
+	if (currentTab.value == 'Enrolled' && is_student.value) {
 		filters.value['enrolled'] = 1
 		delete filters.value['start_date']
 		delete filters.value['published']
 		orderBy.value = 'start_date desc'
-	} else if (user.data?.is_student) {
+	} else if (is_student.value) {
 		delete filters.value['enrolled']
 	} else {
 		delete filters.value['start_date']
@@ -211,7 +229,7 @@ const updateTabFilter = () => {
 }
 
 const updateStudentFilter = () => {
-	if (!user.data || (user.data?.is_student && currentTab.value != 'Enrolled')) {
+	if (!user.data || (is_student.value && currentTab.value != 'Enrolled')) {
 		filters.value['start_date'] = ['>=', dayjs().format('YYYY-MM-DD')]
 		filters.value['published'] = 1
 	}
@@ -222,6 +240,7 @@ const setQueryParams = () => {
 	let filterKeys = {
 		title: title.value,
 		category: currentCategory.value,
+		certification: certification.value,
 	}
 
 	Object.keys(filterKeys).forEach((key) => {
@@ -232,7 +251,12 @@ const setQueryParams = () => {
 		}
 	})
 
-	history.replaceState({}, '', `${location.pathname}?${queries.toString()}`)
+	let queryString = ''
+	if (queries.toString()) {
+		queryString = `?${queries.toString()}`
+	}
+
+	history.replaceState({}, '', `${location.pathname}${queryString}`)
 }
 
 const updateCategories = (data) => {
@@ -252,30 +276,23 @@ watch(currentTab, () => {
 	updateBatches()
 })
 
-const batchType = computed(() => {
-	let types = [
-		{ label: __(''), value: null },
-		{ label: __('Upcoming'), value: 'Upcoming' },
-		{ label: __('Archived'), value: 'Archived' },
-	]
-	if (user.data?.is_moderator) {
-		types.push({ label: __('Unpublished'), value: 'Unpublished' })
-	}
-	return types
-})
-
 const batchTabs = computed(() => {
 	let tabs = [
 		{
 			label: __('All'),
 		},
 	]
-	if (user.data?.is_student) {
-		tabs.push({ label: __('Enrolled') })
-	} else {
+
+	if (
+		user.data?.is_moderator ||
+		user.data?.is_instructor ||
+		user.data?.is_evaluator
+	) {
 		tabs.push({ label: __('Upcoming') })
 		tabs.push({ label: __('Archived') })
 		tabs.push({ label: __('Unpublished') })
+	} else if (user.data) {
+		tabs.push({ label: __('Enrolled') })
 	}
 	return tabs
 })

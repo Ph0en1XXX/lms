@@ -1,10 +1,17 @@
 <template>
-	<div class="text-base">
+	<div class="h-full">
 		<div
 			v-if="title && (outline.data?.length || allowEdit)"
-			class="grid grid-cols-[70%,30%] mb-4 px-2"
+			class="flex items-center justify-between space-x-2 mb-4 px-2"
+			:class="{
+				'sticky top-0 z-10 bg-surface-white border-b px-3 py-2.5 sm:px-5':
+					allowEdit,
+			}"
 		>
-			<div class="font-semibold text-lg leading-5">
+			<div
+				class="font-semibold text-lg leading-5 text-ink-gray-9"
+				:class="{ 'font-medium text-p-base': allowEdit }"
+			>
 				{{ __(title) }}
 			</div>
 			<Button size="sm" v-if="allowEdit" @click="openChapterModal()">
@@ -16,7 +23,7 @@
 		</div>
 		<div
 			:class="{
-				'shadow rounded-md py-2 px-2': showOutline && outline.data?.length,
+				'border-2 rounded-md py-2 px-2': showOutline && outline.data?.length,
 			}"
 		>
 			<Disclosure
@@ -33,10 +40,10 @@
 							hidden: chapter.is_scorm_package,
 							open: index == 1,
 						}"
-						class="h-4 w-4 text-gray-900 stroke-1"
+						class="h-4 w-4 text-ink-gray-9 stroke-1"
 					/>
 					<div
-						class="text-base text-left font-medium leading-5 ml-2"
+						class="text-base text-left text-ink-gray-9 font-medium leading-5 ml-2"
 						@click="redirectToChapter(chapter)"
 					>
 						{{ chapter.title }}
@@ -46,14 +53,14 @@
 							<FilePenLine
 								v-if="allowEdit"
 								@click.prevent="openChapterModal(chapter)"
-								class="h-4 w-4 text-gray-900 invisible group-hover:visible"
+								class="h-4 w-4 text-ink-gray-9 invisible group-hover:visible"
 							/>
 						</Tooltip>
 						<Tooltip :text="__('Delete Chapter')" placement="bottom">
 							<Trash2
 								v-if="allowEdit"
 								@click.prevent="trashChapter(chapter.name)"
-								class="h-4 w-4 text-red-500 invisible group-hover:visible"
+								class="h-4 w-4 text-ink-red-3 invisible group-hover:visible"
 							/>
 						</Tooltip>
 					</div>
@@ -69,7 +76,12 @@
 						:data-chapter="chapter.name"
 					>
 						<template #item="{ element: lesson }">
-							<div class="outline-lesson pl-8 py-2 pr-4 text-ink-gray-9" :class=" isActiveLesson(lesson.number) ? 'bg-surface-gray-3' : '' ">
+							<div
+								class="outline-lesson pl-8 py-2 pr-4 text-ink-gray-9"
+								:class="
+									isActiveLesson(lesson.number) ? 'bg-surface-gray-3' : ''
+								"
+							>
 								<router-link
 									:to="{
 										name: allowEdit ? 'LessonForm' : 'Lesson',
@@ -83,21 +95,21 @@
 									<div class="flex items-center text-sm leading-5 group">
 										<MonitorPlay
 											v-if="lesson.icon === 'icon-youtube'"
-											class="h-4 w-4 text-gray-900 stroke-1 mr-2"
+											class="h-4 w-4 stroke-1 mr-2"
 										/>
 										<HelpCircle
 											v-else-if="lesson.icon === 'icon-quiz'"
-											class="h-4 w-4 text-gray-900 stroke-1 mr-2"
+											class="h-4 w-4 stroke-1 mr-2"
 										/>
 										<FileText
 											v-else-if="lesson.icon === 'icon-list'"
-											class="h-4 w-4 text-gray-900 stroke-1 mr-2"
+											class="h-4 w-4 text-ink-gray-9 stroke-1 mr-2"
 										/>
 										{{ lesson.title }}
 										<Trash2
 											v-if="allowEdit"
 											@click.prevent="trashLesson(lesson.name, chapter.name)"
-											class="h-4 w-4 text-red-500 ml-auto invisible group-hover:visible"
+											class="h-4 w-4 text-ink-red-3 ml-auto invisible group-hover:visible"
 										/>
 										<Check
 											v-if="lesson.is_complete"
@@ -323,9 +335,11 @@ const redirectToChapter = (chapter) => {
 		},
 	})
 }
-</script>
-<style>
-.outline-lesson:has(.router-link-active) {
-	background-color: theme('colors.gray.100');
+
+const isActiveLesson = (lessonNumber) => {
+	return (
+		route.params.chapterNumber == lessonNumber.split('.')[0] &&
+		route.params.lessonNumber == lessonNumber.split('.')[1]
+	)
 }
-</style>
+</script>

@@ -60,7 +60,7 @@ export class Upload {
 				window.location.origin
 			}${encodeURI(
 				file.file_url
-			)}&embedded=true" width='100%' height='700px' class="mb-4" type="application/pdf"></iframe>`
+			)}" width='100%' height='700px' class="mb-4" type="application/pdf"></iframe>`
 			return
 		} else {
 			this.wrapper.innerHTML = `<img class="mb-4" src=${encodeURI(

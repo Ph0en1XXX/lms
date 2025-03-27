@@ -1,6 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { usersStore } from './stores/user'
 import { sessionStore } from './stores/session'
+import { useSettings } from './stores/settings'
 
 let defaultRoute = '/courses'
 const routes = [
@@ -25,6 +26,12 @@ const routes = [
 		path: '/courses/:courseName/learn/:chapterNumber-:lessonNumber',
 		name: 'Lesson',
 		component: () => import('@/pages/Lesson.vue'),
+		props: true,
+	},
+	{
+		path: '/courses/:courseName/certification',
+		name: 'CourseCertification',
+		component: () => import('@/pages/CourseCertification.vue'),
 		props: true,
 	},
 	{
@@ -217,23 +224,24 @@ let router = createRouter({
 })
 
 router.beforeEach(async (to, from, next) => {
-	const { userResource, allUsers } = usersStore()
+	const { userResource } = usersStore()
 	let { isLoggedIn } = sessionStore()
+	const { allowGuestAccess } = useSettings()
 
 	try {
 		if (isLoggedIn) {
 			await userResource.promise
 		}
-		if (
-			isLoggedIn &&
-			(to.name == 'Lesson' ||
-				to.name == 'Batch' ||
-				to.name == 'Notifications')
-		) {
-			await allUsers.promise
-		}
 	} catch (error) {
 		isLoggedIn = false
+	}
+
+	if (!isLoggedIn) {
+		await allowGuestAccess.promise
+		if (!allowGuestAccess.data) {
+			window.location.href = '/login'
+			return
+		}
 	}
 	return next()
 })

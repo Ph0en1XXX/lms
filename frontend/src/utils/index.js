@@ -95,11 +95,11 @@ export function getFileSize(file_size) {
 export function showToast(title, text, icon, iconClasses = null) {
 	if (!iconClasses) {
 		if (icon == 'check') {
-			iconClasses = 'bg-green-600 text-white rounded-md p-px'
+			iconClasses = 'bg-surface-green-3 text-ink-white rounded-md p-px'
 		} else if (icon == 'alert-circle') {
-			iconClasses = 'bg-yellow-600 text-white rounded-md p-px'
+			iconClasses = 'bg-yellow-600 text-ink-white rounded-md p-px'
 		} else {
-			iconClasses = 'bg-red-600 text-white rounded-md p-px'
+			iconClasses = 'bg-surface-red-5 text-ink-white rounded-md p-px'
 		}
 	}
 	createToast({
@@ -158,7 +158,10 @@ export function getEditorTools() {
 		quiz: Quiz,
 		assignment: Assignment,
 		upload: Upload,
-		markdown: Markdown,
+		markdown: {
+			class: Markdown,
+			inlineToolbar: true,
+		},
 		image: SimpleImage,
 		table: {
 			class: Table,
@@ -174,9 +177,6 @@ export function getEditorTools() {
 		codeBox: {
 			class: CodeBox,
 			config: {
-				themeURL:
-					'https://cdn.jsdelivr.net/gh/highlightjs/cdn-release@9.18.1/build/styles/atom-one-dark.min.css',
-				themeName: 'atom-one-dark',
 				useDefaultTheme: 'dark',
 			},
 		},
@@ -439,6 +439,22 @@ export function getTimezones() {
 		'America/Tegucigalpa',
 		'Pacific/Apia',
 	]
+}
+
+export function getUserTimezone() {
+	try {
+		const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone
+		const supportedTimezones = getTimezones()
+
+		if (supportedTimezones.includes(timezone)) {
+			return timezone // e.g., 'Asia/Calcutta', 'America/New_York', etc.
+		} else {
+			throw Error('unsupported timezone')
+		}
+	} catch (error) {
+		console.error('Error getting timezone:', error)
+		return null
+	}
 }
 
 export function getSidebarLinks() {

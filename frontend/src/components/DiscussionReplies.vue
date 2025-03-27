@@ -3,10 +3,10 @@
 		<div v-if="!singleThread" class="flex items-center mb-5">
 			<Button variant="outline" @click="showTopics = true">
 				<template #icon>
-					<ChevronLeft class="w-5 h-5 stroke-1.5 text-gray-700" />
+					<ChevronLeft class="w-5 h-5 stroke-1.5 text-ink-gray-7" />
 				</template>
 			</Button>
-			<span class="text-lg font-semibold ml-2">
+			<span class="text-lg font-semibold ml-2 text-ink-gray-9">
 				{{ topic.title }}
 			</span>
 		</div>
@@ -17,7 +17,7 @@
 				:class="{ 'border-b': index + 1 != replies.data.length }"
 			>
 				<div class="flex items-center justify-between mb-2">
-					<div class="flex items-center">
+					<div class="flex items-center text-ink-gray-5">
 						<UserAvatar :user="reply.user" class="mr-2" />
 						<span>
 							{{ reply.user.full_name }}
@@ -63,7 +63,7 @@
 					:fixedMenu="reply.editable || false"
 					:editorClass="
 						reply.editable
-							? 'ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-gray-300 prose-th:border-gray-300 prose-td:relative prose-th:relative prose-th:bg-gray-100 prose-sm max-w-none'
+							? 'ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none'
 							: 'prose-sm'
 					"
 				/>
@@ -71,13 +71,14 @@
 		</div>
 
 		<TextEditor
+			v-if="renderEditor"
 			class="mt-5"
 			:content="newReply"
 			:mentions="mentionUsers"
 			@change="(val) => (newReply = val)"
 			placeholder="Type your reply here..."
 			:fixedMenu="true"
-			editorClass="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-gray-300 prose-th:border-gray-300 prose-td:relative prose-th:relative prose-th:bg-gray-100 prose-sm max-w-none border border-gray-300 rounded-b-md min-h-[7rem] py-1 px-2"
+			editorClass="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none border border-outline-gray-2 rounded-b-md min-h-[7rem] py-1 px-2"
 		/>
 		<div class="flex justify-between mt-2">
 			<span> </span>
@@ -94,7 +95,7 @@ import { createResource, TextEditor, Button, Dropdown } from 'frappe-ui'
 import { timeAgo } from '../utils'
 import UserAvatar from '@/components/UserAvatar.vue'
 import { ChevronLeft, MoreHorizontal } from 'lucide-vue-next'
-import { ref, inject, onMounted, computed } from 'vue'
+import { ref, inject, onMounted } from 'vue'
 import { createToast } from '../utils'
 
 const showTopics = defineModel('showTopics')
@@ -102,6 +103,8 @@ const newReply = ref('')
 const socket = inject('$socket')
 const user = inject('$user')
 const allUsers = inject('$allUsers')
+const mentionUsers = ref([])
+const renderEditor = ref(false)
 
 const props = defineProps({
 	topic: {
@@ -124,6 +127,7 @@ onMounted(() => {
 	socket.on('delete_message', (data) => {
 		replies.reload()
 	})
+	fetchMentionUsers()
 })
 
 const replies = createResource({
@@ -150,15 +154,26 @@ const newReplyResource = createResource({
 	},
 })
 
-const mentionUsers = computed(() => {
-	let users = Object.values(allUsers.data).map((user) => {
-		return {
-			value: user.name,
-			label: user.full_name,
-		}
-	})
-	return users
-})
+const fetchMentionUsers = () => {
+	if (user.data?.is_student) {
+		renderEditor.value = true
+	} else {
+		allUsers.reload(
+			{},
+			{
+				onSuccess(data) {
+					mentionUsers.value = Object.values(data).map((user) => {
+						return {
+							value: user.name,
+							label: user.full_name,
+						}
+					})
+					renderEditor.value = true
+				},
+			}
+		)
+	}
+}
 
 const postReply = () => {
 	newReplyResource.submit(
@@ -178,7 +193,7 @@ const postReply = () => {
 					title: 'Error',
 					text: err.messages?.[0] || err,
 					icon: 'x',
-					iconClasses: 'bg-red-600 text-white rounded-md p-px',
+					iconClasses: 'bg-surface-red-5 text-ink-white rounded-md p-px',
 					position: 'top-center',
 					timeout: 10,
 				})

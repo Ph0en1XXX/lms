@@ -2,10 +2,10 @@
 	<div class="flex min-h-0 flex-col text-base">
 		<div class="flex items-center justify-between">
 			<div>
-				<div class="text-xl font-semibold mb-1">
+				<div class="text-xl font-semibold mb-1 text-ink-gray-9">
 					{{ __(label) }}
 				</div>
-				<!-- <div class="text-xs text-gray-600">
+				<!-- <div class="text-xs text-ink-gray-5">
 					{{ __(description) }}
 				</div> -->
 			</div>
@@ -36,7 +36,7 @@
 			<FormControl
 				v-model="member.first_name"
 				:placeholder="__('First Name')"
-				type="test"
+				type="text"
 				class="w-full"
 			/>
 			<Button @click="addMember()" variant="subtle">
@@ -63,7 +63,7 @@
 							/>
 							<div class="space-y-1">
 								<div class="flex">
-									<div class="text-gray-900">
+									<div class="text-ink-gray-9">
 										{{ member.full_name }}
 									</div>
 									<div
@@ -81,12 +81,14 @@
 										</Badge>
 									</div>
 								</div>
-								<div class="text-sm text-gray-700">
+								<div class="text-sm text-ink-gray-7">
 									{{ member.name }}
 								</div>
 							</div>
 						</div>
-						<div class="flex items-center justify-center text-gray-700 text-sm">
+						<div
+							class="flex items-center justify-center text-ink-gray-7 text-sm"
+						>
 							<div v-if="member.last_active">
 								{{ dayjs(member.last_active).format('DD MMM, YYYY HH:mm a') }}
 							</div>
@@ -114,6 +116,7 @@ import { createResource, Avatar, Button, FormControl, Badge } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import { ref, watch, reactive, inject } from 'vue'
 import { RefreshCw, Plus, X } from 'lucide-vue-next'
+import { useOnboarding } from 'frappe-ui/frappe'
 
 const router = useRouter()
 const show = defineModel('show')
@@ -123,6 +126,7 @@ const memberList = ref([])
 const hasNextPage = ref(false)
 const showForm = ref(false)
 const dayjs = inject('$dayjs')
+const { updateOnboardingStep } = useOnboarding('learning')
 
 const member = reactive({
 	email: '',
@@ -183,6 +187,7 @@ const newMember = createResource({
 	auto: false,
 	onSuccess(data) {
 		show.value = false
+		updateOnboardingStep('invite_students')
 		router.push({
 			name: 'Profile',
 			params: {

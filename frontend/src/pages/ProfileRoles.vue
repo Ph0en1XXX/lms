@@ -1,6 +1,6 @@
 <template>
 	<div class="mt-7">
-		<h2 class="mb-3 text-lg font-semibold text-gray-900">
+		<h2 class="mb-3 text-lg font-semibold text-ink-gray-9">
 			{{ __('Settings') }}
 		</h2>
 		<div
@@ -72,7 +72,7 @@ const roles = createResource({
 })
 
 const updateRole = createResource({
-	url: 'lms.overrides.user.save_role',
+	url: 'lms.lms.api.save_role',
 	makeParams(values) {
 		return {
 			user: props.profile.data?.name,

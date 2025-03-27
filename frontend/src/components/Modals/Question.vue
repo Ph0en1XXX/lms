@@ -4,7 +4,7 @@
 			<div class="space-y-4">
 				<div
 					v-if="!editMode"
-					class="flex items-center text-xs text-gray-700 space-x-5"
+					class="flex items-center text-xs text-ink-gray-7 space-x-5"
 				>
 					<div class="flex items-center space-x-2">
 						<input
@@ -34,7 +34,7 @@
 				</div>
 				<div v-if="questionType == 'new' || editMode" class="space-y-2">
 					<div>
-						<label class="block text-xs text-gray-600 mb-1">
+						<label class="block text-xs text-ink-gray-5 mb-1">
 							{{ __('Question') }}
 						</label>
 						<TextEditor
@@ -42,7 +42,7 @@
 							@change="(val) => (question.question = val)"
 							:editable="true"
 							:fixedMenu="true"
-							editorClass="prose-sm max-w-none border-b border-x bg-gray-100 rounded-b-md py-1 px-2 min-h-[7rem]"
+							editorClass="prose-sm max-w-none border-b border-x bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
 						/>
 					</div>
 					<FormControl
@@ -109,11 +109,13 @@ import { Dialog, FormControl, TextEditor, createResource } from 'frappe-ui'
 import { computed, watch, reactive, ref } from 'vue'
 import Link from '@/components/Controls/Link.vue'
 import { showToast } from '@/utils'
+import { useOnboarding } from 'frappe-ui/frappe'
 
 const show = defineModel()
 const quiz = defineModel('quiz')
 const questionType = ref(null)
 const editMode = ref(false)
+const { updateOnboardingStep } = useOnboarding('learning')
 
 const existingQuestion = reactive({
 	question: '',
@@ -122,7 +124,7 @@ const existingQuestion = reactive({
 const question = reactive({
 	question: '',
 	type: 'Choices',
-	marks: 0,
+	marks: 1,
 })
 
 const populateFields = () => {
@@ -261,6 +263,7 @@ const addQuestionRow = (question, close) => {
 		{
 			onSuccess() {
 				show.value = false
+				updateOnboardingStep('create_first_quiz')
 				showToast(__('Success'), __('Question added successfully'), 'check')
 				quiz.value.reload()
 				close()

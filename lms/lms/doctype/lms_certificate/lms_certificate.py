@@ -7,11 +7,15 @@ from frappe.model.document import Document
 from frappe.utils import add_years, nowdate
 from lms.lms.utils import is_certified
 from frappe.email.doctype.email_template.email_template import get_email_template
+from frappe.model.naming import make_autoname
 
 
 class LMSCertificate(Document):
 	def validate(self):
 		self.validate_duplicate_certificate()
+
+	def autoname(self):
+		self.name = make_autoname("hash", self.doctype)
 
 	def after_insert(self):
 		if not frappe.flags.in_test:
@@ -48,16 +52,46 @@ class LMSCertificate(Document):
 		)
 
 	def validate_duplicate_certificate(self):
-		certificates = frappe.get_all(
-			"LMS Certificate",
-			{"member": self.member, "course": self.course, "name": ["!=", self.name]},
-		)
-		if len(certificates):
-			full_name = frappe.db.get_value("User", self.member, "full_name")
-			course_name = frappe.db.get_value("LMS Course", self.course, "title")
-			frappe.throw(
-				_("{0} is already certified for the course {1}").format(full_name, course_name)
+		self.validate_course_duplicates()
+		self.validate_batch_duplicates()
+
+	def validate_course_duplicates(self):
+		if self.course:
+			course_duplicates = frappe.get_all(
+				"LMS Certificate",
+				filters={
+					"member": self.member,
+					"name": ["!=", self.name],
+					"course": self.course,
+				},
+				fields=["name", "course", "course_title"],
 			)
+			if len(course_duplicates):
+				full_name = frappe.db.get_value("User", self.member, "full_name")
+				frappe.throw(
+					_("{0} is already certified for the course {1}").format(
+						full_name, course_duplicates[0].course_title
+					)
+				)
+
+	def validate_batch_duplicates(self):
+		if self.batch_name:
+			batch_duplicates = frappe.get_all(
+				"LMS Certificate",
+				filters={
+					"member": self.member,
+					"name": ["!=", self.name],
+					"batch_name": self.batch_name,
+				},
+				fields=["name", "batch_name", "batch_title"],
+			)
+			if len(batch_duplicates):
+				full_name = frappe.db.get_value("User", self.member, "full_name")
+				frappe.throw(
+					_("{0} is already certified for the batch {1}").format(
+						full_name, batch_duplicates[0].batch_title
+					)
+				)
 
 	def on_update(self):
 		frappe.share.add_docshare(
@@ -88,11 +122,6 @@ def create_certificate(course):
 		)
 
 	else:
-		expires_after_yrs = int(frappe.db.get_value("LMS Course", course, "expiry"))
-		expiry_date = None
-		if expires_after_yrs:
-			expiry_date = add_years(nowdate(), expires_after_yrs)
-
 		default_certificate_template = frappe.db.get_value(
 			"Property Setter",
 			{
@@ -114,7 +143,6 @@ def create_certificate(course):
 				"member": frappe.session.user,
 				"course": course,
 				"issue_date": nowdate(),
-				"expiry_date": expiry_date,
 				"template": default_certificate_template,
 			}
 		)

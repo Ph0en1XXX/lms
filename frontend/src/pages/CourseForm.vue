@@ -1,19 +1,20 @@
 <template>
-	<div class="">
+	<div class="h-full">
 		<div class="grid md:grid-cols-[70%,30%] h-full">
 			<div>
 				<header
-					class="sticky top-0 z-10 flex flex-col md:flex-row md:items-center justify-between border-b bg-white px-3 py-2.5 sm:px-5"
+					class="sticky top-0 z-10 group flex flex-col md:flex-row md:items-center justify-between border-b bg-surface-white px-3 py-2.5 sm:px-5"
 				>
 					<Breadcrumbs class="h-7" :items="breadcrumbs" />
 					<div class="flex items-center mt-3 md:mt-0">
-						<Button v-if="courseResource.data?.name" @click="trashCourse()">
-							<template #prefix>
+						<Button
+							v-if="courseResource.data?.name"
+							@click="trashCourse()"
+							class="invisible group-hover:visible"
+						>
+							<template #icon>
 								<Trash2 class="w-4 h-4 stroke-1.5" />
 							</template>
-							<span>
-								{{ __('Delete') }}
-							</span>
 						</Button>
 						<Button variant="solid" @click="submitCourse()" class="ml-2">
 							<span>
@@ -45,22 +46,22 @@
 							:required="true"
 						/>
 						<div class="mb-4">
-							<div class="mb-1.5 text-sm text-gray-600">
+							<div class="mb-1.5 text-sm text-ink-gray-5">
 								{{ __('Course Description') }}
-								<span class="text-red-500">*</span>
+								<span class="text-ink-red-3">*</span>
 							</div>
 							<TextEditor
 								:content="course.description"
 								@change="(val) => (course.description = val)"
 								:editable="true"
 								:fixedMenu="true"
-								editorClass="prose-sm max-w-none border-b border-x bg-gray-100 rounded-b-md py-1 px-2 min-h-[7rem]"
+								editorClass="prose-sm max-w-none border-b border-x bg-surface-gray-2 rounded-b-md py-1 px-2 min-h-[7rem]"
 							/>
 						</div>
 						<div class="mb-4">
-							<div class="text-xs text-gray-600 mb-2">
+							<div class="text-xs text-ink-gray-5 mb-2">
 								{{ __('Course Image') }}
-								<span class="text-red-500">*</span>
+								<span class="text-ink-red-3">*</span>
 							</div>
 							<FileUploader
 								v-if="!course.course_image"
@@ -73,13 +74,13 @@
 								>
 									<div class="flex items-center">
 										<div class="border rounded-md w-fit py-5 px-20">
-											<Image class="size-5 stroke-1 text-gray-700" />
+											<Image class="size-5 stroke-1 text-ink-gray-7" />
 										</div>
 										<div class="ml-4">
 											<Button @click="openFileSelector">
 												{{ __('Upload') }}
 											</Button>
-											<div class="mt-2 text-gray-600 text-sm">
+											<div class="mt-2 text-ink-gray-5 text-sm">
 												{{
 													__('Appears on the course card in the course list')
 												}}
@@ -98,7 +99,7 @@
 										<Button @click="removeImage()">
 											{{ __('Remove') }}
 										</Button>
-										<div class="mt-2 text-gray-600 text-sm">
+										<div class="mt-2 text-ink-gray-5 text-sm">
 											{{ __('Appears on the course card in the course list') }}
 										</div>
 									</div>
@@ -116,14 +117,14 @@
 							class="mb-4"
 						/>
 						<div class="mb-4">
-							<div class="mb-1.5 text-xs text-gray-600">
+							<div class="mb-1.5 text-xs text-ink-gray-5">
 								{{ __('Tags') }}
 							</div>
 							<div class="flex items-center">
 								<div
 									v-if="course.tags"
 									v-for="tag in course.tags?.split(', ')"
-									class="flex items-center bg-gray-100 p-2 rounded-md mr-2"
+									class="flex items-center bg-surface-gray-2 text-ink-gray-7 p-2 rounded-md mr-2"
 								>
 									{{ tag }}
 									<X
@@ -160,7 +161,7 @@
 						<div class="text-lg font-semibold mt-5 mb-4">
 							{{ __('Settings') }}
 						</div>
-						<div class="grid grid-cols-3 gap-10 mb-4">
+						<div class="grid grid-cols-2 gap-10 mb-4">
 							<div
 								v-if="user.data?.is_moderator"
 								class="flex flex-col space-y-4"
@@ -188,51 +189,56 @@
 									v-model="course.featured"
 									:label="__('Featured')"
 								/>
-							</div>
-							<div class="flex flex-col space-y-3">
 								<FormControl
 									type="checkbox"
 									v-model="course.disable_self_learning"
 									:label="__('Disable Self Enrollment')"
 								/>
-								<FormControl
-									type="checkbox"
-									v-model="course.enable_certification"
-									:label="__('Completion Certificate')"
-								/>
 							</div>
 						</div>
 					</div>
-					<div class="container border-t">
-						<div class="text-lg font-semibold mt-5 mb-4">
-							{{ __('Pricing') }}
+					<div class="container border-t space-y-4">
+						<div class="text-lg font-semibold mt-5">
+							{{ __('Pricing and Certification') }}
 						</div>
-						<div class="mb-4">
+						<div class="grid grid-cols-3">
 							<FormControl
 								type="checkbox"
 								v-model="course.paid_course"
 								:label="__('Paid Course')"
 							/>
+							<FormControl
+								type="checkbox"
+								v-model="course.enable_certification"
+								:label="__('Completion Certificate')"
+							/>
+							<FormControl
+								type="checkbox"
+								v-model="course.paid_certificate"
+								:label="__('Paid Certificate')"
+							/>
 						</div>
-						<FormControl
-							v-model="course.course_price"
-							:label="__('Course Price')"
-							class="mb-4"
-						/>
+						<FormControl v-model="course.course_price" :label="__('Amount')" />
 						<Link
 							doctype="Currency"
 							v-model="course.currency"
 							:filters="{ enabled: 1 }"
 							:label="__('Currency')"
 						/>
+						<Link
+							v-if="course.paid_certificate"
+							doctype="Course Evaluator"
+							v-model="course.evaluator"
+							:label="__('Evaluator')"
+						/>
 					</div>
 				</div>
 			</div>
-			<div class="border-l pt-5">
+			<div class="border-l">
 				<CourseOutline
 					v-if="courseResource.data"
 					:courseName="courseResource.data.name"
-					:title="course.title"
+					:title="__('Course Outline')"
 					:allowEdit="true"
 				/>
 			</div>
@@ -265,6 +271,7 @@ import { useRouter } from 'vue-router'
 import CourseOutline from '@/components/CourseOutline.vue'
 import MultiSelect from '@/components/Controls/MultiSelect.vue'
 import { capture } from '@/telemetry'
+import { useOnboarding } from 'frappe-ui/frappe'
 import { useSettings } from '@/stores/settings'
 
 const user = inject('$user')
@@ -273,6 +280,7 @@ const router = useRouter()
 const instructors = ref([])
 const settingsStore = useSettings()
 const app = getCurrentInstance()
+const { updateOnboardingStep } = useOnboarding('learning')
 const { $dialog } = app.appContext.config.globalProperties
 
 const props = defineProps({
@@ -296,8 +304,10 @@ const course = reactive({
 	disable_self_learning: false,
 	enable_certification: false,
 	paid_course: false,
+	paid_certificate: false,
 	course_price: '',
 	currency: '',
+	evaluator: '',
 })
 
 onMounted(() => {
@@ -391,6 +401,7 @@ const courseResource = createResource({
 			'paid_course',
 			'featured',
 			'enable_certification',
+			'paid_certifiate',
 		]
 		for (let idx in checkboxes) {
 			let key = checkboxes[idx]
@@ -435,9 +446,9 @@ const submitCourse = () => {
 			onSuccess(data) {
 				capture('course_created')
 				showToast('Success', 'Course created successfully', 'check')
-				if (!settingsStore.onboardingDetails.data?.is_onboarded) {
-					settingsStore.onboardingDetails.reload()
-				}
+				updateOnboardingStep('create_first_course', true, false, () => {
+					localStorage.setItem('firstCourse', data.name)
+				})
 				router.push({
 					name: 'CourseForm',
 					params: { courseName: data.name },
