@@ -35,7 +35,7 @@ import { Dialog, createResource } from 'frappe-ui'
 import { ref } from 'vue'
 import Link from '@/components/Controls/Link.vue'
 import { showToast } from '@/utils'
-import { useOnboarding } from 'frappe-ui'
+import { useOnboarding } from 'frappe-ui/frappe'
 import { useSettings } from '@/stores/settings'
 
 const show = defineModel()

@@ -92,7 +92,7 @@ import LessonHelp from '@/components/LessonHelp.vue'
 import { ChevronRight } from 'lucide-vue-next'
 import { updateDocumentTitle, createToast, getEditorTools } from '@/utils'
 import { capture } from '@/telemetry'
-import { useOnboarding } from 'frappe-ui'
+import { useOnboarding } from 'frappe-ui/frappe'
 
 const editor = ref(null)
 const instructorEditor = ref(null)

@@ -11,24 +11,21 @@
             <input type="email" id="signup_email" class="form-control"
             placeholder="{{ _('jane@example.com') }}" required>
         </div>
-        <div class="form-group">
-            <label class="form-label sr-only" for="signup_phone"> {{ _("Phone") }} </label>
-            <input type="phone" id="signup_phone" class="form-control"
-            placeholder="{{ _('+79990009900') }}" required>
-        </div>
 
         {% if frappe.db.get_single_value("LMS Settings", "user_category") %}
         <div class="form-group">
-            <label class="form-label sr-only"> {{ _("Role") }} </label>
+            <label class="form-label sr-only"> {{ _("User Category") }} </label>
             <div class="control-input-wrapper">
                 <div class="control-input flex align-center">
-                    <select type="text" id="user_role" data-fieldname="user_role" style="color: var(--text-muted)"
+                    <select type="text" id="user_category" data-fieldname="user_category" style="color: var(--text-muted)"
                     class="input-with-feedback form-control ellipsis" data-fieldtype="Select" required>
-                        <option value=""> {{ _("Role") }} </option>
-                        <option value="LMS Student"> {{ _("Student") }} </option>
-                        <option value="LMS Schoolchild"> {{ _("Ученик 11 класса") }} </option>
-                        <option value="Course Creator"> {{ _("Course Creator") }} </option>
-                        <option value="Parent"> {{ _("Parent") }} </option>
+                        <option value=""> {{ _("Category") }} </option>
+                        <option value="Business Owner"> {{ _("Business Owner") }} </option>
+                        <option value="Manager (Sales/Marketing/Customer)"> {{ _("Manager (Sales/Marketing/Customer)") }} </option>
+                        <option value="Employee"> {{ _("Employee") }} </option>
+                        <option value="Student"> {{ _("Student") }} </option>
+                        <option value="Freelancer/Just looking"> {{ _("Freelancer/Just looking") }} </option>
+                        <option value="Others"> {{ _("Others") }} </option>
                     </select>
                 </div>
             </div>
@@ -81,30 +78,22 @@
         e.preventDefault();
         const email = ($("#signup_email").val() || "").trim();
         const full_name = frappe.utils.xss_sanitise(($("#signup_fullname").val() || "").trim());
-        const phone = ($("#signup_phone").val() || "").trim();
 
-        if (!email || !validate_email(email) || !full_name || !validate_phone(phone)) {
-            login.set_status('{{ _("Valid email, name, and phone required") }}', 'red');
+        if (!email || !validate_email(email) || !full_name) {
+            login.set_status('{{ _("Valid email and name required") }}', 'red');
             return false;
         }
 
         frappe.call({
-            method: "lms.overrides.user.sign_up",
+            method: "lms.lms.user.sign_up",
             args: {
                 "email": email,
                 "full_name": full_name,
-                "phone": phone,
                 "verify_terms": $("#signup-terms").prop("checked") ? 1 : 0,
-                "user_category": $("#user_category").length ?  $("#user_category").val() : "",
-                "user_role": $("#user_role").length ? $("#user_role").val() : ""
+                "user_category": $("#user_category").length ?  $("#user_category").val() : ""
             },
             statusCode: login.login_handlers
         })
         return false;
-    }
-
-    const validate_phone = (phone) => {
-        const phone_regex = /^[0-9\-\+\s]{10,15}$/;
-        return phone_regex.test(phone);
     }
 </script>

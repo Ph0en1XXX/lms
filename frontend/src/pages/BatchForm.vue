@@ -271,7 +271,7 @@ import { showToast } from '@/utils'
 import { Image } from 'lucide-vue-next'
 import { capture } from '@/telemetry'
 import MultiSelect from '@/components/Controls/MultiSelect.vue'
-import { useOnboarding } from 'frappe-ui'
+import { useOnboarding } from 'frappe-ui/frappe'
 
 const router = useRouter()
 const user = inject('$user')
