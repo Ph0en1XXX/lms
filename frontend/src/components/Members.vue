@@ -116,7 +116,7 @@ import { createResource, Avatar, Button, FormControl, Badge } from 'frappe-ui'
 import { useRouter } from 'vue-router'
 import { ref, watch, reactive, inject } from 'vue'
 import { RefreshCw, Plus, X } from 'lucide-vue-next'
-import { useOnboarding } from 'frappe-ui/frappe'
+import { useOnboarding } from 'frappe-ui'
 
 const router = useRouter()
 const show = defineModel('show')

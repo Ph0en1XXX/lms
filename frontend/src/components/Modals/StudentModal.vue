@@ -29,7 +29,7 @@ import { Dialog, createResource } from 'frappe-ui'
 import { ref } from 'vue'
 import Link from '@/components/Controls/Link.vue'
 import { showToast } from '@/utils'
-import { useOnboarding } from 'frappe-ui/frappe'
+import { useOnboarding } from 'frappe-ui'
 
 const students = defineModel('reloadStudents')
 const student = ref()

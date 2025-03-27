@@ -173,7 +173,7 @@ import {
 	showHelpModal,
 	minimize,
 	IntermediateStepModal,
-} from 'frappe-ui/frappe'
+} from 'frappe-ui'
 
 const { user, sidebarSettings } = sessionStore()
 const { userResource } = usersStore()

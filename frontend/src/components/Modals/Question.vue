@@ -109,7 +109,7 @@ import { Dialog, FormControl, TextEditor, createResource } from 'frappe-ui'
 import { computed, watch, reactive, ref } from 'vue'
 import Link from '@/components/Controls/Link.vue'
 import { showToast } from '@/utils'
-import { useOnboarding } from 'frappe-ui/frappe'
+import { useOnboarding } from 'frappe-ui'
 
 const show = defineModel()
 const quiz = defineModel('quiz')
