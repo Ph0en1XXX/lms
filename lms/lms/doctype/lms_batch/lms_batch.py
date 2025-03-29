@@ -131,7 +131,7 @@ class LMSBatch(Document):
 			update_payment_record("LMS Batch", self.name)
 
 
-@frappe.whitelist()
+"""@frappe.whitelist()
 def create_live_class(
 	batch_name, title, duration, date, time, timezone, auto_recording, description=None
 ):
@@ -174,14 +174,36 @@ def create_live_class(
 		)
 		class_details = frappe.get_doc(payload)
 		class_details.save()
-		return class_details
-	else:
-		frappe.throw(
-			_("Error creating live class. Please try again. {0}").format(response.text)
-		)
+		return class_details"""
+
+@frappe.whitelist()
+def create_live_class(batch_name, title, date, time, timezone, auto_recording, description=None, duration=None):
+	frappe.only_for("Moderator")
+	
+	meeting_id = title.replace(" ", "_").lower()
+	join_url = f"https://meet.enlightlive.ru/{meeting_id}"
+
+	payload = {
+		"doctype": "LMS Live Class",
+		"start_url": join_url,
+		"join_url": join_url,
+		"title": title,
+		"host": frappe.session.user,
+		"date": date,
+		"time": time,
+		"batch_name": batch_name,
+		"description": description,
+		"duration":duration,
+		"auto_recording": auto_recording,
+		"timezone": timezone
+	}
+
+	class_details = frappe.get_doc(payload)
+	class_details.save()
+	return class_details
 
 
-def authenticate():
+"""def authenticate():
 	zoom = frappe.get_single("Zoom Settings")
 	if not zoom.enable:
 		frappe.throw(_("Please enable Zoom Settings to use this feature."))
@@ -200,7 +222,7 @@ def authenticate():
 		).decode()
 	}
 	response = requests.request("POST", authenticate_url, headers=headers)
-	return response.json()["access_token"]
+	return response.json()["access_token"]"""
 
 
 @frappe.whitelist()

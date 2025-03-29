@@ -221,6 +221,8 @@ const setSidebarLinks = () => {
 			},
 		}
 	)
+
+	sidebarLinks.value = getSidebarLinks().filter(link => link.label !== 'Courses')
 }
 
 const unreadNotifications = createResource({
@@ -246,6 +248,43 @@ const unreadNotifications = createResource({
 	},
 	auto: user ? true : false,
 })
+
+const addMyPoints = () => {
+	const roles = userResource.data?.roles || []
+	if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
+		sidebarLinks.value.push({
+			label: __('My points'),
+			icon: 'Award',
+			to: 'my_points',
+			external: true,
+			activeFor: [],
+		})
+	}
+}
+
+const addChatGPT = () => {
+	const roles = userResource.data?.roles || []
+	let URL = ''
+	let nameLabel = ''
+	if (roles.includes('LMS Schoolchild')) {
+		URL = 'chatgpt-schoolchild'
+		nameLabel = __('ChatGPT for Schoolers')
+	} else if (roles.includes('LMS Student')) {
+		URL = 'chatgpt-schoolchild'
+		nameLabel = __('ChatGPT for Students')
+	} else if (roles.includes('Course Creator')) {
+		URL = 'chatgpt-schoolchild'
+		nameLabel = __('ChatGPT for Teachers')
+	}
+
+	sidebarLinks.value.push({
+			label: nameLabel,
+			icon: 'Cpu',
+			to: URL,
+			external: true,
+			activeFor: [],
+	})
+}
 
 const addNotifications = () => {
 	if (user) {
@@ -568,14 +607,61 @@ const setUpOnboarding = () => {
 	}
 }
 
+const addLeaderBoard = () => {
+ 	if (user) {
+ 		sidebarLinks.value.push({
+ 			label: __('Leader Board'),
+ 			icon: 'Trophy',
+ 			to: 'leaderboardsample',
+ 			external: true,
+ 			activeFor: [],
+ 		})
+ 	}
+ }
+ 
+ const addForms = () => {
+ 	if (user) {
+ 		sidebarLinks.value.push({
+ 			label: __('Forms'),
+ 			icon: 'ClipboardList',
+ 			to: 'form-page',
+ 			external: true,
+ 			activeFor: [],
+ 		})
+ 	}
+ }
+
 watch(userResource, () => {
 	if (userResource.data) {
 		isModerator.value = userResource.data.is_moderator
 		isInstructor.value = userResource.data.is_instructor
+
+		const roles = userResource.data?.roles || []
+        let courseURL = 'lms/courses' // По умолчанию обычные курсы
+
+        if (roles.includes('Course Creator')) {
+            courseURL = 'lms/courses?category=Курсы+для+преподавателей'
+        } else if (roles.includes('LMS Student')) {
+            courseURL = 'lms/courses?category=Курсы+для+студентов'
+        } else if (roles.includes('LMS Schoolchild')) {
+            courseURL = 'lms/courses?category=Курсы+для+школьников'
+		}
+
+        sidebarLinks.value.push({
+            label: 'Courses',
+            icon: 'Book',
+            to: courseURL,
+            activeFor: ['Courses', 'CourseDetail', 'Lesson'],
+        })
+		
 		addPrograms()
 		addQuizzes()
 		addAssignments()
 		setUpOnboarding()
+		addMyPoints()
+ 		addLeaderBoard()
+ 		addChatGPT()
+ 		addForms()
 	}
 })
 </script>

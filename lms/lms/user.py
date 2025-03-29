@@ -19,12 +19,12 @@ def validate_username_duplicates(doc, method):
 		doc.username = doc.email.replace("@", "").replace(".", "")
 
 
-def after_insert(doc, method):
-	doc.add_roles("LMS Student")
+'''def after_insert(doc, method):
+	doc.add_roles("LMS Student")'''
 
 
 @frappe.whitelist(allow_guest=True)
-def sign_up(email, full_name, verify_terms, user_category):
+def sign_up(email, full_name, verify_terms, user_category, user_role, phone):
 	if is_signup_disabled():
 		frappe.throw(_("Sign Up is disabled"), _("Not Allowed"))
 
@@ -48,6 +48,7 @@ def sign_up(email, full_name, verify_terms, user_category):
 		{
 			"doctype": "User",
 			"email": email,
+			"phone": escape_html(phone),
 			"first_name": escape_html(full_name),
 			"verify_terms": verify_terms,
 			"user_category": user_category,
@@ -62,11 +63,15 @@ def sign_up(email, full_name, verify_terms, user_category):
 	user.insert()
 
 	# set default signup role as per Portal Settings
-	default_role = frappe.db.get_single_value("Portal Settings", "default_role")
+	default_role = frappe.db.get_value("Portal Settings", None, "default_role")
 	if default_role:
 		user.add_roles(default_role)
+	elif user_role: # set Role
+		user.add_roles(user_role)  # Если роль передана, добавляем её
+	else:
+		user.add_roles("LMS Student")  # Иначе добавляем роль по умолчанию
 
-	user.add_roles("LMS Student")
+	#user.add_roles("LMS Student")
 	set_country_from_ip(None, user.name)
 
 	if user.flags.email_sent:
