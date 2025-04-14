@@ -9,11 +9,31 @@
 			allowfullscreen
 		></iframe>
 	</div>
+	<div v-if="rutube">
+		<iframe
+			class="rutube-video"
+			:src="getRutubeVideoSource(rutube.split('/').pop())"
+			width="100%"
+			:height="screenSize.width < 640 ? 200 : 400"
+			frameborder="0"
+			allowfullscreen
+		></iframe>
+	</div>
 	<div v-for="block in content?.split('\n\n')">
 		<div v-if="block.includes('{{ YouTubeVideo')">
 			<iframe
 				class="youtube-video"
 				:src="getYouTubeVideoSource(block)"
+				width="100%"
+				:height="screenSize.width < 640 ? 200 : 400"
+				frameborder="0"
+				allowfullscreen
+			></iframe>
+		</div>
+		<div v-else-if="block.includes('{{ RutubeVideo')">
+			<iframe
+				class="rutube-video"
+				:src="getRutubeVideoSource(block)"
 				width="100%"
 				:height="screenSize.width < 640 ? 200 : 400"
 				frameborder="0"
@@ -54,8 +74,7 @@
 				:src="getId(block)"
 				frameborder="0"
 				allowfullscreen
-			>
-			</iframe>
+			></iframe>
 		</div>
 		<div v-else v-html="markdown.render(block)"></div>
 	</div>
@@ -63,6 +82,7 @@
 		<Quiz :quiz="quizId" />
 	</div>
 </template>
+
 <script setup>
 import Quiz from '@/components/QuizBlock.vue'
 import MarkdownIt from 'markdown-it'
@@ -84,6 +104,10 @@ const props = defineProps({
 		type: String,
 		required: false,
 	},
+	rutube: {
+		type: String,
+		required: false,
+	},
 	quizId: {
 		type: String,
 		required: false,
@@ -97,11 +121,27 @@ const getYouTubeVideoSource = (block) => {
 	return `https://www.youtube.com/embed/${block}`
 }
 
+const getRutubeVideoSource = (block) => {
+	if (block.includes('{{')) {
+		block = getId(block)
+	}
+	return `https://rutube.ru/play/embed/${block}`
+}
+
 const getPDFSource = (block) => {
 	return `${getId(block)}#toolbar=0`
 }
 
 const getId = (block) => {
-	return block.match(/\(["']([^"']+?)["']\)/)[1]
+	const match = block.match(/\(["']([^"']+?)["']\)/)
+	return match ? match[1] : ''
 }
 </script>
+
+<style scoped>
+.youtube-video,
+.rutube-video {
+	display: block;
+	margin: 0 auto;
+}
+</style>
