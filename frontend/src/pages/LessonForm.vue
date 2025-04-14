@@ -257,100 +257,130 @@ const lessonReference = createResource({
 })
 
 const convertToJSON = (lessonData) => {
-	let blocks = []
+	let blocks = [];
+	
+	// Обработка YouTube
 	if (lessonData.youtube) {
-		let youtubeID = lessonData.youtube.split('/').pop()
+		let youtubeID = lessonData.youtube.split('/').pop();
 		blocks.push({
 			type: 'embed',
 			data: {
 				service: 'youtube',
 				embed: `https://www.youtube.com/embed/${youtubeID}`,
 			},
-		})
+		});
 	}
+
+	// Обработка Rutube
+	if (lessonData.rutube) {
+		let rutubeID = lessonData.rutube.includes('rutube.ru')
+			? lessonData.rutube.split('/').pop()
+			: lessonData.rutube;
+		blocks.push({
+			type: 'embed',
+			data: {
+				service: 'rutube',
+				embed: `https://rutube.ru/play/embed/${rutubeID}`,
+			},
+		});
+	}
+
+	// Обработка содержимого body
 	lessonData.body.split('\n').forEach((block) => {
 		if (block.includes('{{ YouTubeVideo')) {
-			let youtubeID = block.match(/\(["']([^"']+?)["']\)/)[1]
+			let youtubeID = block.match(/\(["']([^"']+?)["']\)/)[1];
 			if (!youtubeID.includes('https://'))
-				youtubeID = `https://www.youtube.com/embed/${youtubeID}`
+				youtubeID = `https://www.youtube.com/embed/${youtubeID}`;
 			blocks.push({
 				type: 'embed',
 				data: {
 					service: 'youtube',
 					embed: youtubeID,
 				},
-			})
+			});
+		} else if (block.includes('{{ RutubeVideo')) { // Добавлено
+			let rutubeID = block.match(/\(["']([^"']+?)["']\)/)[1];
+			if (rutubeID.includes('rutube.ru')) {
+				rutubeID = rutubeID.split('/').pop();
+			}
+			blocks.push({
+				type: 'embed',
+				data: {
+					service: 'rutube',
+					embed: `https://rutube.ru/play/embed/${rutubeID}`,
+				},
+			});
 		} else if (block.includes('{{ Quiz')) {
-			let quiz = block.match(/\(["']([^"']+?)["']\)/)[1]
+			let quiz = block.match(/\(["']([^"']+?)["']\)/)[1];
 			blocks.push({
 				type: 'quiz',
 				data: {
 					quiz: quiz,
 				},
-			})
+			});
 		} else if (block.includes('{{ Video')) {
-			let video = block.match(/\(["']([^"']+?)["']\)/)[1]
+			let video = block.match(/\(["']([^"']+?)["']\)/)[1];
 			blocks.push({
 				type: 'upload',
 				data: {
 					file_url: video,
 					file_type: video.split('.').pop(),
 				},
-			})
+			});
 		} else if (block.includes('{{ Audio')) {
-			let audio = block.match(/\(["']([^"']+?)["']\)/)[1]
+			let audio = block.match(/\(["']([^"']+?)["']\)/)[1];
 			blocks.push({
 				type: 'upload',
 				data: {
 					file_url: audio,
 					file_type: audio.split('.').pop(),
 				},
-			})
+			});
 		} else if (block.includes('{{ PDF')) {
-			let pdf = block.match(/\(["']([^"']+?)["']\)/)[1]
+			let pdf = block.match(/\(["']([^"']+?)["']\)/)[1];
 			blocks.push({
 				type: 'upload',
 				data: {
 					file_url: pdf,
 					file_type: 'pdf',
 				},
-			})
+			});
 		} else if (block.includes('{{ Embed')) {
-			let embed = block.match(/\(["']([^"']+?)["']\)/)[1]
+			let embed = block.match(/\(["']([^"']+?)["']\)/)[1];
 			blocks.push({
 				type: 'embed',
 				data: {
 					service: embed.split('|||')[0],
 					embed: embed.split('|||')[1],
 				},
-			})
+			});
 		} else if (block.includes('![]')) {
-			let image = block.match(/\((.*?)\)/)[1]
+			let image = block.match(/\((.*?)\)/)[1];
 			blocks.push({
 				type: 'upload',
 				data: {
 					file_url: image,
 					file_type: 'image',
 				},
-			})
+			});
 		} else if (block.includes('#')) {
-			let level = (block.match(/#/g) || []).length
+			let level = (block.match(/#/g) || []).length;
 			blocks.push({
 				type: 'header',
 				data: {
 					text: block.replace(/#/g, '').trim(),
 					level: level,
 				},
-			})
+			});
 		} else {
 			blocks.push({
 				type: 'paragraph',
 				data: {
 					text: block,
 				},
-			})
+			});
 		}
-	})
+	});
 
 	if (lessonData.quizId) {
 		blocks.push({
@@ -358,11 +388,11 @@ const convertToJSON = (lessonData) => {
 			data: {
 				quiz: lessonData.quizId,
 			},
-		})
+		});
 	}
 
-	return blocks
-}
+	return blocks;
+};
 
 const saveLesson = (e) => {
 	showSuccessMessage = false

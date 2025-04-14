@@ -222,6 +222,7 @@ lms_markdown_macro_renderers = {
 	"Exercise": "lms.plugins.exercise_renderer",
 	"Quiz": "lms.plugins.quiz_renderer",
 	"YouTubeVideo": "lms.plugins.youtube_video_renderer",
+    "RuTubeVideo": "lms.plugins.rutube_video_renderer",
 	"Video": "lms.plugins.video_renderer",
 	"Assignment": "lms.plugins.assignment_renderer",
 	"Embed": "lms.plugins.embed_renderer",

@@ -22,6 +22,7 @@
   "instructor_notes",
   "section_break_6",
   "youtube",
+  "rutube",
   "column_break_9",
   "quiz_id",
   "section_break_16",
@@ -94,6 +95,12 @@
    "fieldname": "column_break_9",
    "fieldtype": "Column Break"
   },
+  {
+    "description": "RuTube Video will appear at the top of the lesson.",
+    "fieldname": "rutube",
+    "fieldtype": "Data",
+    "label": "RuTube Video URL"
+   },
   {
    "fieldname": "section_break_11",
    "fieldtype": "Section Break"

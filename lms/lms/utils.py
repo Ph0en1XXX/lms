@@ -333,22 +333,27 @@ def get_progress(course, lesson, member=None):
 
 
 def render_html(lesson):
-	youtube = lesson.youtube
-	quiz_id = lesson.quiz_id
-	body = lesson.body
+    youtube = lesson.youtube
+    quiz_id = lesson.quiz_id
+    body = lesson.body
+    rutube = lesson.get("rutube")  # Предполагаем, что поле rutube добавлено в Course Lesson
 
-	if youtube and "/" in youtube:
-		youtube = youtube.split("/")[-1]
+    if youtube and "/" in youtube:
+        youtube = youtube.split("/")[-1]
 
-	quiz_id = "{{ Quiz('" + quiz_id + "') }}" if quiz_id else ""
-	youtube = "{{ YouTubeVideo('" + youtube + "') }}" if youtube else ""
-	text = youtube + body + quiz_id
+    if rutube and "/" in rutube:
+        rutube = rutube.split("/")[-1]
 
-	if lesson.question:
-		assignment = "{{ Assignment('" + lesson.question + "-" + lesson.file_type + "') }}"
-		text = text + assignment
+    quiz_id = "{{ Quiz('" + quiz_id + "') }}" if quiz_id else ""
+    youtube = "{{ YouTubeVideo('" + youtube + "') }}" if youtube else ""
+    rutube = "{{ RutubeVideo('" + rutube + "') }}" if rutube else ""
+    text = rutube + youtube + body + quiz_id
 
-	return markdown_to_html(text)
+    if lesson.question:
+        assignment = "{{ Assignment('" + lesson.question + "-" + lesson.file_type + "') }}"
+        text = text + assignment
+
+    return markdown_to_html(text)
 
 
 def is_mentor(course, email):
@@ -1299,6 +1304,7 @@ def get_lesson(course, chapter, lesson):
 			"body",
 			"creation",
 			"youtube",
+			"rutube",
 			"quiz_id",
 			"question",
 			"file_type",
@@ -1819,6 +1825,7 @@ def get_lesson_creation_details(course, chapter, lesson):
 				"instructor_notes",
 				"instructor_content",
 				"youtube",
+				"rutube",
 				"quiz_id",
 			],
 			as_dict=1,

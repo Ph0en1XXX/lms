@@ -175,6 +175,18 @@ def youtube_video_renderer(video_id):
     </iframe>
     """
 
+def rutube_video_renderer(video_id):
+    return f"""
+    <iframe width="100%" height="400"
+        src="https://rutube.ru/play/embed/{video_id}"
+        title="Rutube video player"
+        frameborder="0"
+        class="rutube-video"
+        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+        allowfullscreen>
+    </iframe>
+    """
+
 
 def embed_renderer(details):
 	type = details.split("|||")[0]

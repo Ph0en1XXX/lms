@@ -153,6 +153,7 @@
 						v-if="lesson.data?.body"
 						:content="lesson.data.body"
 						:youtube="lesson.data.youtube"
+						:rutube="lesson.data.rutube"
 						:quizId="lesson.data.quiz_id"
 					/>
 				</div>

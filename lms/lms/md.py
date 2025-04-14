@@ -35,6 +35,7 @@ def find_macros(text):
 	>>> find_macros(text)
 	[
 	    ('YouTubeVideo': 'abcd1234')
+		('RuTubeVideo': 'abcd1234')
 	    ('Exercise', 'two-circles'),
 	    ('Exercise', 'four-circles')
 	]
@@ -108,18 +109,20 @@ class MacroInlineProcessor(InlineProcessor):
 
 
 def sanitize_html(html, macro):
-	"""Sanitize the html using BeautifulSoup.
+    """Sanitize the html using BeautifulSoup.
 
-	The markdown processor request the correct markup and crashes on
-	any broken tags. This makes sures that all those things are fixed
-	before passing to the etree parser.
-	"""
-	soup = BeautifulSoup(html, features="lxml")
-	nodes = soup.body.children
-	classname = ""
-	if macro == "YouTubeVideo":
-		classname = "lesson-video"
+    The markdown processor request the correct markup and crashes on
+    any broken tags. This makes sures that all those things are fixed
+    before passing to the etree parser.
+    """
+    soup = BeautifulSoup(html, features="lxml")
+    nodes = soup.body.children
+    classname = ""
+    if macro == "YouTubeVideo":
+        classname = "lesson-video"
+    elif macro == "RutubeVideo":  # Добавлено
+        classname = "rutube-video"
 
-	return (
-		"<div class='" + classname + "'>" + "\n".join(str(node) for node in nodes) + "</div>"
-	)
+    return (
+        "<div class='" + classname + "'>" + "\n".join(str(node) for node in nodes) + "</div>"
+    )
