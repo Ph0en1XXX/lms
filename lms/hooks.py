@@ -105,7 +105,7 @@ doc_events = {
 	"Notification Log": {"on_change": "lms.lms.utils.publish_notifications"},
 	"User": {
 		"validate": "lms.lms.user.validate_username_duplicates",
-		"after_insert": "lms.lms.user.after_insert",
+		#"after_insert": "lms.lms.user.after_insert",
 	},
 }
 
