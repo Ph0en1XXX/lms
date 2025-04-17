@@ -96,12 +96,12 @@ const addOtherLinks = () => {
 	otherLinks.value = []
 
 	if (user) {
-		otherLinks.value.push({
+		/*otherLinks.value.push({
 			label: 'Notifications',
 			icon: 'Bell',
 			to: 'Notifications',
 			activeFor: ['Notifications'],
-		})
+		})*/
 
 		const roles = userResource.data?.roles || []
 
@@ -112,14 +112,14 @@ const addOtherLinks = () => {
 			sidebarSettings.data?.learning_paths
 		) {
 			otherLinks.value.push({
-				label: 'Programs',
+				label: __('Programs'),
 				icon: 'Route',
 				to: 'Programs',
 				activeFor: ['Programs', 'ProgramForm', 'CourseDetail', 'Lesson'],
 			})
 		} else if (userResource.data?.is_instructor || userResource.data?.is_moderator) {
 			otherLinks.value.push({
-				label: 'Programs',
+				label: __('Programs'),
 				icon: 'Route',
 				to: 'Programs',
 				activeFor: ['Programs', 'ProgramForm'],
@@ -127,7 +127,7 @@ const addOtherLinks = () => {
 		}
 
 		// Добавляем Courses с учетом ролей
-		let courseURL = 'lms/courses'
+		/*let courseURL = 'lms/courses'
 		let courseLabel = 'Courses'
 		if (roles.includes('Course Creator')) {
 			courseURL = 'lms/courses?category=Курсы+для+преподавателей'
@@ -144,12 +144,12 @@ const addOtherLinks = () => {
 			icon: 'Book',
 			to: courseURL,
 			activeFor: ['Courses', 'CourseDetail', 'Lesson'],
-		})
+		})*/
 
 		// Добавляем Quizzes для модераторов и инструкторов
 		if (userResource.data?.is_moderator || userResource.data?.is_instructor) {
 			otherLinks.value.push({
-				label: 'Quizzes',
+				label: __('Quizzes'),
 				icon: 'CircleHelp',
 				to: 'Quizzes',
 				activeFor: [
@@ -164,7 +164,7 @@ const addOtherLinks = () => {
 		// Добавляем Assignments для модераторов и инструкторов
 		if (userResource.data?.is_moderator || userResource.data?.is_instructor) {
 			otherLinks.value.push({
-				label: 'Assignments',
+				label: __('Assignments'),
 				icon: 'Pencil',
 				to: 'Assignments',
 				activeFor: [
@@ -179,7 +179,7 @@ const addOtherLinks = () => {
 		// Добавляем My Points для студентов и школьников
 		if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
 			otherLinks.value.push({
-				label: 'My points',
+				label: __('My points'),
 				icon: 'Award',
 				to: 'my_points',
 				external: true,
@@ -192,13 +192,13 @@ const addOtherLinks = () => {
 		let chatGPTLabel = ''
 		if (roles.includes('LMS Schoolchild')) {
 			chatGPTURL = 'chatgpt-schoolchild'
-			chatGPTLabel = 'ChatGPT for Schoolers'
+			chatGPTLabel = __('ChatGPT for Schoolers')
 		} else if (roles.includes('LMS Student')) {
 			chatGPTURL = 'chatgpt-schoolchild'
-			chatGPTLabel = 'ChatGPT for Students'
+			chatGPTLabel = __('ChatGPT for Students')
 		} else if (roles.includes('Course Creator')) {
 			chatGPTURL = 'chatgpt-schoolchild'
-			chatGPTLabel = 'ChatGPT for Teachers'
+			chatGPTLabel = __('ChatGPT for Teachers')
 		}
 		if (chatGPTURL) {
 			otherLinks.value.push({
@@ -212,7 +212,7 @@ const addOtherLinks = () => {
 
 		// Добавляем Leader Board
 		otherLinks.value.push({
-			label: 'Leader Board',
+			label: __('Leader Board'),
 			icon: 'Trophy',
 			to: 'leaderboardsample',
 			external: true,
@@ -220,27 +220,27 @@ const addOtherLinks = () => {
 		})
 
 		// Добавляем Forms
-		otherLinks.value.push({
+		/*otherLinks.value.push({
 			label: 'Forms',
 			icon: 'ClipboardList',
 			to: 'form-page',
 			external: true,
 			activeFor: [],
-		})
+		})*/
 
 		otherLinks.value.push({
-			label: 'Profile',
+			label: __('Profile'),
 			icon: 'UserRound',
 			to: 'Profile',
 			params: { username: userResource.data?.username },
 		})
 		otherLinks.value.push({
-			label: 'Log out',
+			label: __('Log out'),
 			icon: 'LogOut',
 		})
 	} else {
 		otherLinks.value.push({
-			label: 'Log in',
+			label: __('Log in'),
 			icon: 'LogIn',
 		})
 	}

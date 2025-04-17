@@ -199,7 +199,7 @@ const iconProps = {
 }
 
 onMounted(() => {
-	addNotifications()
+	//addNotifications()
 	setSidebarLinks()
 	socket.on('publish_lms_notifications', (data) => {
 		unreadNotifications.reload()
@@ -289,7 +289,7 @@ const addChatGPT = () => {
 const addNotifications = () => {
 	if (user) {
 		sidebarLinks.value.push({
-			label: 'Notifications',
+			label: __('Notifications'),
 			icon: 'Bell',
 			to: 'Notifications',
 			activeFor: ['Notifications'],
@@ -301,7 +301,7 @@ const addNotifications = () => {
 const addQuizzes = () => {
 	if (isInstructor.value || isModerator.value) {
 		sidebarLinks.value.push({
-			label: 'Quizzes',
+			label: __('Quizzes'),
 			icon: 'CircleHelp',
 			to: 'Quizzes',
 			activeFor: [
@@ -317,7 +317,7 @@ const addQuizzes = () => {
 const addAssignments = () => {
 	if (isInstructor.value || isModerator.value) {
 		sidebarLinks.value.push({
-			label: 'Assignments',
+			label: __('Assignments'),
 			icon: 'Pencil',
 			to: 'Assignments',
 			activeFor: [
@@ -353,7 +353,7 @@ const addPrograms = () => {
 
 	if (canAddProgram) {
 		sidebarLinks.value.splice(index, 0, {
-			label: 'Programs',
+			label: __('Programs'),
 			icon: 'Route',
 			to: 'Programs',
 			activeFor: activeFor,
@@ -648,7 +648,7 @@ watch(userResource, () => {
 		}
 
         sidebarLinks.value.push({
-            label: 'Courses',
+            label: __('Courses'),
             icon: 'Book',
             to: courseURL,
             activeFor: ['Courses', 'CourseDetail', 'Lesson'],
@@ -661,7 +661,7 @@ watch(userResource, () => {
 		addMyPoints()
  		addLeaderBoard()
  		addChatGPT()
- 		addForms()
+ 		//addForms()
 	}
 })
 </script>

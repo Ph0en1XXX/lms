@@ -354,7 +354,7 @@ watch(
 const startTimer = () => {
 	timerInterval = setInterval(() => {
 		timer.value++
-		if (timer.value == 30) {
+		if (timer.value == 5) {
 			clearInterval(timerInterval)
 			markProgress()
 		}
