@@ -139,7 +139,7 @@ const courses = createListResource({
 	doctype: 'LMS Course',
 	url: 'lms.lms.utils.get_courses',
 	cache: ['courses', user.data?.name],
-	pageLength: pageLength.value,
+	//pageLength: pageLength.value,
 	start: start.value,
 	onSuccess(data) {
 		let allCategories = data.map((course) => course.category)
