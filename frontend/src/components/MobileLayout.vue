@@ -86,12 +86,55 @@ onMounted(() => {
 					}
 				})
 
+				addSideBar()
 				addOtherLinks()
 			},
 		}
 	)
 })
 
+const addSideBar = () => {
+	sidebarLinks.value.push({
+		label: __('Leader Board'),
+		icon: 'Trophy',
+		to: 'leaderboardsample',
+		external: true,
+		activeFor: [],
+	})
+
+	const roles = userResource.data?.roles || []
+	let URL = ''
+	let nameLabel = ''
+	if (roles.includes('LMS Schoolchild')) {
+		URL = 'chatgpt-schoolchild'
+		nameLabel = __('ChatGPT for Schoolers')
+	} else if (roles.includes('LMS Student')) {
+		URL = 'chatgpt-schoolchild'
+		nameLabel = __('ChatGPT for Students')
+	} else if (roles.includes('Course Creator')) {
+		URL = 'chatgpt-schoolchild'
+		nameLabel = __('ChatGPT for Teachers')
+	}
+
+	sidebarLinks.value.push({
+			label: nameLabel,
+			icon: 'Cpu',
+			to: URL,
+			external: true,
+			activeFor: [],
+	})
+
+	const roles = userResource.data?.roles || []
+	if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
+		sidebarLinks.value.push({
+			label: __('My points'),
+			icon: 'Award',
+			to: 'my_points',
+			external: true,
+			activeFor: [],
+		})
+	}
+}
 const addOtherLinks = () => {
 	otherLinks.value = []
 
