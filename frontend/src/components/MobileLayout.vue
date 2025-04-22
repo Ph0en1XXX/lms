@@ -78,13 +78,13 @@ onMounted(() => {
 		{},
 		{
 			onSuccess(data) {
-				Object.keys(data).forEach((key) => {
+				/*Object.keys(data).forEach((key) => {
 					if (!parseInt(data[key])) {
 						sidebarLinks.value = sidebarLinks.value.filter(
 							(link) => link.label.toLowerCase().split(' ').join('_') !== key
 						)
 					}
-				})
+				})*/
 
 				sidebarLinks.value.push({
 					label: __('Leader Board'),
@@ -94,7 +94,7 @@ onMounted(() => {
 					activeFor: [],
 				})
 
-				addSideBar()
+				//addSideBar()
 				addOtherLinks()
 			},
 		}
