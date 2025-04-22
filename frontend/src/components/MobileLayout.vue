@@ -86,6 +86,14 @@ onMounted(() => {
 					}
 				})
 
+				sidebarLinks.value.push({
+					label: __('Leader Board'),
+					icon: 'Trophy',
+					to: 'leaderboardsample',
+					external: true,
+					activeFor: [],
+				})
+
 				addSideBar()
 				addOtherLinks()
 			},
