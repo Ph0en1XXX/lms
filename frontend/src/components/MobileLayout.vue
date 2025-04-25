@@ -108,7 +108,7 @@ const addSideBar = () => {
 			activeFor: [],
 	})
 
-	/*const roles = userResource.data?.roles || []
+	const roles = userResource.data?.roles || []
 	let URL = ''
 	let nameLabel = ''
 
@@ -121,12 +121,12 @@ const addSideBar = () => {
 	} else if (roles.includes('Course Creator')) {
 		URL = 'chatgpt-schoolchild'
 		nameLabel = __('ChatGPT for Teachers')
-	}*/
+	}
 
 	sidebarLinks.value.push({
 		label: nameLabel,
 		icon: 'Cpu',
-		to: 'chatgpt-schoolchild',
+		to: URL,
 		external: true,
 		activeFor: [],
 	})
