@@ -4,7 +4,6 @@
 			<slot />
 		</div>
 		<div
-			v-if="sidebarSettings.data"
 			class="fixed flex items-center justify-around border-t border-outline-gray-2 bottom-0 z-10 w-full bg-surface-white standalone:pb-4"
 			:style="{
 				gridTemplateColumns: `repeat(${sidebarLinks.length + 1}, minmax(0, 1fr))`,
@@ -66,7 +65,7 @@ import { usersStore } from '@/stores/user'
 import { Popover } from 'frappe-ui'
 import * as icons from 'lucide-vue-next'
 
-const { logout, user, sidebarSettings } = sessionStore()
+const { logout, user } = sessionStore()
 let { isLoggedIn } = sessionStore()
 const router = useRouter()
 let { userResource } = usersStore()
@@ -74,47 +73,15 @@ const sidebarLinks = ref(getSidebarLinks())
 const otherLinks = ref([])
 
 onMounted(() => {
-	/*sidebarSettings.reload(
-		{},
-		{
-			onSuccess(data) {
-				Object.keys(data).forEach((key) => {
-					if (!parseInt(data[key])) {
-						sidebarLinks.value = sidebarLinks.value.filter(
-							(link) => link.label.toLowerCase().split(' ').join('_') !== key
-						)
-					}
-				})
-
-				
-
-				//addSideBar()
-				
-			},
-		}
-	)*/
+	addSideBar()
 	addOtherLinks()
-	sidebarLinks.value.push({
-		label: __('Leader Board'),
-		icon: 'Trophy',
-		to: 'leaderboardsample',
-		external: true,
-		activeFor: [],
-	})
 })
 
 const addSideBar = () => {
-	sidebarLinks.value.push({
-		label: __('Leader Board'),
-		icon: 'Trophy',
-		to: 'leaderboardsample',
-		external: true,
-		activeFor: [],
-	})
-
 	const roles = userResource.data?.roles || []
 	let URL = ''
 	let nameLabel = ''
+
 	if (roles.includes('LMS Schoolchild')) {
 		URL = 'chatgpt-schoolchild'
 		nameLabel = __('ChatGPT for Schoolers')
@@ -127,14 +94,13 @@ const addSideBar = () => {
 	}
 
 	sidebarLinks.value.push({
-			label: nameLabel,
-			icon: 'Cpu',
-			to: URL,
-			external: true,
-			activeFor: [],
+		label: nameLabel,
+		icon: 'Cpu',
+		to: URL,
+		external: true,
+		activeFor: [],
 	})
 
-	const roles = userResource.data?.roles || []
 	if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
 		sidebarLinks.value.push({
 			label: __('My points'),
@@ -144,26 +110,23 @@ const addSideBar = () => {
 			activeFor: [],
 		})
 	}
+
+	sidebarLinks.value.push({
+		label: __('Leader Board'),
+		icon: 'Trophy',
+		to: 'leaderboardsample',
+		external: true,
+		activeFor: [],
+	})
 }
+
 const addOtherLinks = () => {
 	otherLinks.value = []
 
 	if (user) {
-		/*otherLinks.value.push({
-			label: 'Notifications',
-			icon: 'Bell',
-			to: 'Notifications',
-			activeFor: ['Notifications'],
-		})*/
-
 		const roles = userResource.data?.roles || []
 
-		// Добавляем Programs, если разрешено
-		if (
-			!userResource.data?.is_instructor &&
-			!userResource.data?.is_moderator &&
-			sidebarSettings.data?.learning_paths
-		) {
+		if (!userResource.data?.is_instructor && !userResource.data?.is_moderator) {
 			otherLinks.value.push({
 				label: __('Programs'),
 				icon: 'Route',
@@ -179,27 +142,6 @@ const addOtherLinks = () => {
 			})
 		}
 
-		// Добавляем Courses с учетом ролей
-		/*let courseURL = 'lms/courses'
-		let courseLabel = 'Courses'
-		if (roles.includes('Course Creator')) {
-			courseURL = 'lms/courses?category=Курсы+для+преподавателей'
-			courseLabel = 'Courses'
-		} else if (roles.includes('LMS Student')) {
-			courseURL = 'lms/courses?category=Курсы+для+студентов'
-			courseLabel = 'Courses'
-		} else if (roles.includes('LMS Schoolchild')) {
-			courseURL = 'lms/courses?category=Курсы+для+школьников'
-			courseLabel = 'Courses'
-		}
-		otherLinks.value.push({
-			label: courseLabel,
-			icon: 'Book',
-			to: courseURL,
-			activeFor: ['Courses', 'CourseDetail', 'Lesson'],
-		})*/
-
-		// Добавляем Quizzes для модераторов и инструкторов
 		if (userResource.data?.is_moderator || userResource.data?.is_instructor) {
 			otherLinks.value.push({
 				label: __('Quizzes'),
@@ -212,10 +154,7 @@ const addOtherLinks = () => {
 					'QuizSubmission',
 				],
 			})
-		}
 
-		// Добавляем Assignments для модераторов и инструкторов
-		if (userResource.data?.is_moderator || userResource.data?.is_instructor) {
 			otherLinks.value.push({
 				label: __('Assignments'),
 				icon: 'Pencil',
@@ -229,7 +168,6 @@ const addOtherLinks = () => {
 			})
 		}
 
-		// Добавляем My Points для студентов и школьников
 		if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
 			otherLinks.value.push({
 				label: __('My points'),
@@ -240,9 +178,9 @@ const addOtherLinks = () => {
 			})
 		}
 
-		// Добавляем ChatGPT с учетом ролей
 		let chatGPTURL = ''
 		let chatGPTLabel = ''
+
 		if (roles.includes('LMS Schoolchild')) {
 			chatGPTURL = 'chatgpt-schoolchild'
 			chatGPTLabel = __('ChatGPT for Schoolers')
@@ -253,6 +191,7 @@ const addOtherLinks = () => {
 			chatGPTURL = 'chatgpt-schoolchild'
 			chatGPTLabel = __('ChatGPT for Teachers')
 		}
+
 		if (chatGPTURL) {
 			otherLinks.value.push({
 				label: chatGPTLabel,
@@ -263,7 +202,6 @@ const addOtherLinks = () => {
 			})
 		}
 
-		// Добавляем Leader Board
 		otherLinks.value.push({
 			label: __('Leader Board'),
 			icon: 'Trophy',
@@ -272,21 +210,13 @@ const addOtherLinks = () => {
 			activeFor: [],
 		})
 
-		// Добавляем Forms
-		/*otherLinks.value.push({
-			label: 'Forms',
-			icon: 'ClipboardList',
-			to: 'form-page',
-			external: true,
-			activeFor: [],
-		})*/
-
 		otherLinks.value.push({
 			label: __('Profile'),
 			icon: 'UserRound',
 			to: 'Profile',
 			params: { username: userResource.data?.username },
 		})
+
 		otherLinks.value.push({
 			label: __('Log out'),
 			icon: 'LogOut',
