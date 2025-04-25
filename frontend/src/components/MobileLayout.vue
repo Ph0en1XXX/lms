@@ -69,7 +69,7 @@ const { logout, user } = sessionStore()
 let { isLoggedIn } = sessionStore()
 const router = useRouter()
 let { userResource } = usersStore()
-const sidebarLinks = ref(getSidebarLinks())
+const sidebarLinks = ref([])
 const otherLinks = ref([])
 
 onMounted(() => {
@@ -78,7 +78,37 @@ onMounted(() => {
 })
 
 const addSideBar = () => {
-	const roles = userResource.data?.roles || []
+
+	sidebarLinks.value.push({
+		label: __('Courses'),
+		icon: 'BookOpen',
+		to: 'Courses',
+		activeFor: [
+			'Courses',
+			'CourseDetail',
+			'Lesson',
+			'CourseForm',
+			'LessonForm',
+		],
+	})
+
+	sidebarLinks.value.push({
+		label: __('Leader Board'),
+		icon: 'Trophy',
+		to: 'leaderboardsample',
+		external: true,
+		activeFor: [],
+	})
+
+	sidebarLinks.value.push({
+			label: __('My points'),
+			icon: 'Award',
+			to: 'my_points',
+			external: true,
+			activeFor: [],
+	})
+
+	/*const roles = userResource.data?.roles || []
 	let URL = ''
 	let nameLabel = ''
 
@@ -91,33 +121,16 @@ const addSideBar = () => {
 	} else if (roles.includes('Course Creator')) {
 		URL = 'chatgpt-schoolchild'
 		nameLabel = __('ChatGPT for Teachers')
-	}
+	}*/
 
 	sidebarLinks.value.push({
 		label: nameLabel,
 		icon: 'Cpu',
-		to: URL,
+		to: 'chatgpt-schoolchild',
 		external: true,
 		activeFor: [],
 	})
 
-	if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
-		sidebarLinks.value.push({
-			label: __('My points'),
-			icon: 'Award',
-			to: 'my_points',
-			external: true,
-			activeFor: [],
-		})
-	}
-
-	sidebarLinks.value.push({
-		label: __('Leader Board'),
-		icon: 'Trophy',
-		to: 'leaderboardsample',
-		external: true,
-		activeFor: [],
-	})
 }
 
 const addOtherLinks = () => {
