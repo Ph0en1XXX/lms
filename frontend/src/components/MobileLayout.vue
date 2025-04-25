@@ -108,28 +108,29 @@ const addSideBar = () => {
 			activeFor: [],
 	})
 
-	const roles = userResource.data?.roles || []
-	let URL = ''
-	let nameLabel = ''
+	let chatGPTURL = ''
+	let chatGPTLabel = ''
 
 	if (roles.includes('LMS Schoolchild')) {
-		URL = 'chatgpt-schoolchild'
-		nameLabel = __('ChatGPT for Schoolers')
+		chatGPTURL = 'chatgpt-schoolchild'
+		chatGPTLabel = __('ChatGPT for Schoolers')
 	} else if (roles.includes('LMS Student')) {
-		URL = 'chatgpt-schoolchild'
-		nameLabel = __('ChatGPT for Students')
+		chatGPTURL = 'chatgpt-schoolchild'
+		chatGPTLabel = __('ChatGPT for Students')
 	} else if (roles.includes('Course Creator')) {
-		URL = 'chatgpt-schoolchild'
-		nameLabel = __('ChatGPT for Teachers')
+		chatGPTURL = 'chatgpt-schoolchild'
+		chatGPTLabel = __('ChatGPT for Teachers')
 	}
 
-	sidebarLinks.value.push({
-		label: nameLabel,
-		icon: 'Cpu',
-		to: URL,
-		external: true,
-		activeFor: [],
-	})
+	if (chatGPTURL) {
+		sidebarLinks.value.push({
+			label: chatGPTLabel,
+			icon: 'Cpu',
+			to: chatGPTURL,
+			external: true,
+			activeFor: [],
+		})
+	}
 
 }
 
