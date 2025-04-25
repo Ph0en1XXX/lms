@@ -74,7 +74,7 @@ const sidebarLinks = ref(getSidebarLinks())
 const otherLinks = ref([])
 
 onMounted(() => {
-	sidebarSettings.reload(
+	/*sidebarSettings.reload(
 		{},
 		{
 			onSuccess(data) {
@@ -89,11 +89,11 @@ onMounted(() => {
 				
 
 				//addSideBar()
-				addOtherLinks()
+				
 			},
 		}
-	)
-
+	)*/
+	addOtherLinks()
 	sidebarLinks.value.push({
 		label: __('Leader Board'),
 		icon: 'Trophy',
