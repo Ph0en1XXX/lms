@@ -108,13 +108,29 @@ const addSideBar = () => {
 		activeFor: [],
 	})
 
-	sidebarLinks.value.push({
-		label: __('ChatGPT for Schoolers'),
-		icon: 'Cpu',
-		to: 'chatgpt-schoolchild',
-		external: true,
-		activeFor: [],
-	})
+	let chatGPTURL = ''
+		let chatGPTLabel = ''
+
+		if (roles.includes('LMS Schoolchild')) {
+			chatGPTURL = 'chatgpt-schoolchild'
+			chatGPTLabel = __('ChatGPT for Schoolers')
+		} else if (roles.includes('LMS Student')) {
+			chatGPTURL = 'chatgpt-schoolchild'
+			chatGPTLabel = __('ChatGPT for Students')
+		} else if (roles.includes('Course Creator')) {
+			chatGPTURL = 'AI-teachers'
+			chatGPTLabel = __('ChatGPT for Teachers')
+		}
+
+	if (chatGPTURL) {
+		sidebarLinks.value.push({
+			label: chatGPTLabel,
+			icon: 'Cpu',
+			to: chatGPTURL,
+			external: true,
+			activeFor: [],
+		})
+	}
 
 }
 
@@ -186,7 +202,7 @@ const addOtherLinks = () => {
 			chatGPTURL = 'chatgpt-schoolchild'
 			chatGPTLabel = __('ChatGPT for Students')
 		} else if (roles.includes('Course Creator')) {
-			chatGPTURL = 'chatgpt-schoolchild'
+			chatGPTURL = 'AI-teachers'
 			chatGPTLabel = __('ChatGPT for Teachers')
 		}
 
