@@ -73,11 +73,18 @@ const sidebarLinks = ref([])
 const otherLinks = ref([])
 
 onMounted(() => {
-	addSideBar()
+	// Вызываем addSideBar только если userResource уже загружен
+	if (userResource.data) {
+		addSideBar()
+	}
 	addOtherLinks()
 })
 
 const addSideBar = () => {
+	sidebarLinks.value = [] // Очищаем, чтобы избежать дублирования
+	
+	// Проверяем роли пользователя
+	const roles = userResource.data?.roles || []
 
 	sidebarLinks.value.push({
 		label: __('Courses'),
@@ -100,27 +107,29 @@ const addSideBar = () => {
 		activeFor: [],
 	})
 
-	sidebarLinks.value.push({
-		label: __('My points'),
-		icon: 'Award',
-		to: 'my_points',
-		external: true,
-		activeFor: [],
-	})
+	if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {
+		otherLinks.value.push({
+			label: __('My points'),
+			icon: 'Award',
+			to: 'my_points',
+			external: true,
+			activeFor: [],
+		})
+	}
 
 	let chatGPTURL = ''
-		let chatGPTLabel = ''
+	let chatGPTLabel = ''
 
-		if (roles.includes('LMS Schoolchild')) {
-			chatGPTURL = 'chatgpt-schoolchild'
-			chatGPTLabel = __('ChatGPT for Schoolers')
-		} else if (roles.includes('LMS Student')) {
-			chatGPTURL = 'chatgpt-schoolchild'
-			chatGPTLabel = __('ChatGPT for Students')
-		} else if (roles.includes('Course Creator')) {
-			chatGPTURL = 'AI-teachers'
-			chatGPTLabel = __('ChatGPT for Teachers')
-		}
+	if (roles.includes('LMS Schoolchild')) {
+		chatGPTURL = 'chatgpt-schoolchild'
+		chatGPTLabel = __('ChatGPT for Schoolers')
+	} else if (roles.includes('LMS Student')) {
+		chatGPTURL = 'chatgpt-schoolchild'
+		chatGPTLabel = __('ChatGPT for Students')
+	} else if (roles.includes('Course Creator')) {
+		chatGPTURL = 'AI-teachers'
+		chatGPTLabel = __('ChatGPT for Teachers')
+	}
 
 	if (chatGPTURL) {
 		sidebarLinks.value.push({
@@ -131,9 +140,7 @@ const addSideBar = () => {
 			activeFor: [],
 		})
 	}
-
 }
-
 const addOtherLinks = () => {
 	otherLinks.value = []
 
@@ -245,7 +252,8 @@ const addOtherLinks = () => {
 
 watch(userResource, () => {
 	if (userResource.data) {
-		addOtherLinks()
+		addSideBar() // Обновляем sidebarLinks при изменении userResource
+		addOtherLinks() // Обновляем otherLinks
 	}
 })
 
