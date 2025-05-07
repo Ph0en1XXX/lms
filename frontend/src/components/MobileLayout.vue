@@ -127,7 +127,7 @@ const addSideBar = () => {
 		chatGPTURL = 'chatgpt-schoolchild'
 		chatGPTLabel = __('ChatGPT for Students')
 	} else if (roles.includes('Course Creator')) {
-		chatGPTURL = 'AI-teachers'
+		chatGPTURL = 'ai-teachers'
 		chatGPTLabel = __('ChatGPT for Teachers')
 	}
 
@@ -209,7 +209,7 @@ const addOtherLinks = () => {
 			chatGPTURL = 'chatgpt-schoolchild'
 			chatGPTLabel = __('ChatGPT for Students')
 		} else if (roles.includes('Course Creator')) {
-			chatGPTURL = 'AI-teachers'
+			chatGPTURL = 'ai-teachers'
 			chatGPTLabel = __('ChatGPT for Teachers')
 		}
 

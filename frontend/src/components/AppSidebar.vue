@@ -273,7 +273,7 @@ const addChatGPT = () => {
 		URL = 'chatgpt-schoolchild'
 		nameLabel = __('ChatGPT for Students')
 	} else if (roles.includes('Course Creator')) {
-		URL = 'AI-teachers'
+		URL = 'ai-teachers'
 		nameLabel = __('ChatGPT for Teachers')
 	}
 
