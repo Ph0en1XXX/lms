@@ -9,25 +9,48 @@
 			class="ProseMirror prose prose-table:table-fixed prose-td:p-2 prose-th:p-2 prose-td:border prose-th:border prose-td:border-outline-gray-2 prose-th:border-outline-gray-2 prose-td:relative prose-th:relative prose-th:bg-surface-gray-2 prose-sm max-w-none !whitespace-normal"
 		></div>
 		
-		<div v-else class="text-ink-gray-7 text-sm italic">
+		<!-- Email -->
+		<div v-if="profile.data.email" class="mt-3 text-gray-700 text-sm">
+			<strong>{{ __('Email') }}:</strong> {{ profile.data.email }}
+		</div>
+
+		<!-- Phone -->
+		<div v-if="profile.data.phone" class="mt-1 text-gray-700 text-sm">
+			<strong>{{ __('Phone') }}:</strong> {{ profile.data.phone }}
+		</div>
+
+		<div v-else-if="!profile.data.email && !profile.data.phone && !profile.data.bio" class="text-ink-gray-7 text-sm italic">
 			{{ __('No introduction') }}
 		</div>
 	</div>
 
 	<!-- Points Section -->
-	<div class="mt-7 mb-10" v-if="profile.data.points">
+	<div class="mt-7 mb-10" v-if="energyPoints.data?.length">
 		<h2 class="mb-3 text-lg font-semibold text-ink-gray-9">
 			{{ __('Points') }}
 		</h2>
-		<div class="flex items-center">
-			<div class="bg-surface-gray-2 rounded-full p-3 mr-3">
-				<Star class="w-5 h-5 text-yellow-500" />
+		<ul class="space-y-4">
+			<li v-for="item in energyPoints.data.slice(0, 10)" :key="item.name" class="text-sm text-gray-700">
+				<div class="flex justify-between">
+					<span>{{ __('Points') }}: {{ item.points }}</span>
+					<span>{{ dayjs(item.creation).format('DD-MM-YYYY') }}</span>
+				</div>
+				<div v-if="item.rule" class="text-ink-gray-7">
+					{{ __('Reason') }}: {{ item.rule }}
+				</div>
+			</li>
+		</ul>
+		<div class="mt-4 text-sm">
+			<div class="font-semibold">
+				{{ __('Total Points') }}: {{ totalPoints }}
 			</div>
-			<div>
-				<div class="text-2xl font-bold">{{ profile.data.points }}</div>
-				<div class="text-sm text-ink-gray-7">{{ __('Total points earned') }}</div>
+			<div class="font-semibold">
+				{{ __('Additional Points for MPGU Admission') }}: {{ additionalPoints }}
 			</div>
 		</div>
+	</div>
+	<div v-else class="mt-7 text-ink-gray-7 text-sm italic">
+		{{ __('No points yet') }}
 	</div>
 
 	<!-- Courses Section -->
@@ -35,26 +58,22 @@
 		<h2 class="mb-3 text-lg font-semibold text-ink-gray-9">
 			{{ __('Completed Courses') }}
 		</h2>
-		<div class="grid grid-cols-1 gap-3">
-			<div v-for="course in courses.data" :key="course.name" class="border border-outline-gray-2 rounded-md p-4 hover:bg-surface-gray-1">
-				<router-link :to="`/courses/${course.course}`" class="flex items-center">
-					<img 
-						v-if="course.course_image" 
-						:src="course.course_image" 
-						class="h-12 w-12 object-cover rounded mr-3"
-					/>
-					<div>
-						<div class="font-medium">{{ course.course_title }}</div>
-						<div class="text-sm text-ink-gray-7">
-							{{ __('Completed on') }} {{ dayjs(course.completion_date).format('DD MMM YYYY') }}
-						</div>
-					</div>
-				</router-link>
+		<div class="grid grid-cols-1 gap-4">
+			<div v-for="course in courses.data" :key="course.name">
+				<a
+					:href="`/lms/courses/${course.name}`"
+					class="text-base text-ink-gray-9 hover:text-blue-600"
+				>
+					{{ course.title }}
+				</a>
+				<div class="text-sm text-ink-gray-7">
+					{{ __('Completed on') }}: {{ dayjs(course.completion_date).format('DD MMM YYYY') }}
+				</div>
 			</div>
 		</div>
 	</div>
 
-	<!-- Badges Section -->
+	<!-- Achievements Section -->
 	<div class="mt-7 mb-10" v-if="badges.data?.length">
 		<h2 class="mb-3 text-lg font-semibold text-ink-gray-9">
 			{{ __('Achievements') }}
@@ -141,9 +160,9 @@
 </template>
 
 <script setup>
-import { inject } from 'vue'
+import { inject, computed } from 'vue'
 import { createResource, Popover, Button } from 'frappe-ui'
-import { X, LinkedinIcon, Twitter, Star } from 'lucide-vue-next'
+import { X, LinkedinIcon, Twitter } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
 
 const dayjs = inject('$dayjs')
@@ -156,7 +175,6 @@ const props = defineProps({
 	},
 })
 
-// Get user badges
 const badges = createResource({
 	url: 'frappe.client.get_list',
 	params: {
@@ -179,19 +197,38 @@ const badges = createResource({
 	},
 })
 
-// Get completed courses
 const courses = createResource({
 	url: 'frappe.client.get_list',
 	params: {
-		doctype: 'LMS Course Enrollment',
-		fields: ['course', 'course_title', 'course_image', 'completion_date'],
+		doctype: 'LMS Course Progress',
+		fields: ['name', 'course', 'title', 'completion_date'],
 		filters: {
 			member: props.profile.data.name,
-			status: 'Completed'
+			status: 'Completed',
 		},
-		order_by: 'completion_date desc'
 	},
-	auto: true
+	auto: true,
+})
+
+const energyPoints = createResource({
+	url: 'frappe.client.get_list',
+	params: {
+		doctype: 'Energy Point Log',
+		fields: ['name', 'user', 'points', 'rule', 'creation'],
+		filters: {
+			user: props.profile.data.email,
+		},
+	},
+	auto: true,
+})
+
+const totalPoints = computed(() => {
+	return energyPoints.data?.reduce((sum, item) => sum + (item.points || 0), 0) || 0
+})
+
+const additionalPoints = computed(() => {
+	const points = Math.floor(totalPoints.value / 100)
+	return points < 10 ? points : 10
 })
 
 const shareOnSocial = (badge, medium) => {
