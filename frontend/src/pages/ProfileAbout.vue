@@ -207,7 +207,7 @@ const courses = createResource({
 		fields: ['name', 'member', 'course', 'status', 'creation'], // Добавлены поля из формы
 		filters: {
 			member: props.profile.data.email,
-			status: 'Completed',
+			status: 'Complete',
 		},
 	},
 	auto: true,
