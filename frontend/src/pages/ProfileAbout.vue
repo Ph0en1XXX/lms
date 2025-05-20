@@ -211,15 +211,20 @@ const courses = createResource({
 		},
 	},
 	auto: true,
+	onSuccess(data) {
+		console.log('LMS Course Progress data:', data) // Отладка
+	},
 })
 
 const courseTitles = ref({})
 const coursesWithTitles = computed(() => {
 	if (!courses.data) return []
-	return courses.data.map(course => ({
+	const result = courses.data.map(course => ({
 		...course,
-		title: courseTitles.value[course.course] || null, // Добавляем title из courseTitles
+		title: courseTitles.value[course.course] || null,
 	}))
+	console.log('Courses with titles:', result) // Отладка
+	return result
 })
 
 // Запрашиваем title для каждого курса
@@ -228,22 +233,28 @@ watch(
 	(newCourses) => {
 		if (newCourses && newCourses.length) {
 			const courseIds = newCourses.map(course => course.course)
+			console.log('Course IDs:', courseIds) // Отладка
 			createResource({
 				url: 'frappe.client.get_list',
 				params: {
 					doctype: 'LMS Course',
 					fields: ['name', 'title'],
 					filters: {
-						name: ['in', courseIds], // Запрашиваем курсы по их ID
+						name: ['in', courseIds],
 					},
 				},
 				auto: true,
 				onSuccess(data) {
+					console.log('Raw course titles data:', data) // Отладка сырых данных
 					const titles = {}
 					data.forEach(course => {
 						titles[course.name] = course.title
 					})
 					courseTitles.value = titles
+					console.log('Processed course titles:', titles) // Отладка обработанных titles
+				},
+				onError(error) {
+					console.error('Error fetching course titles:', error) // Отладка ошибок
 				},
 			})
 		}
