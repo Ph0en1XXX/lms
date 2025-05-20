@@ -54,20 +54,20 @@
 	</div>
 
 	<!-- Courses Section -->
-	<div class="mt-7 mb-10" v-if="courses.data?.length">
+	<div class="mt-7 mb-10" v-if="coursesWithTitles.length">
 		<h2 class="mb-3 text-lg font-semibold text-ink-gray-9">
 			{{ __('Completed Courses') }}
 		</h2>
 		<div class="grid grid-cols-1 gap-4">
-			<div v-for="course in courses.data" :key="course.name">
+			<div v-for="course in coursesWithTitles" :key="course.name">
 				<a
 					:href="`/lms/courses/${course.course}`"
 					class="text-base text-ink-gray-9 hover:text-blue-600"
 				>
-					{{ course.course }} <!-- Используем поле Course как название -->
+					{{ course.title || course.course }} <!-- Отображаем title, если есть, иначе course -->
 				</a>
 				<div class="text-sm text-ink-gray-7">
-					{{ __('Completed on') }}: {{ dayjs(course.creation).format('DD MMM YYYY') }} <!-- Используем creation как дату завершения -->
+					{{ __('Completed on') }}: {{ dayjs(course.creation).format('DD MMM YYYY') }}
 				</div>
 			</div>
 		</div>
@@ -163,7 +163,7 @@
 </template>
 
 <script setup>
-import { inject, computed } from 'vue'
+import { inject, computed, ref, watch } from 'vue'
 import { createResource, Popover, Button } from 'frappe-ui'
 import { X, LinkedinIcon, Twitter } from 'lucide-vue-next'
 import { sessionStore } from '@/stores/session'
@@ -204,7 +204,7 @@ const courses = createResource({
 	url: 'frappe.client.get_list',
 	params: {
 		doctype: 'LMS Course Progress',
-		fields: ['name', 'member', 'course', 'status', 'creation'], // Добавлены поля из формы
+		fields: ['name', 'member', 'course', 'status', 'creation'],
 		filters: {
 			member: props.profile.data.email,
 			status: 'Complete',
@@ -212,6 +212,44 @@ const courses = createResource({
 	},
 	auto: true,
 })
+
+const courseTitles = ref({})
+const coursesWithTitles = computed(() => {
+	if (!courses.data) return []
+	return courses.data.map(course => ({
+		...course,
+		title: courseTitles.value[course.course] || null, // Добавляем title из courseTitles
+	}))
+})
+
+// Запрашиваем title для каждого курса
+watch(
+	() => courses.data,
+	(newCourses) => {
+		if (newCourses && newCourses.length) {
+			const courseIds = newCourses.map(course => course.course)
+			createResource({
+				url: 'frappe.client.get_list',
+				params: {
+					doctype: 'LMS Course',
+					fields: ['name', 'title'],
+					filters: {
+						name: ['in', courseIds], // Запрашиваем курсы по их ID
+					},
+				},
+				auto: true,
+				onSuccess(data) {
+					const titles = {}
+					data.forEach(course => {
+						titles[course.name] = course.title
+					})
+					courseTitles.value = titles
+				},
+			})
+		}
+	},
+	{ immediate: true }
+)
 
 const energyPoints = createResource({
 	url: 'frappe.client.get_list',
