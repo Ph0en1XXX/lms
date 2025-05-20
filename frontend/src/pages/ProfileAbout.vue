@@ -206,7 +206,7 @@ const courses = createResource({
 		doctype: 'LMS Course Progress',
 		fields: ['name', 'member', 'course', 'status', 'creation'], // Добавлены поля из формы
 		filters: {
-			member: props.profile.data.name,
+			member: props.profile.data.email,
 			status: 'Completed',
 		},
 	},
