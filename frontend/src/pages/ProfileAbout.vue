@@ -61,16 +61,19 @@
 		<div class="grid grid-cols-1 gap-4">
 			<div v-for="course in courses.data" :key="course.name">
 				<a
-					:href="`/lms/courses/${course.name}`"
+					:href="`/lms/courses/${course.course}`"
 					class="text-base text-ink-gray-9 hover:text-blue-600"
 				>
-					{{ course.title }}
+					{{ course.course }} <!-- Используем поле Course как название -->
 				</a>
 				<div class="text-sm text-ink-gray-7">
-					{{ __('Completed on') }}: {{ dayjs(course.completion_date).format('DD MMM YYYY') }}
+					{{ __('Completed on') }}: {{ dayjs(course.creation).format('DD MMM YYYY') }} <!-- Используем creation как дату завершения -->
 				</div>
 			</div>
 		</div>
+	</div>
+	<div v-else class="mt-7 text-ink-gray-7 text-sm italic">
+		{{ __('No completed courses yet') }}
 	</div>
 
 	<!-- Achievements Section -->
@@ -201,7 +204,7 @@ const courses = createResource({
 	url: 'frappe.client.get_list',
 	params: {
 		doctype: 'LMS Course Progress',
-		fields: ['name', 'course', 'title', 'completion_date'],
+		fields: ['name', 'member', 'course', 'status', 'creation'], // Добавлены поля из формы
 		filters: {
 			member: props.profile.data.name,
 			status: 'Completed',
