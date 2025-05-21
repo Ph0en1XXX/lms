@@ -1278,7 +1278,7 @@ msgstr "Курс завершен"
 #: lms/lms/doctype/lms_question/lms_question.json
 #: lms/lms/doctype/lms_quiz/lms_quiz.json
 msgid "Course Creator"
-msgstr "Создание курса"
+msgstr "Учитель/Репетитор"
 
 #. Label of a Card Break in the LMS Workspace
 #: lms/lms/workspace/lms/lms.json
