@@ -6162,3 +6162,38 @@ msgstr "{} Прошел"
 msgid "{} Published"
 msgstr "{} Опубликовано"
 
+#: frontend/src/pages/ProfileAbout.vue:30
+msgid "Points"
+msgstr "Баллы"
+
+#: frontend/src/pages/ProfileAbout.vue:33
+msgid "The last 10 score records have been uploaded"
+msgstr "Загружены 10 последних записей о баллах"
+
+#: frontend/src/pages/ProfileAbout.vue:42
+msgid "Reason"
+msgstr "Причина"
+
+#: frontend/src/pages/ProfileAbout.vue:48
+msgid "Total Points"
+msgstr "Всего баллов"
+
+#: frontend/src/pages/ProfileAbout.vue:51
+msgid "Additional Points for MPGU Admission"
+msgstr "Дополнительные баллы для поступления в МПГУ"
+
+#: frontend/src/pages/ProfileAbout.vue:56
+msgid "No points yet"
+msgstr "Нет баллов"
+
+#: frontend/src/pages/ProfileAbout.vue:62
+msgid "Completed Courses"
+msgstr "Пройденные курсы"
+
+#: frontend/src/pages/ProfileAbout.vue:73
+msgid "Completed on"
+msgstr "Завершенно"
+
+#: frontend/src/pages/ProfileAbout.vue:79
+msgid "No completed courses yet"
+msgstr "Нет пройденных курсов"

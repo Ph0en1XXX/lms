@@ -29,6 +29,9 @@
 		<h2 class="mb-3 text-lg font-semibold text-ink-gray-9">
 			{{ __('Points') }}
 		</h2>
+		<h2 class="mb-3 text-lg font-semibold text-ink-gray-9">
+			{{ __('The last 10 score records have been uploaded') }}
+		</h2>
 		<ul class="space-y-4">
 			<li v-for="item in energyPoints.data.slice(0, 10)" :key="item.name" class="text-sm text-gray-700">
 				<div class="flex justify-between">
