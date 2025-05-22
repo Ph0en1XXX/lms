@@ -263,15 +263,21 @@ watch(
 )
 
 const energyPoints = createResource({
-	url: 'frappe.client.get_list',
-	params: {
-		doctype: 'Energy Point Log',
-		fields: ['name', 'user', 'points', 'rule', 'creation'],
-		filters: {
-			user: props.profile.data.email,
-		},
-	},
-	auto: true,
+    url: 'frappe.client.get_list',
+    params: {
+        doctype: 'Energy Point Log',
+        fields: ['name', 'user', 'points', 'rule', 'creation'],
+        filters: {
+            user: props.profile.data.email,
+        },
+    },
+    auto: true,
+    onSuccess(data) {
+        console.log('Energy Points data:', data) // Отладка
+        data.forEach(item => {
+            console.log('Points for', item.name, ':', item.points, typeof item.points)
+        })
+    },
 })
 
 const totalPoints = computed(() => {
