@@ -270,6 +270,7 @@ const energyPoints = createResource({
         filters: {
             user: props.profile.data.email,
         },
+		limit_page_length: 1000,
     },
     auto: true,
     onSuccess(data) {
