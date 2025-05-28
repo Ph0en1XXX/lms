@@ -2,6 +2,7 @@
 """
 
 import json
+from sys import last_traceback
 import frappe
 import zipfile
 import os
@@ -1427,3 +1428,81 @@ def upload_questions():
         "created": created
     }
 
+@frappe.whitelist(allow_guest=True)
+def upload_questions_choices():
+    if 'csv' not in frappe.request.files:
+        frappe.throw("Файл не найден")
+
+    file = frappe.request.files['csv']
+    content = file.stream.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(content))
+
+    created = []
+
+    for row in reader:
+        # Логируем обработанную строку для отладки
+        frappe.log_error(f"Обрабатываемая строка: {row}", "CSV Upload Choices Debug")
+
+        question_text = row.get("question_text", "").strip()
+        option_1 = row.get("option_1", "").strip()
+        option_2 = row.get("option_2", "").strip()
+        option_3 = row.get("option_3", "").strip()
+        option_4 = row.get("option_4", "").strip()
+        is_correct_1 = row.get("is_correct_1", "0").strip()
+        is_correct_2 = row.get("is_correct_2", "0").strip()
+        is_correct_3 = row.get("is_correct_3", "0").strip()
+        is_correct_4 = row.get("is_correct_4", "0").strip()
+        explanation_1 = row.get("explanation_1", "").strip()
+        explanation_2 = row.get("explanation_2", "").strip()
+        explanation_3 = row.get("explanation_3", "").strip()
+        explanation_4 = row.get("explanation_4", "").strip()
+
+        # Проверяем, что вопрос и первый вариант не пустые
+        if not question_text or not option_1:
+            frappe.log_error(f"Отсутствует вопрос или первый вариант: {row}", "CSV Upload Choices Error")
+            continue
+
+        # Проверяем минимум два варианта
+        options = [opt for opt in [option_1, option_2, option_3, option_4] if opt]
+        if len(options) < 2:
+            frappe.log_error(f"Меньше двух опций: {options}", "CSV Upload Choices Error")
+            continue
+
+        # Проверяем, что хотя бы один вариант помечен как правильный
+        correct_options = [is_correct_1, is_correct_2, is_correct_3, is_correct_4]
+        if not any(c == "1" for c in correct_options):
+            frappe.log_error(f"Не указан ни один правильный ответ: {correct_options}", "CSV Upload Choices Error")
+            continue
+
+        # Подготовка данных для создания документа
+        question_data = {
+            "doctype": "LMS Question",
+            "question_type": "Choices",
+            "question_text": question_text,
+            "option_1": option_1,
+            "option_2": option_2,
+            "option_3": option_3,
+            "option_4": option_4,
+            "is_correct_1": 1 if is_correct_1 == "1" else 0,
+            "is_correct_2": 1 if is_correct_2 == "1" else 0,
+            "is_correct_3": 1 if is_correct_3 == "1" else 0,
+            "is_correct_4": 1 if is_correct_4 == "1" else 0,
+            "explanation_1": explanation_1,
+            "explanation_2": explanation_2,
+            "explanation_3": explanation_3,
+            "explanation_4": explanation_4
+        }
+
+        try:
+            doc = frappe.get_doc(question_data)
+            doc.insert()
+            created.append(doc.name)
+            frappe.log_error(f"Создан вопрос: {doc.name}", "CSV Upload Choices Success")
+        except Exception as e:
+            frappe.log_error(f"Ошибка при создании вопроса: {str(e)}\n{last_traceback()}", "CSV Upload Choices Error")
+            continue
+
+    return {
+        "message": f"Создано {len(created)} вопросов",
+        "created": created
+    }
