@@ -1360,3 +1360,70 @@ def add_an_evaluator(email):
 	evaluator.insert()
 
 	return evaluator
+
+
+# upload questions from csv
+import csv
+import io
+
+@frappe.whitelist(allow_guest=True)
+def upload_questions():
+    if 'csv' not in frappe.request.files:
+        frappe.throw("Файл не найден")
+
+    file = frappe.request.files['csv']
+    content = file.stream.read().decode("utf-8")
+    reader = csv.DictReader(io.StringIO(content))
+
+    created = []
+
+    for row in reader:
+        question_type = row.get("question_type", "").strip()
+        question_text = row.get("question_text", "").strip()
+
+        question_data = {
+            "doctype": "LMS Question",
+            "question_type": question_type,
+            "question_text": question_text
+        }
+
+        if question_type == "Choices":
+            question_data.update({
+                "option_1": row.get("option_1", "").strip(),
+                "option_2": row.get("option_2", "").strip(),
+                "option_3": row.get("option_3", "").strip(),
+                "option_4": row.get("option_4", "").strip(),
+                "is_correct": row.get("answer", "").strip(),
+                "explanation": row.get("explanation", "").strip()
+            })
+            frappe.logger().debug(f"[DEBUG] Choices question data: {question_data}")
+
+        elif question_type == "User Input":
+            answer = row.get("option_1", "").strip()
+            if not answer:
+                frappe.logger().error("User Input question requires answer in option_1.")
+                continue
+            question_data["possibility_1"] = answer
+            frappe.logger().debug(f"[DEBUG] User Input question data: {question_data}")
+
+        elif question_type == "Open Ended":
+            frappe.logger().debug("[DEBUG] Open Ended question")
+            frappe.logger().debug(f"[DEBUG] Open Ended question data: {question_data}")
+
+        else:
+            frappe.logger().error(f"Unknown question type: {question_type}")
+            continue
+
+        try:
+            doc = frappe.get_doc(question_data)
+            doc.insert()
+            created.append(doc.name)
+        except Exception as e:
+            frappe.logger().error(f"Ошибка при создании вопроса: {e}")
+            continue
+
+    return {
+        "message": f"Создано {len(created)} вопросов",
+        "created": created
+    }
+
