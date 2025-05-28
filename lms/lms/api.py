@@ -1381,7 +1381,6 @@ def upload_questions():
 	for row in reader:
 
 		question = row.get("question", "").strip()
-		question_text = row.get("question_text", "").strip()
 		option_1 = row.get("option_1", "").strip()
 		option_2 = row.get("option_2", "").strip()
 		option_3 = row.get("option_3", "").strip()
