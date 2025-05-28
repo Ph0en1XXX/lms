@@ -1366,111 +1366,55 @@ def add_an_evaluator(email):
 import csv
 import io
 
-from frappe.utils import get_traceback
 
 @frappe.whitelist(allow_guest=True)
 def upload_questions():
-    if 'csv' not in frappe.request.files:
-        frappe.throw("Файл не найден")
+	if 'csv' not in frappe.request.files:
+		frappe.throw("Файл не найден")
 
-    file = frappe.request.files['csv']
-    content = file.stream.read().decode("utf-8")
-    reader = csv.DictReader(io.StringIO(content))
+	file = frappe.request.files['csv']
+	content = file.stream.read().decode("utf-8")
+	reader = csv.DictReader(io.StringIO(content))
 
-    created = []
+	created = []
 
-    for row in reader:
-        # Логируем обработанную строку для отладки
-        frappe.log_error(f"Обрабатываемая строка: {row}", "CSV Upload Debug")
+	for row in reader:
 
-        question_type = row.get("question_type", "").strip()
-        question_text = row.get("question_text", "").strip()
+		question = row.get("question", "").strip()
+		question_text = row.get("question_text", "").strip()
+		option_1 = row.get("option_1", "").strip()
+		option_2 = row.get("option_2", "").strip()
+		option_3 = row.get("option_3", "").strip()
+		option_4 = row.get("option_4", "").strip()
+		correct = row.get("correct", "").strip()
+		explanation = row.get("explanation", "").strip()
 
-        # Проверяем, что тип вопроса и текст вопроса указаны
-        if not question_type or not question_text:
-            frappe.log_error(f"Отсутствует тип вопроса или текст вопроса: {row}", "CSV Upload Error")
-            continue
-
-        question_data = {
+		question_data = {
             "doctype": "LMS Question",
-            "question_type": question_type,
-            "question_text": question_text
+            "question": question,
+			"type": "Choices",
+			"option_1": option_1,
+			"option_2": option_2,
+			"option_3": option_3,
+			"option_4": option_4,
+			"is_correct_1" : 1 if (correct == option_1) else 0,
+			"is_correct_2" : 1 if (correct == option_2) else 0,
+			"is_correct_3" : 1 if (correct == option_3) else 0,
+			"is_correct_4" : 1 if (correct == option_4) else 0,
+			"explanation_1" : explanation,
+			"explanation_2" : explanation,
+			"explanation_3" : explanation,
+			"explanation_4" : explanation,
         }
 
-        if question_type == "Choices":
-            option_1 = row.get("option_1", "").strip()
-            option_2 = row.get("option_2", "").strip()
-            option_3 = row.get("option_3", "").strip()
-            option_4 = row.get("option_4", "").strip()
-            is_correct_1 = row.get("is_correct_1", "0").strip()
-            is_correct_2 = row.get("is_correct_2", "0").strip()
-            is_correct_3 = row.get("is_correct_3", "0").strip()
-            is_correct_4 = row.get("is_correct_4", "0").strip()
-            explanation_1 = row.get("explanation_1", "").strip()
-            explanation_2 = row.get("explanation_2", "").strip()
-            explanation_3 = row.get("explanation_3", "").strip()
-            explanation_4 = row.get("explanation_4", "").strip()
+		try:
+			doc = frappe.get_doc(question_data)
+			doc.insert()
+			created.append(doc.name)
+		except Exception as e:
+			continue
 
-            # Проверяем, что первый вариант не пустой
-            if not option_1:
-                frappe.log_error(f"Отсутствует первый вариант для Choices: {row}", "CSV Upload Error")
-                continue
-
-            # Проверяем минимум два варианта
-            options = [opt for opt in [option_1, option_2, option_3, option_4] if opt]
-            if len(options) < 2:
-                frappe.log_error(f"Меньше двух опций для Choices: {options}", "CSV Upload Error")
-                continue
-
-            # Проверяем, что хотя бы один вариант помечен как правильный
-            correct_options = [is_correct_1, is_correct_2, is_correct_3, is_correct_4]
-            if not any(c == "1" for c in correct_options):
-                frappe.log_error(f"Не указан ни один правильный ответ для Choices: {correct_options}", "CSV Upload Error")
-                continue
-
-            # Добавляем данные для Choices
-            question_data.update({
-                "option_1": option_1,
-                "option_2": option_2,
-                "option_3": option_3,
-                "option_4": option_4,
-                "is_correct_1": 1 if is_correct_1 == "1" else 0,
-                "is_correct_2": 1 if is_correct_2 == "1" else 0,
-                "is_correct_3": 1 if is_correct_3 == "1" else 0,
-                "is_correct_4": 1 if is_correct_4 == "1" else 0,
-                "explanation_1": explanation_1,
-                "explanation_2": explanation_2,
-                "explanation_3": explanation_3,
-                "explanation_4": explanation_4
-            })
-            frappe.logger().debug(f"[DEBUG] Choices question data: {question_data}")
-
-        elif question_type == "User Input":
-            answer = row.get("option_1", "").strip()
-            if not answer:
-                frappe.log_error("User Input question requires answer in option_1.", "CSV Upload Error")
-                continue
-            question_data["possibility_1"] = answer
-            frappe.logger().debug(f"[DEBUG] User Input question data: {question_data}")
-
-        elif question_type == "Open Ended":
-            frappe.logger().debug("[DEBUG] Open Ended question")
-            frappe.logger().debug(f"[DEBUG] Open Ended question data: {question_data}")
-
-        else:
-            frappe.log_error(f"Unknown question type: {question_type}", "CSV Upload Error")
-            continue
-
-        try:
-            doc = frappe.get_doc(question_data)
-            doc.insert()
-            created.append(doc.name)
-            frappe.log_error(f"Создан вопрос: {doc.name}", "CSV Upload Success")
-        except Exception as e:
-            frappe.log_error(f"Ошибка при создании вопроса: {str(e)}\n{get_traceback()}", "CSV Upload Error")
-            continue
-
-    return {
-        "message": f"Создано {len(created)} вопросов",
-        "created": created
-    }
+	return {
+	"message": f"Создано {len(created)} вопросов",
+	"created": created
+}
