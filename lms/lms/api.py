@@ -1380,31 +1380,53 @@ def upload_questions():
 
 	for row in reader:
 
+		type = row.get("type","").strip()
 		question = row.get("question", "").strip()
-		option_1 = row.get("option_1", "").strip()
-		option_2 = row.get("option_2", "").strip()
-		option_3 = row.get("option_3", "").strip()
-		option_4 = row.get("option_4", "").strip()
-		correct = row.get("correct", "").strip()
-		explanation = row.get("explanation", "").strip()
 
 		question_data = {
-            "doctype": "LMS Question",
-            "question": question,
-			"type": "Choices",
-			"option_1": option_1,
-			"option_2": option_2,
-			"option_3": option_3,
-			"option_4": option_4,
-			"is_correct_1" : 1 if (correct == option_1) else 0,
-			"is_correct_2" : 1 if (correct == option_2) else 0,
-			"is_correct_3" : 1 if (correct == option_3) else 0,
-			"is_correct_4" : 1 if (correct == option_4) else 0,
-			"explanation_1" : explanation,
-			"explanation_2" : explanation,
-			"explanation_3" : explanation,
-			"explanation_4" : explanation,
-        }
+			"doctype": "LMS Question",
+			"question": question,
+			"type": type,
+		}
+
+		if type == "Choices" :
+
+			question = row.get("question", "").strip()
+			option_1 = row.get("option_1", "").strip()
+			option_2 = row.get("option_2", "").strip()
+			option_3 = row.get("option_3", "").strip()
+			option_4 = row.get("option_4", "").strip()
+			correct = row.get("correct", "").strip()
+			explanation = row.get("explanation", "").strip()
+
+			question_data.update({
+				"option_1": option_1,
+				"option_2": option_2,
+				"option_3": option_3,
+				"option_4": option_4,
+				"is_correct_1" : 1 if (correct == option_1) else 0,
+				"is_correct_2" : 1 if (correct == option_2) else 0,
+				"is_correct_3" : 1 if (correct == option_3) else 0,
+				"is_correct_4" : 1 if (correct == option_4) else 0,
+				"explanation_1" : explanation,
+				"explanation_2" : explanation,
+				"explanation_3" : explanation,
+				"explanation_4" : explanation,
+			})
+
+		elif type == "User Input":
+
+			possibility_1 = row.get("possibility_1","").strip()
+			possibility_2 = row.get("possibility_2","").strip()
+			possibility_3 = row.get("possibility_3","").strip()
+			possibility_4 = row.get("possibility_4","").strip()
+
+			question_data.update({
+				"possibility_1" : possibility_1,
+				"possibility_2" : possibility_2,
+				"possibility_3" : possibility_3,
+				"possibility_4" : possibility_4,
+			})
 
 		try:
 			doc = frappe.get_doc(question_data)
