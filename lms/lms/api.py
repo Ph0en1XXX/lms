@@ -2,7 +2,6 @@
 """
 
 import json
-from sys import last_traceback
 import frappe
 import zipfile
 import os
@@ -1499,7 +1498,7 @@ def upload_questions_choices():
             created.append(doc.name)
             frappe.log_error(f"Создан вопрос: {doc.name}", "CSV Upload Choices Success")
         except Exception as e:
-            frappe.log_error(f"Ошибка при создании вопроса: {str(e)}\n{last_traceback()}", "CSV Upload Choices Error")
+            frappe.log_error(f"Ошибка при создании вопроса", "CSV Upload Choices Error")
             continue
 
     return {
