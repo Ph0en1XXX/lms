@@ -282,6 +282,7 @@
 		</div>
 	</div>
 </template>
+
 <script setup>
 import {
 	Badge,
@@ -316,6 +317,8 @@ const props = defineProps({
 		required: true,
 	},
 })
+
+const emit = defineEmits(['current-question']) // Определяем событие
 
 const quiz = createResource({
 	url: 'frappe.client.get',
@@ -451,6 +454,7 @@ watch(activeQuestion, (value) => {
 	if (value > 0) {
 		currentQuestion.value = quiz.data.questions[value - 1].question
 		questionDetails.reload()
+		emit('current-question', value - 1) // Передаём индекс (0-based)
 	}
 })
 

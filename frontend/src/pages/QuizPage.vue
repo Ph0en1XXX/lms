@@ -9,7 +9,7 @@
 		class="md:w-7/12 md:mx-auto mx-4 py-10"
 		:class="{ 'pt-4 md:w-full': fromLesson }"
 	>
-		<Quiz :quizName="quizID" />
+		<Quiz :quizName="quizID" @current-question="handleCurrentQuestion" />
 	</div>
 	<div>
 		<button @click="toggleChatGPT" class="btn btn-primary">Решить с ChatGPT</button>
@@ -39,6 +39,7 @@ const router = useRouter()
 const fromLesson = ref(false)
 const showChat = ref(false)
 const chatResponse = ref(null)
+const currentQuestionIndex = ref(0) // Индекс текущего вопроса
 
 const props = defineProps({
 	quizID: {
@@ -47,7 +48,6 @@ const props = defineProps({
 	},
 })
 
-// Ресурс для получения данных квиза
 const quizData = createResource({
 	url: 'frappe.client.get',
 	params: {
@@ -86,6 +86,11 @@ const pageMeta = computed(() => {
 	}
 })
 
+const handleCurrentQuestion = (index) => {
+	currentQuestionIndex.value = index
+	console.log('[DEBUG] Текущий индекс вопроса из Quiz.vue:', index)
+}
+
 const toggleChatGPT = async () => {
 	console.log('[DEBUG] toggleChatGPT вызван, showChat:', showChat.value)
 	showChat.value = !showChat.value
@@ -115,8 +120,8 @@ const toggleChatGPT = async () => {
 			return
 		}
 
-		// Предполагаем, что текущий вопрос — первый
-		const currentQuestion = quiz.questions[0]
+		// Используем текущий индекс
+		const currentQuestion = quiz.questions[currentQuestionIndex.value]
 		console.log('[DEBUG] currentQuestion:', currentQuestion)
 		if (!currentQuestion) {
 			chatResponse.value = 'Вопрос не найден'
