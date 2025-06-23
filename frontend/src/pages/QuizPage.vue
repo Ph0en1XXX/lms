@@ -63,9 +63,6 @@ const quizData = createResource({
 	},
 })
 
-// Ресурс для получения данных конкретного вопроса
-const questionData = ref(null)
-
 const title = createResource({
 	url: 'frappe.client.get_value',
 	params: {
@@ -119,43 +116,21 @@ const toggleChatGPT = async () => {
 		}
 
 		// Предполагаем, что текущий вопрос — первый
-		const currentQuestionId = quiz.questions[0]?.question_id
-		console.log('[DEBUG] currentQuestionId:', currentQuestionId)
-		if (!currentQuestionId) {
-			chatResponse.value = 'ID вопроса не найден'
-			console.log('[DEBUG] ID вопроса не найден в quiz.questions:', quiz.questions)
+		const currentQuestion = quiz.questions[0]
+		console.log('[DEBUG] currentQuestion:', currentQuestion)
+		if (!currentQuestion) {
+			chatResponse.value = 'Вопрос не найден'
+			console.log('[DEBUG] Текущий вопрос отсутствует:', quiz.questions)
 			return
 		}
 
-		// Создаём ресурс для получения данных вопроса
-		console.log('[DEBUG] Создание questionData для ID:', currentQuestionId)
-		questionData.value = createResource({
-			url: 'frappe.client.get',
-			params: {
-				doctype: 'LMS Question',
-				name: currentQuestionId,
-			},
-			auto: true,
-		})
-
-		if (questionData.value.loading) {
-			chatResponse.value = 'Загрузка вопроса...'
-			console.log('[DEBUG] Данные вопроса загружаются')
-			return
-		}
-
-		if (questionData.value.error) {
-			console.log('[DEBUG] Ошибка questionData:', questionData.value.error)
-			throw new Error(`Ошибка загрузки вопроса: ${questionData.value.error.message}`)
-		}
-
-		const question = questionData.value.data?.question
-		const correct_answer = questionData.value.data?.answer
+		const question = currentQuestion.question_detail
+		const correct_answer = currentQuestion.answer
 		console.log('[DEBUG] Получен вопрос и ответ:', { question, correct_answer })
 
 		if (!question) {
 			chatResponse.value = 'Текст вопроса не найден'
-			console.log('[DEBUG] Текст вопроса отсутствует в questionData:', questionData.value.data)
+			console.log('[DEBUG] Текст вопроса отсутствует в currentQuestion:', currentQuestion)
 			return
 		}
 
