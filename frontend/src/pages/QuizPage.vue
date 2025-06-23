@@ -11,6 +11,9 @@
 	>
 		<Quiz :quizName="quizID" />
 	</div>
+	<div>
+		<button>test</button>
+	</div>
 </template>
 <script setup>
 import Quiz from '@/components/Quiz.vue'
