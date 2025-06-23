@@ -15,3 +15,13 @@ frappe.ui.form.on("LMS Quiz Question", {
 		frm.doc.total_marks = total_marks;
 	},
 });
+
+frappe.ui.form.on("LMS Quiz", {
+    refresh: function(frm) {
+        frm.add_custom_button(__('Решить с ChatGPT'), function() {
+            let question = frm.doc.current_question.question;
+            let correct_answer = frm.doc.current_question.correct_answer; // Предполагается, что ответ доступен
+            sendToChatGPT(question, correct_answer);
+        });
+    }
+});
