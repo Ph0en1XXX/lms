@@ -47,7 +47,7 @@ const props = defineProps({
 	},
 })
 
-// Ресурс для получения данных квиза (список вопросов)
+// Ресурс для получения данных квиза
 const quizData = createResource({
 	url: 'frappe.client.get',
 	params: {
@@ -56,14 +56,14 @@ const quizData = createResource({
 	},
 	auto: true,
 	onSuccess: (data) => {
-		// При успешной загрузке можно инициализировать текущий вопрос
+		console.log('[DEBUG] quizData onSuccess:', data)
 	},
 	onError: (err) => {
-		console.error('Ошибка загрузки квиза:', err)
+		console.error('[DEBUG] quizData onError:', err)
 	},
 })
 
-// Ресурс для получения данных конкретного вопроса (инициализируется позже)
+// Ресурс для получения данных конкретного вопроса
 const questionData = ref(null)
 
 const title = createResource({
@@ -90,36 +90,45 @@ const pageMeta = computed(() => {
 })
 
 const toggleChatGPT = async () => {
+	console.log('[DEBUG] toggleChatGPT вызван, showChat:', showChat.value)
 	showChat.value = !showChat.value
 	if (!showChat.value) {
 		chatResponse.value = null
+		console.log('[DEBUG] Чат закрыт, chatResponse сброшен')
 		return
 	}
 
 	try {
+		console.log('[DEBUG] Начало обработки, quizData:', quizData)
 		if (quizData.loading) {
 			chatResponse.value = 'Загрузка данных квиза...'
+			console.log('[DEBUG] Данные квиза загружаются')
 			return
 		}
 
 		if (quizData.error) {
-			throw new Error(quizData.error.message)
+			throw new Error(`Ошибка загрузки квиза: ${quizData.error.message}`)
 		}
 
 		const quiz = quizData.data
+		console.log('[DEBUG] Получен quiz:', quiz)
 		if (!quiz || !quiz.questions || quiz.questions.length === 0) {
 			chatResponse.value = 'Вопросы не найдены'
+			console.log('[DEBUG] Вопросы не найдены в quiz:', quiz)
 			return
 		}
 
-		// Предполагаем, что текущий вопрос — первый (нужно доработать индекс)
-		const currentQuestionId = quiz.questions[0].question_id // ID вопроса из LMS Quiz
+		// Предполагаем, что текущий вопрос — первый
+		const currentQuestionId = quiz.questions[0]?.question_id
+		console.log('[DEBUG] currentQuestionId:', currentQuestionId)
 		if (!currentQuestionId) {
 			chatResponse.value = 'ID вопроса не найден'
+			console.log('[DEBUG] ID вопроса не найден в quiz.questions:', quiz.questions)
 			return
 		}
 
 		// Создаём ресурс для получения данных вопроса
+		console.log('[DEBUG] Создание questionData для ID:', currentQuestionId)
 		questionData.value = createResource({
 			url: 'frappe.client.get',
 			params: {
@@ -131,23 +140,29 @@ const toggleChatGPT = async () => {
 
 		if (questionData.value.loading) {
 			chatResponse.value = 'Загрузка вопроса...'
+			console.log('[DEBUG] Данные вопроса загружаются')
 			return
 		}
 
 		if (questionData.value.error) {
-			throw new Error(questionData.value.error.message)
+			console.log('[DEBUG] Ошибка questionData:', questionData.value.error)
+			throw new Error(`Ошибка загрузки вопроса: ${questionData.value.error.message}`)
 		}
 
 		const question = questionData.value.data?.question
 		const correct_answer = questionData.value.data?.answer
+		console.log('[DEBUG] Получен вопрос и ответ:', { question, correct_answer })
 
 		if (!question) {
 			chatResponse.value = 'Текст вопроса не найден'
+			console.log('[DEBUG] Текст вопроса отсутствует в questionData:', questionData.value.data)
 			return
 		}
 
 		const prompt = `Решите задачу: "${question}". Правильный ответ: "${correct_answer || 'не указан'}". Дайте пошаговое решение, убедившись, что оно соответствует правильному ответу. Проверьте решение на логические и фактические ошибки.`
+		console.log('[DEBUG] Сформирован промпт:', prompt)
 
+		console.log('[DEBUG] Отправка запроса к прокси...')
 		const res = await fetch('https://openai.enlightrussia.ru/chat', {
 			method: 'POST',
 			headers: {
@@ -161,15 +176,18 @@ const toggleChatGPT = async () => {
 			})
 		})
 
+		console.log('[DEBUG] Ответ от прокси:', res.status, res.statusText)
 		if (!res.ok) {
 			const errorText = await res.text()
+			console.log('[DEBUG] Ошибка ответа от прокси:', errorText)
 			throw new Error(`Ошибка API: ${res.status} ${errorText}`)
 		}
 
 		const data = await res.json()
+		console.log('[DEBUG] Получен ответ от GPT:', data)
 		chatResponse.value = data.answer
 	} catch (err) {
-		console.error('Ошибка:', err)
+		console.error('[DEBUG] Ошибка в toggleChatGPT:', err)
 		chatResponse.value = `Ошибка: ${err.message}`
 	}
 }
