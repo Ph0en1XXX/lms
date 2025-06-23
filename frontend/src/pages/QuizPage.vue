@@ -47,14 +47,24 @@ const props = defineProps({
 	},
 })
 
-onMounted(() => {
-	if (!user.data) {
-		router.push({ name: 'Courses' })
-	}
-	if (new URLSearchParams(window.location.search).get('fromLesson')) {
-		fromLesson.value = true
-	}
+// Ресурс для получения данных квиза (список вопросов)
+const quizData = createResource({
+	url: 'frappe.client.get',
+	params: {
+		doctype: 'LMS Quiz',
+		name: props.quizID,
+	},
+	auto: true,
+	onSuccess: (data) => {
+		// При успешной загрузке можно инициализировать текущий вопрос
+	},
+	onError: (err) => {
+		console.error('Ошибка загрузки квиза:', err)
+	},
 })
+
+// Ресурс для получения данных конкретного вопроса (инициализируется позже)
+const questionData = ref(null)
 
 const title = createResource({
 	url: 'frappe.client.get_value',
@@ -79,22 +89,6 @@ const pageMeta = computed(() => {
 	}
 })
 
-// Ресурс для получения данных квиза
-const quizData = createResource({
-	url: 'frappe.client.get',
-	params: {
-		doctype: 'LMS Quiz',
-		name: props.quizID,
-	},
-	auto: true,
-	onSuccess: (data) => {
-		// Можно предварительно обработать данные, если нужно
-	},
-	onError: (err) => {
-		console.error('Ошибка загрузки квиза:', err)
-	},
-})
-
 const toggleChatGPT = async () => {
 	showChat.value = !showChat.value
 	if (!showChat.value) {
@@ -114,16 +108,41 @@ const toggleChatGPT = async () => {
 
 		const quiz = quizData.data
 		if (!quiz || !quiz.questions || quiz.questions.length === 0) {
-			chatResponse.value = 'Вопрос не найден'
+			chatResponse.value = 'Вопросы не найдены'
 			return
 		}
 
-		// Берём первый вопрос (нужно доработать для текущего вопроса)
-		const question = quiz.questions[0]?.question
-		const correct_answer = quiz.questions[0]?.answer
+		// Предполагаем, что текущий вопрос — первый (нужно доработать индекс)
+		const currentQuestionId = quiz.questions[0].question_id // ID вопроса из LMS Quiz
+		if (!currentQuestionId) {
+			chatResponse.value = 'ID вопроса не найден'
+			return
+		}
+
+		// Создаём ресурс для получения данных вопроса
+		questionData.value = createResource({
+			url: 'frappe.client.get',
+			params: {
+				doctype: 'LMS Question',
+				name: currentQuestionId,
+			},
+			auto: true,
+		})
+
+		if (questionData.value.loading) {
+			chatResponse.value = 'Загрузка вопроса...'
+			return
+		}
+
+		if (questionData.value.error) {
+			throw new Error(questionData.value.error.message)
+		}
+
+		const question = questionData.value.data?.question
+		const correct_answer = questionData.value.data?.answer
 
 		if (!question) {
-			chatResponse.value = 'Вопрос не найден'
+			chatResponse.value = 'Текст вопроса не найден'
 			return
 		}
 
