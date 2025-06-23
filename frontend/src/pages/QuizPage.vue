@@ -79,6 +79,22 @@ const pageMeta = computed(() => {
 	}
 })
 
+// Ресурс для получения данных квиза
+const quizData = createResource({
+	url: 'frappe.client.get',
+	params: {
+		doctype: 'LMS Quiz',
+		name: props.quizID,
+	},
+	auto: true,
+	onSuccess: (data) => {
+		// Можно предварительно обработать данные, если нужно
+	},
+	onError: (err) => {
+		console.error('Ошибка загрузки квиза:', err)
+	},
+})
+
 const toggleChatGPT = async () => {
 	showChat.value = !showChat.value
 	if (!showChat.value) {
@@ -87,28 +103,32 @@ const toggleChatGPT = async () => {
 	}
 
 	try {
-		// Получаем данные квиза через Frappe API
-		const response = await frappe.call({
-			method: 'frappe.client.get',
-			args: {
-				doctype: 'LMS Quiz',
-				name: props.quizID,
-			},
-		})
-		const quiz = response.message
-		// Для примера берём первый вопрос (нужно доработать под текущий)
-		const question = quiz.questions[0]?.question
-		const correct_answer = quiz.questions[0]?.answer // Предполагаем, что ответ хранится в поле answer
-
-		if (!question) {
-			alert('Вопрос не найден')
+		if (quizData.loading) {
+			chatResponse.value = 'Загрузка данных квиза...'
 			return
 		}
 
-		// Формируем промпт
-		const prompt = `Решите задачу: "${question}". Правильный ответ: "${correct_answer || 'не указан'}". Дайте пошаговое решение, убедившись, что оно соответствует правильному ответу. Проверьте решение на логические и фактические ошибки.`;
+		if (quizData.error) {
+			throw new Error(quizData.error.message)
+		}
 
-		// Отправляем запрос к прокси
+		const quiz = quizData.data
+		if (!quiz || !quiz.questions || quiz.questions.length === 0) {
+			chatResponse.value = 'Вопрос не найден'
+			return
+		}
+
+		// Берём первый вопрос (нужно доработать для текущего вопроса)
+		const question = quiz.questions[0]?.question
+		const correct_answer = quiz.questions[0]?.answer
+
+		if (!question) {
+			chatResponse.value = 'Вопрос не найден'
+			return
+		}
+
+		const prompt = `Решите задачу: "${question}". Правильный ответ: "${correct_answer || 'не указан'}". Дайте пошаговое решение, убедившись, что оно соответствует правильному ответу. Проверьте решение на логические и фактические ошибки.`
+
 		const res = await fetch('https://openai.enlightrussia.ru/chat', {
 			method: 'POST',
 			headers: {
