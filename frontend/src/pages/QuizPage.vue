@@ -92,101 +92,116 @@ const handleCurrentQuestion = (index) => {
 }
 
 const toggleChatGPT = async () => {
-	console.log('[DEBUG] toggleChatGPT вызван, showChat:', showChat.value)
-	showChat.value = !showChat.value
+	console.log('[DEBUG] toggleChatGPT вызван, showChat:', showChat.value);
+	showChat.value = !showChat.value;
 	if (!showChat.value) {
-		chatResponse.value = null
-		console.log('[DEBUG] Чат закрыт, chatResponse сброшен')
-		return
+		chatResponse.value = null;
+		console.log('[DEBUG] Чат закрыт, chatResponse сброшен');
+		return;
 	}
 
 	try {
-		console.log('[DEBUG] Начало обработки, quizData:', quizData)
+		console.log('[DEBUG] Начало обработки, quizData:', quizData);
 		if (quizData.loading) {
-			chatResponse.value = 'Загрузка данных квиза...'
-			console.log('[DEBUG] Данные квиза загружаются')
-			return
+			chatResponse.value = 'Загрузка данных квиза...';
+			console.log('[DEBUG] Данные квиза загружаются');
+			return;
 		}
 
 		if (quizData.error) {
-			throw new Error(`Ошибка загрузки квиза: ${quizData.error.message}`)
+			throw new Error(`Ошибка загрузки квиза: ${quizData.error.message}`);
 		}
 
-		const quiz = quizData.data
-		console.log('[DEBUG] Получен quiz:', quiz)
+		const quiz = quizData.data;
+		console.log('[DEBUG] Получен quiz:', quiz);
 		if (!quiz || !quiz.questions || quiz.questions.length === 0) {
-			chatResponse.value = 'Вопросы не найдены'
-			console.log('[DEBUG] Вопросы не найдены в quiz:', quiz)
-			return
+			chatResponse.value = 'Вопросы не найдены';
+			console.log('[DEBUG] Вопросы не найдены в quiz:', quiz);
+			return;
 		}
 
 		// Используем текущий индекс
-		const currentQuestion = quiz.questions[currentQuestionIndex.value]
-		console.log('[DEBUG] currentQuestion:', currentQuestion)
+		const currentQuestion = quiz.questions[currentQuestionIndex.value];
+		console.log('[DEBUG] currentQuestion:', currentQuestion);
 		if (!currentQuestion) {
-			chatResponse.value = 'Вопрос не найден'
-			console.log('[DEBUG] Текущий вопрос отсутствует:', quiz.questions)
-			return
+			chatResponse.value = 'Вопрос не найден';
+			console.log('[DEBUG] Текущий вопрос отсутствует:', quiz.questions);
+			return;
 		}
 
-		const questionData = createResource({
-			url: 'frappe.client.get',
-			params: {
-				doctype: 'LMS Question',
-				name: currentQuestion.question,
-			},
-			auto: true,
-			onSuccess: (data) => {
-				console.log('[DEBUG] quizData onSuccess:', data)
-			},
-			onError: (err) => {
-				console.error('[DEBUG] quizData onError:', err)
-			},
-		})
+		// Создаём и ждём загрузки данных вопроса
+		const questionData = await new Promise((resolve) => {
+			const resource = createResource({
+				url: 'frappe.client.get',
+				params: {
+					doctype: 'LMS Question',
+					name: currentQuestion.question,
+				},
+				auto: true,
+				onSuccess: (data) => {
+					console.log('[DEBUG] questionData onSuccess:', data);
+					resolve(data);
+				},
+				onError: (err) => {
+					console.error('[DEBUG] questionData onError:', err);
+					resolve(null);
+				},
+			});
+		});
 
-		if (questionData.type == "Choices") {
-			const question = currentQuestion.question_detail
+		if (!questionData) {
+			chatResponse.value = 'Данные вопроса не загружены';
+			console.log('[DEBUG] Данные вопроса отсутствуют');
+			return;
+		}
 
-			const option_1 = questionData.option_1
-			const option_2 = questionData.option_1
-			const option_3 = questionData.option_1
-			const option_4 = questionData.option_1
-			for (let i = 1; i < 5; i++) {
-				if (questionData[`is_correct_${i}`] == 1) {
-					const correct_answer = questionData[`option_${i}`];
+		let question, prompt, correct_answer, options = [], possibilitys = [];
+
+		if (questionData.type === "Choices") {
+			question = currentQuestion.question_detail;
+			options = [
+				questionData.option_1,
+				questionData.option_2,
+				questionData.option_3,
+				questionData.option_4,
+			].filter(Boolean); // Убираем undefined/null
+			correct_answer = null;
+			for (let i = 1; i <= 4; i++) {
+				if (questionData[`is_correct_${i}`] === 1) {
+					correct_answer = questionData[`option_${i}`];
 					console.log(`Правильный ответ ${i}:`, correct_answer);
+					break;
 				}
 			}
-			console.log('[DEBUG] Получен вопрос, варианты и ответ:', { question, option_1, option_2, option_3, option_4, correct_answer })
-			const prompt = `Решите задачу: "${question}". Вопрос имеет выбор ответов: "${option_1}", "${option_2}", "${option_3}", "${option_4}". Правильный ответ: "${correct_answer || 'не указан'}". 
-			Дайте пошаговое решение, убедившись, что оно соответствует правильному ответу. Проверьте решение на логические и фактические ошибки.`
-			console.log('[DEBUG] Сформирован промпт:', prompt)
-		} else if (questionData.type == "User Input") {
-			const question = currentQuestion.question_detail
-
-			const possibility_1 = questionData.possibility_1
-			const possibility_2 = questionData.possibility_2
-			const possibility_3 = questionData.possibility_3
-			const possibility_4 = questionData.possibility_4
-
-			console.log('[DEBUG] Получен вопрос и возможные варианты', { question, possibility_1, possibility_2, possibility_3, possibility_4})
-			const prompt = `Решите задачу: "${question}". Вопрос подрозумевает пользовательский ввод, есть возможные варианты ответа: 
-			"${possibility_1}", "${possibility_2}", "${possibility_3}", "${possibility_4}". Правильный ответ: "${correct_answer || 'не указан'}". 
-			Дайте пошаговое решение, убедившись, что оно соответствует возможным вариантам ответа. Проверьте решение на логические и фактические ошибки.`
-			console.log('[DEBUG] Сформирован промпт:', prompt)
+			console.log('[DEBUG] Получен вопрос, варианты и ответ:', { question, options, correct_answer });
+			prompt = `Решите задачу: "${question}". Вопрос имеет выбор ответов: "${options.join('", "')}". Правильный ответ: "${correct_answer || 'не указан'}". 
+			Дайте пошаговое решение, убедившись, что оно соответствует правильному ответу. Проверьте решение на логические и фактические ошибки.`;
+		} else if (questionData.type === "User Input") {
+			question = currentQuestion.question_detail;
+			possibilitys = [
+				questionData.possibility_1,
+				questionData.possibility_2,
+				questionData.possibility_3,
+				questionData.possibility_4,
+			].filter(Boolean);
+			console.log('[DEBUG] Получен вопрос и возможные варианты:', { question, options });
+			prompt = `Решите задачу: "${question}". Вопрос предполагает пользовательский ввод, есть возможные варианты ответа: 
+			"${possibilitys.join('", "')}". 
+			Дайте пошаговое решение, убедившись, что оно соответствует возможным вариантам ответа. Проверьте решение на логические и фактические ошибки.`;
 		} else {
-			const question = currentQuestion.question_detail
-			const prompt = `Решите задачу: "${question}". Дайте пошаговое решение. Проверьте решение на логические и фактические ошибки.`
-			console.log('[DEBUG] Сформирован промпт:', prompt)
+			question = currentQuestion.question_detail;
+			prompt = `Решите задачу: "${question}". Дайте пошаговое решение. Проверьте решение на логические и фактические ошибки.`;
+			console.log('[DEBUG] Получен вопрос:', { question });
 		}
 
 		if (!question) {
-			chatResponse.value = 'Текст вопроса не найден'
-			console.log('[DEBUG] Текст вопроса отсутствует в currentQuestion:', currentQuestion)
-			return
+			chatResponse.value = 'Текст вопроса не найден';
+			console.log('[DEBUG] Текст вопроса отсутствует в currentQuestion:', currentQuestion);
+			return;
 		}
 
-		console.log('[DEBUG] Отправка запроса к прокси...')
+		console.log('[DEBUG] Сформирован промпт:', prompt);
+		console.log('[DEBUG] Отправка запроса к прокси...');
 		const res = await fetch('https://openai.enlightrussia.ru/chat', {
 			method: 'POST',
 			headers: {
@@ -198,23 +213,23 @@ const toggleChatGPT = async () => {
 				model: 'gpt-4o',
 				system_prompt: 'Ты — эксперт, решающий задачи для школьников. Дай полное пошаговое решение, проверяя его на соответствие правильному ответу.'
 			})
-		})
+		});
 
-		console.log('[DEBUG] Ответ от прокси:', res.status, res.statusText)
+		console.log('[DEBUG] Ответ от прокси:', res.status, res.statusText);
 		if (!res.ok) {
-			const errorText = await res.text()
-			console.log('[DEBUG] Ошибка ответа от прокси:', errorText)
-			throw new Error(`Ошибка API: ${res.status} ${errorText}`)
+			const errorText = await res.text();
+			console.log('[DEBUG] Ошибка ответа от прокси:', errorText);
+			throw new Error(`Ошибка API: ${res.status} ${errorText}`);
 		}
 
-		const data = await res.json()
-		console.log('[DEBUG] Получен ответ от GPT:', data)
-		chatResponse.value = data.answer
+		const data = await res.json();
+		console.log('[DEBUG] Получен ответ от GPT:', data);
+		chatResponse.value = data.answer;
 	} catch (err) {
-		console.error('[DEBUG] Ошибка в toggleChatGPT:', err)
-		chatResponse.value = `Ошибка: ${err.message}`
+		console.error('[DEBUG] Ошибка в toggleChatGPT:', err);
+		chatResponse.value = `Ошибка: ${err.message}`;
 	}
-}
+};
 
 updateDocumentTitle(pageMeta)
 </script>
