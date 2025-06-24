@@ -173,6 +173,23 @@ const toggleChatGPT = async () => {
 }
 
 updateDocumentTitle(pageMeta)
+
+const questionData = createResource({
+	url: 'frappe.client.get',
+	params: {
+		doctype: 'LMS Question',
+		name: currentQuestion.question,
+	},
+	auto: true,
+	onSuccess: (data) => {
+		console.log('[DEBUG] quizData onSuccess:', data)
+	},
+	onError: (err) => {
+		console.error('[DEBUG] quizData onError:', err)
+	},
+})
+
+console.log(questionData)
 </script>
 
 <style scoped>
