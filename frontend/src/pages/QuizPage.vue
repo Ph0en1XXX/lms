@@ -113,7 +113,7 @@ const toggleChatGPT = async () => {
 		}
 
 		const quiz = quizData.data;
-		const quiz_title = quizData.title;
+		const quiz_title = quiz.title;
 		console.log('[DEBUG] Получен quiz:', quiz, quiz_title);
 		if (!quiz || !quiz.questions || quiz.questions.length === 0) {
 			chatResponse.value = 'Вопросы не найдены';
