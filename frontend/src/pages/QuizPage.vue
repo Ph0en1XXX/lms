@@ -144,20 +144,47 @@ const toggleChatGPT = async () => {
 			},
 		})
 
-		console.log(questionData)
+		if (questionData.type == "Choices") {
+			const question = currentQuestion.question_detail
 
-		const question = currentQuestion.question_detail
-		const correct_answer = currentQuestion.answer
-		console.log('[DEBUG] Получен вопрос и ответ:', { question, correct_answer })
+			const option_1 = questionData.option_1
+			const option_2 = questionData.option_1
+			const option_3 = questionData.option_1
+			const option_4 = questionData.option_1
+			for (let i = 1; i < 5; i++) {
+				if (questionData[`is_correct_${i}`] == 1) {
+					const correct_answer = questionData[`option_${i}`];
+					console.log(`Правильный ответ ${i}:`, correct_answer);
+				}
+			}
+			console.log('[DEBUG] Получен вопрос, варианты и ответ:', { question, option_1, option_2, option_3, option_4, correct_answer })
+			const prompt = `Решите задачу: "${question}". Вопрос имеет выбор ответов: "${option_1}", "${option_2}", "${option_3}", "${option_4}". Правильный ответ: "${correct_answer || 'не указан'}". 
+			Дайте пошаговое решение, убедившись, что оно соответствует правильному ответу. Проверьте решение на логические и фактические ошибки.`
+			console.log('[DEBUG] Сформирован промпт:', prompt)
+		} else if (questionData.type == "User Input") {
+			const question = currentQuestion.question_detail
+
+			const possibility_1 = questionData.possibility_1
+			const possibility_2 = questionData.possibility_2
+			const possibility_3 = questionData.possibility_3
+			const possibility_4 = questionData.possibility_4
+
+			console.log('[DEBUG] Получен вопрос и возможные варианты', { question, possibility_1, possibility_2, possibility_3, possibility_4})
+			const prompt = `Решите задачу: "${question}". Вопрос подрозумевает пользовательский ввод, есть возможные варианты ответа: 
+			"${possibility_1}", "${possibility_2}", "${possibility_3}", "${possibility_4}". Правильный ответ: "${correct_answer || 'не указан'}". 
+			Дайте пошаговое решение, убедившись, что оно соответствует возможным вариантам ответа. Проверьте решение на логические и фактические ошибки.`
+			console.log('[DEBUG] Сформирован промпт:', prompt)
+		} else {
+			const question = currentQuestion.question_detail
+			const prompt = `Решите задачу: "${question}". Дайте пошаговое решение. Проверьте решение на логические и фактические ошибки.`
+			console.log('[DEBUG] Сформирован промпт:', prompt)
+		}
 
 		if (!question) {
 			chatResponse.value = 'Текст вопроса не найден'
 			console.log('[DEBUG] Текст вопроса отсутствует в currentQuestion:', currentQuestion)
 			return
 		}
-
-		const prompt = `Решите задачу: "${question}". Правильный ответ: "${correct_answer || 'не указан'}". Дайте пошаговое решение, убедившись, что оно соответствует правильному ответу. Проверьте решение на логические и фактические ошибки.`
-		console.log('[DEBUG] Сформирован промпт:', prompt)
 
 		console.log('[DEBUG] Отправка запроса к прокси...')
 		const res = await fetch('https://openai.enlightrussia.ru/chat', {
