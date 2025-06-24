@@ -113,7 +113,8 @@ const toggleChatGPT = async () => {
 		}
 
 		const quiz = quizData.data;
-		console.log('[DEBUG] Получен quiz:', quiz);
+		const quiz_title = quizData.title;
+		console.log('[DEBUG] Получен quiz:', quiz, quiz_title);
 		if (!quiz || !quiz.questions || quiz.questions.length === 0) {
 			chatResponse.value = 'Вопросы не найдены';
 			console.log('[DEBUG] Вопросы не найдены в quiz:', quiz);
@@ -174,7 +175,7 @@ const toggleChatGPT = async () => {
 				}
 			}
 			console.log('[DEBUG] Получен вопрос, варианты и ответ:', { question, options, correct_answer });
-			prompt = `Решите задачу: "${question}". Вопрос имеет выбор ответов: "${options.join('", "')}". Правильный ответ: "${correct_answer || 'не указан'}". 
+			prompt = `Вопрос из квиза: "${quiz_title}". Решите задачу: "${question}". Вопрос имеет выбор ответов: "${options.join('", "')}". Правильный ответ: "${correct_answer || 'не указан'}". 
 			Дайте пошаговое решение, убедившись, что оно соответствует правильному ответу. Проверьте решение на логические и фактические ошибки.`;
 		} else if (questionData.type === "User Input") {
 			question = currentQuestion.question_detail;
@@ -185,12 +186,12 @@ const toggleChatGPT = async () => {
 				questionData.possibility_4,
 			].filter(Boolean);
 			console.log('[DEBUG] Получен вопрос и возможные варианты:', { question, options });
-			prompt = `Решите задачу: "${question}". Вопрос предполагает пользовательский ввод, есть возможные варианты ответа: 
+			prompt = `Вопрос из квиза: "${quiz_title}". Решите задачу: "${question}". Вопрос предполагает пользовательский ввод, есть возможные варианты ответа: 
 			"${possibilitys.join('", "')}". 
 			Дайте пошаговое решение, убедившись, что оно соответствует возможным вариантам ответа. Проверьте решение на логические и фактические ошибки.`;
 		} else {
 			question = currentQuestion.question_detail;
-			prompt = `Решите задачу: "${question}". Дайте пошаговое решение. Проверьте решение на логические и фактические ошибки.`;
+			prompt = `Вопрос из квиза: "${quiz_title}". Решите задачу: "${question}". Дайте пошаговое решение. Проверьте решение на логические и фактические ошибки.`;
 			console.log('[DEBUG] Получен вопрос:', { question });
 		}
 
