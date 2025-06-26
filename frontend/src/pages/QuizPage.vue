@@ -12,10 +12,10 @@
 		<Quiz :quizName="quizID" @current-question="handleCurrentQuestion" />
 	</div>
 	<div>
-		<button @click="toggleChatGPT" class="btn btn-primary">Решить с ChatGPT</button>
+		<button @click="toggleChatGPT" class="btn btn-primary">Решить с ChatGPT (режим "solve-together")</button>
 	</div>
 	<div v-if="showChat" class="chat-container mt-4">
-		<h2>AI-тьютор</h2>
+		<h2>AI-тьютор (режим "solve-together")</h2>
 		<div class="chat-window">
 			<div id="chat-box" class="chat-box">
 				<div v-for="(message, index) in chatHistory" :key="index" class="message">
@@ -23,14 +23,14 @@
 						{{ message.text }}
 					</span>
 				</div>
-				<div v-if="chatHistory.length === 0" class="placeholder-text">Загрузка ответа...</div>
+				<div v-if="chatHistory.length === 0" class="placeholder-text">Ожидаю вашего первого шага...</div>
 			</div>
 		</div>
 		<div class="chat-input mt-4">
 			<input
 				v-model="userInput"
 				type="text"
-				placeholder="Введите ваше сообщение..."
+				placeholder="Опишите задачу или ответьте на вопрос..."
 				class="w-full p-2 border rounded-md"
 				@keyup.enter="sendMessage"
 			/>
@@ -125,9 +125,11 @@ const sendMessage = async () => {
 				'X-API-KEY': 'a38ed6248c82e31f014b7459479d4c75154e41a331f8a4d9b4afc4b10cbc884a'
 			},
 			body: JSON.stringify({
-				prompt: userMessage,
+				prompt: generatePrompt(userMessage),
 				model: 'gpt-4o',
-				system_prompt: 'Ты — эксперт, помогающий с вопросами квиза. Отвечай максимально полезно и точно.'
+				system_prompt: `Ты — опытный, доброжелательный и очень терпеливый учитель. Твоя задача — сопровождать ученика в самостоятельном разборе заданий (домашних заданий, ЕГЭ или олимпиадных), не раскрывая ему готовое решение и не выдавая правильного ответа напрямую. 
+Ни при каких условиях нельзя выдавать готовый ответ. Ученик должен сам дойти до него. Обязательно нужно разбирать процесс решений по шагам, задавая ученику по одному вопросу за один шаг и ожидая от него ответа. 
+Говори и отвечай на русском языке, простыми и понятными формулировками. Будь вежлив, отзывчив и дружелюбен. Показывай искреннее желание помочь. Подбадривай ученика, если он ошибается или затрудняется.`
 			})
 		});
 
@@ -173,7 +175,7 @@ const toggleChatGPT = async () => {
 		const quiz_title = quiz.title;
 		console.log('[DEBUG] Получен quiz:', quiz, quiz_title);
 		if (!quiz || !quiz.questions || quiz.questions.length === 0) {
-			chatResponse.value = 'Вопросы не найдены';
+			chatHistory.value.push({ text: 'Вопросы не найдены', isUser: false });
 			console.log('[DEBUG] Вопросы не найдены в quiz:', quiz);
 			return;
 		}
@@ -182,7 +184,7 @@ const toggleChatGPT = async () => {
 		const currentQuestion = quiz.questions[currentQuestionIndex.value];
 		console.log('[DEBUG] currentQuestion:', currentQuestion);
 		if (!currentQuestion) {
-			chatResponse.value = 'Вопрос не найден';
+			chatHistory.value.push({ text: 'Вопрос не найден', isUser: false });
 			console.log('[DEBUG] Текущий вопрос отсутствует:', quiz.questions);
 			return;
 		}
@@ -208,7 +210,7 @@ const toggleChatGPT = async () => {
 		});
 
 		if (!questionData) {
-			chatResponse.value = 'Данные вопроса не загружены';
+			chatHistory.value.push({ text: 'Данные вопроса не загружены', isUser: false });
 			console.log('[DEBUG] Данные вопроса отсутствуют');
 			return;
 		}
@@ -232,8 +234,7 @@ const toggleChatGPT = async () => {
 				}
 			}
 			console.log('[DEBUG] Получен вопрос, варианты и ответ:', { question, options, correct_answer });
-			prompt = `Вопрос из квиза: "${quiz_title}". Решите задачу: "${question}". Вопрос имеет выбор ответов: "${options.join('", "')}". Правильный ответ: "${correct_answer || 'не указан'}". 
-			Дайте пошаговое решение, убедившись, что оно соответствует правильному ответу. Проверьте решение на логические и фактические ошибки.`;
+			prompt = generatePrompt(question, { type: "Choices", options, correct_answer });
 		} else if (questionData.type === "User Input") {
 			question = currentQuestion.question_detail;
 			possibilitys = [
@@ -243,22 +244,21 @@ const toggleChatGPT = async () => {
 				questionData.possibility_4,
 			].filter(Boolean);
 			console.log('[DEBUG] Получен вопрос и возможные варианты:', { question, possibilitys });
-			prompt = `Вопрос из квиза: "${quiz_title}". Решите задачу: "${question}". Вопрос предполагает пользовательский ввод, есть возможные варианты ответа: 
-			"${possibilitys.join('", "')}". 
-			Дайте пошаговое решение, убедившись, что оно соответствует возможным вариантам ответа. Проверьте решение на логические и фактические ошибки.`;
+			prompt = generatePrompt(question, { type: "User Input", possibilitys });
 		} else {
 			question = currentQuestion.question_detail;
-			prompt = `Вопрос из квиза: "${quiz_title}". Решите задачу: "${question}". Дайте пошаговое решение. Проверьте решение на логические и фактические ошибки.`;
 			console.log('[DEBUG] Получен вопрос:', { question });
+			prompt = generatePrompt(question, { type: "Other" });
 		}
 
 		if (!question) {
-			chatResponse.value = 'Текст вопроса не найден';
+			chatHistory.value.push({ text: 'Текст вопроса не найден', isUser: false });
 			console.log('[DEBUG] Текст вопроса отсутствует в currentQuestion:', currentQuestion);
 			return;
 		}
 
-		console.log('[DEBUG] Сформирован промпт:', prompt);
+		// Генерируем первый наводящий вопрос
+		console.log('[DEBUG] Сформирован начальный промпт:', prompt);
 		console.log('[DEBUG] Отправка запроса к прокси...');
 		const res = await fetch('https://openai.enlightrussia.ru/chat', {
 			method: 'POST',
@@ -269,7 +269,9 @@ const toggleChatGPT = async () => {
 			body: JSON.stringify({
 				prompt: prompt,
 				model: 'gpt-4o',
-				system_prompt: 'Ты — эксперт, решающий задачи для школьников. Дай полное пошаговое решение, проверяя его на соответствие правильному ответу.'
+				system_prompt: `Ты — опытный, доброжелательный и очень терпеливый учитель. Твоя задача — сопровождать ученика в самостоятельном разборе заданий (домашних заданий, ЕГЭ или олимпиадных), не раскрывая ему готовое решение и не выдавая правильного ответа напрямую. 
+Ни при каких условиях нельзя выдавать готовый ответ. Ученик должен сам дойти до него. Обязательно нужно разбирать процесс решений по шагам, задавая ученику по одному вопросу за один шаг и ожидая от него ответа. 
+Говори и отвечай на русском языке, простыми и понятными формулировками. Будь вежлив, отзывчив и дружелюбен. Показывай искреннее желание помочь. Подбадривай ученика, если он ошибается или затрудняется.`
 			})
 		});
 
@@ -283,12 +285,28 @@ const toggleChatGPT = async () => {
 		const data = await res.json();
 		console.log('[DEBUG] Получен ответ от GPT:', data);
 		chatHistory.value.push({ text: data.answer, isUser: false });
-		chatResponse.value = null; // Сбрасываем chatResponse после добавления в историю
 	} catch (err) {
 		console.error('[DEBUG] Ошибка в toggleChatGPT:', err);
 		chatHistory.value.push({ text: `Ошибка: ${err.message}`, isUser: false });
-		chatResponse.value = null;
 	}
+};
+
+// Функция для генерации промпта с историей и контекстом задачи
+const generatePrompt = (userMsg, taskContext) => {
+	let sys = `Текущая задача: "${userMsg}".\n`;
+	if (taskContext.type === "Choices") {
+		sys += `Тип задачи: Выбор ответа. Варианты ответа: "${taskContext.options.join('", "')}". Правильный ответ известен учителю, но не должен раскрываться.`;
+	} else if (taskContext.type === "User Input") {
+		sys += `Тип задачи: Ввод ответа. Возможные варианты ответа: "${taskContext.possibilitys.join('", "')}".`;
+	} else {
+		sys += `Тип задачи: Произвольный ввод.`;
+	}
+	sys += '\nИстория диалога:\n';
+	chatHistory.value.forEach(msg => {
+		sys += `${msg.isUser ? 'Ученик' : 'Учитель'}: ${msg.text}\n`;
+	});
+	sys += `\nНовое сообщение от ученика: ${userMsg}`;
+	return sys;
 };
 
 updateDocumentTitle(pageMeta)
