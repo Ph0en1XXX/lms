@@ -18,11 +18,25 @@
 		<h2>AI-тьютор</h2>
 		<div class="chat-window">
 			<div id="chat-box" class="chat-box">
-				<div v-if="chatResponse" v-html="chatResponse"></div>
-				<div v-else class="placeholder-text">
-					Загрузка ответа...
+				<div v-for="(message, index) in chatHistory" :key="index" class="message">
+					<span :class="{ 'user-message': message.isUser, 'ai-message': !message.isUser }">
+						{{ message.text }}
+					</span>
 				</div>
+				<div v-if="chatResponse && !userInput" v-html="chatResponse"></div>
+				<div v-else-if="chatResponse" class="ai-message">{{ chatResponse }}</div>
+				<div v-else class="placeholder-text">Загрузка ответа...</div>
 			</div>
+		</div>
+		<div class="chat-input mt-4">
+			<input
+				v-model="userInput"
+				type="text"
+				placeholder="Введите ваше сообщение..."
+				class="w-full p-2 border rounded-md"
+				@keyup.enter="sendMessage"
+			/>
+			<button @click="sendMessage" class="btn btn-primary ml-2">Отправить</button>
 		</div>
 	</div>
 </template>
@@ -40,6 +54,8 @@ const fromLesson = ref(false)
 const showChat = ref(false)
 const chatResponse = ref(null)
 const currentQuestionIndex = ref(0) // Индекс текущего вопроса
+const userInput = ref('') // Поле для ввода сообщения
+const chatHistory = ref([]) // История сообщений
 
 const props = defineProps({
 	quizID: {
@@ -91,12 +107,55 @@ const handleCurrentQuestion = (index) => {
 	console.log('[DEBUG] Текущий индекс вопроса из Quiz.vue:', index)
 }
 
+const sendMessage = async () => {
+	if (!userInput.value.trim()) return;
+
+	// Добавляем сообщение пользователя в историю
+	chatHistory.value.push({ text: userInput.value, isUser: true });
+	console.log('[DEBUG] Пользовательское сообщение:', userInput.value);
+
+	// Сбрасываем поле ввода
+	const userMessage = userInput.value;
+	userInput.value = '';
+
+	try {
+		console.log('[DEBUG] Отправка запроса к прокси с пользовательским сообщением...');
+		const res = await fetch('https://openai.enlightrussia.ru/chat', {
+			method: 'POST',
+			headers: {
+				'Content-Type': 'application/json',
+				'X-API-KEY': 'a38ed6248c82e31f014b7459479d4c75154e41a331f8a4d9b4afc4b10cbc884a'
+			},
+			body: JSON.stringify({
+				prompt: userMessage,
+				model: 'gpt-4o',
+				system_prompt: 'Ты — эксперт, помогающий с вопросами квиза. Отвечай максимально полезно и точно.'
+			})
+		});
+
+		console.log('[DEBUG] Ответ от прокси:', res.status, res.statusText);
+		if (!res.ok) {
+			const errorText = await res.text();
+			console.log('[DEBUG] Ошибка ответа от прокси:', errorText);
+			throw new Error(`Ошибка API: ${res.status} ${errorText}`);
+		}
+
+		const data = await res.json();
+		console.log('[DEBUG] Получен ответ от GPT:', data);
+		chatHistory.value.push({ text: data.answer, isUser: false });
+	} catch (err) {
+		console.error('[DEBUG] Ошибка в sendMessage:', err);
+		chatHistory.value.push({ text: `Ошибка: ${err.message}`, isUser: false });
+	}
+};
+
 const toggleChatGPT = async () => {
 	console.log('[DEBUG] toggleChatGPT вызван, showChat:', showChat.value);
 	showChat.value = !showChat.value;
 	if (!showChat.value) {
 		chatResponse.value = null;
-		console.log('[DEBUG] Чат закрыт, chatResponse сброшен');
+		chatHistory.value = [];
+		console.log('[DEBUG] Чат закрыт, chatResponse и история сброшены');
 		return;
 	}
 
@@ -185,7 +244,7 @@ const toggleChatGPT = async () => {
 				questionData.possibility_3,
 				questionData.possibility_4,
 			].filter(Boolean);
-			console.log('[DEBUG] Получен вопрос и возможные варианты:', { question, options });
+			console.log('[DEBUG] Получен вопрос и возможные варианты:', { question, possibilitys });
 			prompt = `Вопрос из квиза: "${quiz_title}". Решите задачу: "${question}". Вопрос предполагает пользовательский ввод, есть возможные варианты ответа: 
 			"${possibilitys.join('", "')}". 
 			Дайте пошаговое решение, убедившись, что оно соответствует возможным вариантам ответа. Проверьте решение на логические и фактические ошибки.`;
@@ -226,9 +285,11 @@ const toggleChatGPT = async () => {
 		const data = await res.json();
 		console.log('[DEBUG] Получен ответ от GPT:', data);
 		chatResponse.value = data.answer;
+		chatHistory.value.push({ text: data.answer, isUser: false });
 	} catch (err) {
 		console.error('[DEBUG] Ошибка в toggleChatGPT:', err);
 		chatResponse.value = `Ошибка: ${err.message}`;
+		chatHistory.value.push({ text: `Ошибка: ${err.message}`, isUser: false });
 	}
 };
 
@@ -257,6 +318,24 @@ updateDocumentTitle(pageMeta)
 .placeholder-text {
 	color: #94a3b8;
 	text-align: center;
+}
+.message {
+	margin: 5px 0;
+}
+.user-message {
+	background-color: #e3f2fd;
+	padding: 5px 10px;
+	border-radius: 5px;
+	display: inline-block;
+}
+.ai-message {
+	background-color: #f0f0f0;
+	padding: 5px 10px;
+	border-radius: 5px;
+	display: inline-block;
+}
+.chat-input input {
+	border: 1px solid #e5e7eb;
 }
 .btn-primary {
 	background-color: #2563eb;
