@@ -23,9 +23,7 @@
 						{{ message.text }}
 					</span>
 				</div>
-				<div v-if="chatResponse && !userInput" v-html="chatResponse"></div>
-				<div v-else-if="chatResponse" class="ai-message">{{ chatResponse }}</div>
-				<div v-else class="placeholder-text">Загрузка ответа...</div>
+				<div v-if="chatHistory.length === 0" class="placeholder-text">Загрузка ответа...</div>
 			</div>
 		</div>
 		<div class="chat-input mt-4">
@@ -52,7 +50,7 @@ const user = inject('$user')
 const router = useRouter()
 const fromLesson = ref(false)
 const showChat = ref(false)
-const chatResponse = ref(null)
+const chatResponse = ref(null) // Временная переменная для текущего ответа
 const currentQuestionIndex = ref(0) // Индекс текущего вопроса
 const userInput = ref('') // Поле для ввода сообщения
 const chatHistory = ref([]) // История сообщений
@@ -284,12 +282,12 @@ const toggleChatGPT = async () => {
 
 		const data = await res.json();
 		console.log('[DEBUG] Получен ответ от GPT:', data);
-		chatResponse.value = data.answer;
 		chatHistory.value.push({ text: data.answer, isUser: false });
+		chatResponse.value = null; // Сбрасываем chatResponse после добавления в историю
 	} catch (err) {
 		console.error('[DEBUG] Ошибка в toggleChatGPT:', err);
-		chatResponse.value = `Ошибка: ${err.message}`;
 		chatHistory.value.push({ text: `Ошибка: ${err.message}`, isUser: false });
+		chatResponse.value = null;
 	}
 };
 
