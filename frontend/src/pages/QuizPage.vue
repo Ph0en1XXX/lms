@@ -219,7 +219,7 @@ const toggleChatGPT = async () => {
 			return;
 		}
 
-		let question, prompt, correct_answer, options = [], possibilitys = [];
+		let questionDataPrompt, question, prompt, correct_answer, options = [], possibilitys = [];
 
 		if (questionData.type === "Choices") {
 			question = currentQuestion.question_detail;
@@ -238,7 +238,9 @@ const toggleChatGPT = async () => {
 				}
 			}
 			console.log('[DEBUG] Получен вопрос, варианты и ответ:', { question, options, correct_answer });
-			prompt = generatePrompt(question);
+			questionDataPrompt = `${question}\nВарианты ответа: ${options.join(', ')}\nПравильный ответ: ${correct_answer}`;
+			console.log('[DEBUG] Данные для промта:', questionDataPrompt)
+			prompt = generatePrompt(questionDataPrompt);
 		} else if (questionData.type === "User Input") {
 			question = currentQuestion.question_detail;
 			possibilitys = [
@@ -248,11 +250,15 @@ const toggleChatGPT = async () => {
 				questionData.possibility_4 || '',
 			].filter(Boolean);
 			console.log('[DEBUG] Получен вопрос и возможные варианты:', { question, possibilitys });
-			prompt = generatePrompt(question);
+			questionDataPrompt = `${question}\nВозможные варианты ответа: ${possibilitys.join(', ')}`;
+			console.log('[DEBUG] Данные для промта:', questionDataPrompt)
+			prompt = generatePrompt(questionDataPrompt);
 		} else {
 			question = currentQuestion.question_detail;
 			console.log('[DEBUG] Получен вопрос:', { question });
-			prompt = generatePrompt(question);
+			questionDataPrompt = question;
+			console.log('[DEBUG] Данные для промта:', questionDataPrompt)
+			prompt = generatePrompt(questionDataPrompt);
 		}
 
 		if (!question) {
