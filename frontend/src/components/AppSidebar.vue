@@ -267,7 +267,7 @@ const addMyChild = () => {
 	if (roles.includes('Parent')) {
 		sidebarLinks.value.push({
 			label: __('My Child'),
-			icon: 'user',
+			icon: 'User',
 			to: 'my-child',
 			activeFor: [],
 			external: true,

@@ -120,7 +120,7 @@ const addSideBar = () => {
 	if (roles.includes('Parent')) {
 		otherLinks.value.push({
 			label: __('My Child'),
-			icon: 'user',
+			icon: 'User',
 			to: 'my-child',
 			external: true,
 			activeFor: [],
