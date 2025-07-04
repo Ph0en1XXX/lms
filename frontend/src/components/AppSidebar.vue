@@ -262,28 +262,44 @@ const addMyPoints = () => {
 	}
 }
 
+const addMyChild = () => {
+	const roles = userResource.data?.roles || []
+	if (roles.includes('Parent')) {
+		sidebarLinks.value.push({
+			label: __('My Child'),
+			icon: 'user',
+			to: 'my-child',
+			activeFor: [],
+			external: true,
+		})
+	}
+
+}
+
 const addChatGPT = () => {
 	const roles = userResource.data?.roles || []
 	let URL = ''
 	let nameLabel = ''
-	if (roles.includes('LMS Schoolchild')) {
-		URL = 'chatgpt-schoolchild'
-		nameLabel = __('ChatGPT for Schoolers')
-	} else if (roles.includes('LMS Student')) {
-		URL = 'chatgpt-schoolchild'
-		nameLabel = __('ChatGPT for Students')
-	} else if (roles.includes('Course Creator')) {
-		URL = 'ai-teachers'
-		nameLabel = __('ChatGPT for Teachers')
-	}
+	if (roles.includes('LMS Schoolchild') || roles.includes('LMS Student') || roles.includes('Course Creator')) {
+		if (roles.includes('LMS Schoolchild')) {
+			URL = 'chatgpt-schoolchild'
+			nameLabel = __('ChatGPT for Schoolers')
+		} else if (roles.includes('LMS Student')) {
+			URL = 'chatgpt-schoolchild'
+			nameLabel = __('ChatGPT for Students')
+		} else if (roles.includes('Course Creator')) {
+			URL = 'ai-teachers'
+			nameLabel = __('ChatGPT for Teachers')
+		}
 
-	sidebarLinks.value.push({
+		sidebarLinks.value.push({
 			label: nameLabel,
 			icon: 'Cpu',
 			to: URL,
 			external: true,
 			activeFor: [],
-	})
+		})
+ 	}
 }
 
 const addNotifications = () => {
@@ -661,6 +677,7 @@ watch(userResource, () => {
 		addMyPoints()
  		addLeaderBoard()
  		addChatGPT()
+		addMyChild()
  		//addForms()
 	}
 })

@@ -117,6 +117,16 @@ const addSideBar = () => {
 		})
 	}
 
+	if (roles.includes('Parent')) {
+		otherLinks.value.push({
+			label: __('My Child'),
+			icon: 'user',
+			to: 'my-child',
+			external: true,
+			activeFor: [],
+		})
+	}
+
 	let chatGPTURL = ''
 	let chatGPTLabel = ''
 
