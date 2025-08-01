@@ -250,11 +250,11 @@ const unreadNotifications = createResource({
 })
 
 //test of new page
-const addMyChild = () => {
+const addHome = () => {
 	sidebarLinks.value.push({
-		label: __('My Child'),
-		icon: 'User',
-		to: 'my-child',
+		label: __('Home'),
+		icon: 'Home',
+		to: 'hometest',
 		activeFor: [],
 		external: true,
 	})
@@ -690,6 +690,7 @@ watch(userResource, () => {
  		addLeaderBoard()
  		addChatGPT()
 		addMyChild()
+		addHome()
  		//addForms()
 	}
 })
