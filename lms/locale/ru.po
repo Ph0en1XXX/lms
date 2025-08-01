@@ -3042,11 +3042,11 @@ msgstr "Войдите в Frappe Cloud?"
 
 #: frontend/src/pages/JobDetail.vue:48
 msgid "Login to apply"
-msgid "Войдите в систему, чтобы подать заявку"
+msgstr "Войдите в систему, чтобы подать заявку"
 
 #: lms/templates/emails/payment_reminder.html:23
 msgid "Looking forward to seeing you enrolled!"
-сообщение: "С нетерпением ждем вашего зачисления!"
+msgstr "С нетерпением ждем вашего зачисления!"
 
 #. Label of the default_home (Check) field in DocType 'LMS Settings'
 #: lms/lms/doctype/lms_settings/lms_settings.json
@@ -3060,7 +3060,7 @@ msgstr "Разместить объявление"
 
 #: frontend/src/pages/Billing.vue:123
 msgid "Make sure to enter the correct billing name as the same will be used in your invoice."
-msgid "Убедитесь, что вы ввели правильное имя для выставления счета, так как оно будет использовано в вашем счете-фактуре".
+msgstr "Убедитесь, что вы ввели правильное имя для выставления счета, так как оно будет использовано в вашем счете-фактуре".
 
 #: frontend/src/components/BatchOverlay.vue:60
 msgid "Manage Batch"
@@ -3195,7 +3195,7 @@ msgstr "Email участника"
 #. Feedback'
 #: lms/lms/doctype/lms_batch_feedback/lms_batch_feedback.json
 msgid "Member Image"
-msgid "Изображение участника"
+msgstr "Изображение участника"
 
 #. Label of the member_name (Data) field in DocType 'LMS Assignment Submission'
 #. Label of the member_name (Data) field in DocType 'LMS Badge Assignment'
@@ -4713,7 +4713,7 @@ msgstr "Поделиться"
 
 #: frontend/src/pages/BatchForm.vue:228
 msgid "Short Description"
-msgid "Краткое описание"
+msgstr "Краткое описание"
 
 #. Label of the short_introduction (Small Text) field in DocType 'LMS Course'
 #: frontend/src/pages/CourseForm.vue:38
@@ -5254,7 +5254,7 @@ msgstr "Нет ни одной партии, соответствующей кр
 
 #: frontend/src/components/CreateOutline.vue:12
 msgid "There are no chapters in this course. Create and manage chapters from here."
-msgid "В этом курсе нет глав. Создавайте главы и управляйте ими отсюда."
+msgstr "В этом курсе нет глав. Создавайте главы и управляйте ими отсюда."
 
 #: frontend/src/pages/Courses.vue:79
 msgid "There are no courses matching the criteria. Keep an eye out, fresh learning experiences are on the way soon!"
@@ -5713,7 +5713,7 @@ msgstr "Перейдите по следующей ссылке, чтобы пр
 #: lms/templates/emails/batch_start_reminder.html:23
 #: lms/templates/emails/live_class_reminder.html:20
 msgid "Visit your batch"
-msgid "Перейти к вашей партии"
+msgstr "Перейти к вашей партии"
 
 #. Label of the internship (Table) field in DocType 'User'
 #: lms/fixtures/custom_field.json
@@ -5810,7 +5810,7 @@ msgstr "У вас уже есть оценка {0} в {1} для курса {2}.
 
 #: frontend/src/pages/CourseCertification.vue:14
 msgid "You are already certified for this course. Click on the card below to open your certificate."
-msgid "Вы уже сертифицированы для прохождения этого курса. Нажмите на карточку ниже, чтобы открыть свой сертификат."
+msgstr "Вы уже сертифицированы для прохождения этого курса. Нажмите на карточку ниже, чтобы открыть свой сертификат."
 
 #: lms/lms/api.py:230
 msgid "You are already enrolled for this batch."
@@ -5960,7 +5960,7 @@ msgstr "Ваш аккаунт был успешно создан!"
 
 #: lms/lms/doctype/lms_batch/lms_batch.py:418
 msgid "Your batch {0} is starting tomorrow"
-msgid "Ваша партия {0} начинается завтра"
+msgstr "Ваша партия {0} начинается завтра"
 
 #: frontend/src/pages/ProfileEvaluator.vue:120
 msgid "Your calendar is set."
@@ -5968,7 +5968,7 @@ msgstr "Ваш календарь настроен."
 
 #: lms/lms/doctype/lms_live_class/lms_live_class.py:87
 msgid "Your class on {0} is today"
-msgid "Ваше занятие на {0} сегодня"
+msgstr "Ваше занятие на {0} сегодня"
 
 #: lms/lms/notification/certificate_request_reminder/certificate_request_reminder.html:3
 #: lms/templates/emails/certificate_request_notification.html:3
@@ -6010,7 +6010,7 @@ msgstr "активность"
 
 #: lms/templates/emails/payment_reminder.html:4
 msgid "but didn’t complete your payment"
-msgid "но вы не завершили свой платеж"
+msgstr "но вы не завершили свой платеж"
 
 #: lms/templates/emails/mentor_request_creation_email.html:5
 msgid "cancel your application"
