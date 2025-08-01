@@ -254,8 +254,8 @@ const addHome = () => {
 	sidebarLinks.value.push({
 		label: __('Home'),
 		icon: 'Home',
-		to: 'Hometest',
-		activeFor: activeFor,
+		to: 'Home',
+		activeFor: [],
 	})
 
 }

@@ -14,7 +14,7 @@ const routes = [
 	//Test of page
 	{
 		path: '/hometest',
-		name: 'Hometest',
+		name: 'Home',
 		component: () => import('@/pages/Home.vue'),
 	},
 	{
