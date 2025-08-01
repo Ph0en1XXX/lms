@@ -13,7 +13,7 @@ const routes = [
 	},
 	//Test of page
 	{
-		path: '/hometest',
+		path: '/home',
 		name: 'Home',
 		component: () => import('@/pages/Home.vue'),
 	},
