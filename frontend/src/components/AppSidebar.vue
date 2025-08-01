@@ -249,6 +249,18 @@ const unreadNotifications = createResource({
 	auto: user ? true : false,
 })
 
+//test of new page
+const addMyChild = () => {
+	sidebarLinks.value.push({
+		label: __('My Child'),
+		icon: 'User',
+		to: 'my-child',
+		activeFor: [],
+		external: true,
+	})
+
+}
+
 const addMyPoints = () => {
 	const roles = userResource.data?.roles || []
 	if (roles.includes('LMS Student') || roles.includes('LMS Schoolchild')) {

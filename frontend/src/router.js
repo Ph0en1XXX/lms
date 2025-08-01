@@ -11,6 +11,12 @@ const routes = [
 			name: 'Courses',
 		},
 	},
+	//Test of page
+	{
+		path: '/hometest',
+		name: 'Home',
+		component: () => import('@/pages/Home.vue'),
+	},
 	{
 		path: '/courses',
 		name: 'Courses',
