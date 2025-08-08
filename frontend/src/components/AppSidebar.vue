@@ -251,12 +251,36 @@ const unreadNotifications = createResource({
 
 //test of new page
 const addProfile = () => {
-	sidebarLinks.value.push({
-		label: __('Schoolchildren Profile'),
-		icon: 'Home',
-		to: 'Schoolchildren Profile',
-		activeFor: [],
-	})
+	const roles = userResource.data?.roles || []
+	if (roles.includes('LMS Student')) {
+		sidebarLinks.value.push({
+			label: __('Schoolchildren Profile'),
+			icon: 'Home',
+			to: 'SchoolchildrenProfile',
+			activeFor: [],
+		})
+	} else if (roles.includes('LMS Schoolchild')) {
+		sidebarLinks.value.push({
+			label: __('Schoolchildren Profile'),
+			icon: 'Home',
+			to: 'SchoolchildrenProfile',
+			activeFor: [],
+		})
+	} else if (roles.includes('Course Creator')) {
+		sidebarLinks.value.push({
+			label: __('Schoolchildren Profile'),
+			icon: 'Home',
+			to: 'SchoolchildrenProfile',
+			activeFor: [],
+		})
+	} else {
+		sidebarLinks.value.push({
+			label: __('Schoolchildren Profile'),
+			icon: 'Home',
+			to: 'SchoolchildrenProfile',
+			activeFor: [],
+		})
+	}
 
 }
 
