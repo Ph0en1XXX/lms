@@ -13,9 +13,9 @@ const routes = [
 	},
 	//Test of page
 	{
-		path: '/hometest',
-		name: 'Home',
-		component: () => import('@/pages/Home.vue'),
+		path: '/schoolchildren',
+		name: 'SchoolchildrenProfile',
+		component: () => import('@/pages/SchoolchildrenProfile.vue'),
 	},
 	{
 		path: '/courses',
