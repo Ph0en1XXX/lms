@@ -9,20 +9,11 @@
 
       <div class="mx-auto -mt-10 max-w-4xl px-5">
         <div class="flex items-center">
-          <div>
-            <img
-              v-if="profile.data.user_image"
-              :src="profile.data.user_image"
-              class="object-cover h-[100px] w-[100px] rounded-full border-4 border-white"
-            />
-            <UserAvatar v-else :user="profile.data" class="object-cover h-[100px] w-[100px] rounded-full border-4 border-white" />
-          </div>
-
+          <!-- Убрана аватарка -->
           <div class="ml-6">
             <h2 class="mt-2 text-3xl font-semibold text-ink-gray-9">{{ displayName }}</h2>
             <div class="mt-2 text-base text-ink-gray-7">{{ profile.data.headline || '' }}</div>
           </div>
-
           <div class="ml-auto">
             <Button v-if="isSessionUser()" @click="toggleEdit()">
               <template #prefix><Edit class="w-4 h-4 stroke-1.5 text-ink-gray-7" /></template>
@@ -31,9 +22,10 @@
           </div>
         </div>
 
-        <div class="mt-6">
+        <!-- Убрана кнопка About -->
+        <!-- <div class="mt-6">
           <TabButtons class="inline-block" :buttons="[{label:'About'}]" v-model="activeTab" />
-        </div>
+        </div> -->
 
         <!-- VIEW MODE -->
         <div v-if="!editMode" class="mt-4 space-y-3">
@@ -259,6 +251,8 @@ function toggleEdit(){
 async function saveProfile(){
   saving.value = true
   setTimeout(() => {
+    // Копируем данные из формы в schoolProfile (имитация сохранения)
+    schoolProfile.value = { ...form.value }
     saving.value = false
     editMode.value = false
     alert('Профиль сохранён (тестово, без бэка)')
