@@ -160,7 +160,7 @@
 </template>
 
 <script setup>
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, onMounted, inject } from 'vue'
 import { Breadcrumbs, Button, TabButtons, Input, DatePicker, Select, Textarea } from 'frappe-ui'
 import { sessionStore } from '@/stores/session'
 import UserAvatar from '@/components/UserAvatar.vue'
