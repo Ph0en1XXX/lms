@@ -8,8 +8,7 @@
       </header>
 
       <div class="mx-auto -mt-10 max-w-4xl px-5">
-        <div class="flex items-center">
-          <!-- Убрана аватарка -->
+        <div class="flex items-center min-h-[100px]">
           <div class="ml-6">
             <h2 class="mt-2 text-3xl font-semibold text-ink-gray-9">{{ displayName }}</h2>
             <div class="mt-2 text-base text-ink-gray-7">{{ profile.data.headline || '' }}</div>
