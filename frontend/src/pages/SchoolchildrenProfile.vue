@@ -10,9 +10,7 @@
       <div class="mx-auto -mt-10 max-w-4xl px-5">
         <div class="ml-auto" v-if="$user.data && profile.data && isSessionUser()">
           <Button @click="toggleEdit()">
-            <template #prefix>
-              <Edit class="w-4 h-4 stroke-1.5 text-ink-gray-7" />
-            </template>
+            <template #prefix><Edit class="w-4 h-4 stroke-1.5 text-ink-gray-7" /></template>
             {{ editMode ? 'Отмена' : 'Редактировать' }}
           </Button>
         </div>
@@ -140,7 +138,7 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, onMounted } from 'vue'
+import { ref, computed, inject, onMounted, watch } from 'vue' // добавили watch
 import { Breadcrumbs, Button, Input, DatePicker, Select, Textarea, createResource } from 'frappe-ui'
 import { sessionStore } from '@/stores/session'
 import NoPermission from '@/components/NoPermission.vue'
@@ -168,28 +166,26 @@ const learnOptions = [
   'Математика углубленно','Физика углубленно'
 ]
 
-// Получаем профиль пользователя
+const resolvedUsername = computed(() => props.username || $user.data?.username || null)
+
 const profile = createResource({
   url: 'frappe.client.get_value',
   params: {
     doctype: 'User',
-    filters: { name: props.username },
-    fieldname: [
-      'name', 'full_name', 'first_name', 'last_name', 'headline', 'email'
-    ]
+    filters: { name: '' }, // заполним позже
+    fieldname: ['name','full_name','first_name','last_name','headline','email']
   },
-  auto: true
+  auto: false
 })
 
-// Получаем профиль школьника
 const schoolProfile = createResource({
   url: 'frappe.client.get_list',
   params: {
     doctype: 'Schoolchildren Profile',
-    filters: { user: props.username },
+    filters: { user: '' },   // заполним позже
     limit_page_length: 1
   },
-  auto: true,
+  auto: false,
   transform(data) {
     let doc = data && data.length ? data[0] : {}
     try { doc.exams = JSON.parse(doc.exams) } catch(e){ doc.exams = doc.exams ? doc.exams.split(',').map(s=>s.trim()) : [] }
@@ -197,6 +193,24 @@ const schoolProfile = createResource({
     return doc
   }
 })
+
+watch(resolvedUsername, async (u) => {
+  if (!u) return
+  // подставляем юзернейм и грузим данные
+  profile.params.filters = { name: u }
+  await profile.reload()
+
+  schoolProfile.params.filters = { user: u }
+  await schoolProfile.reload()
+
+  // если профиль школьника нашёлся — заполним форму
+  if (schoolProfile.data && Object.keys(schoolProfile.data).length) {
+    fillFormFromProfile()
+  } else {
+    // иначе форма остаётся пустой (как ты и хочешь)
+  }
+}, { immediate: true })
+
 
 const form = ref({
   first_name: '',
@@ -257,27 +271,30 @@ function formatTelegram(t){
 }
 
 function isSessionUser() {
-  return $user.data?.username === props.username
+  return $user.data?.username && ($user.data.username === (props.username || '')) ||
+         ($user.data?.username && !$user.data?.username && false) // просто защита от странных кейсов
 }
 
+
 function fillFormFromProfile(){
-  const sp = schoolProfile.value
+  const sp = schoolProfile.data || {}
   form.value.first_name = sp.first_name || profile.data?.first_name || ''
-  form.value.last_name = sp.last_name || profile.data?.last_name || ''
+  form.value.last_name  = sp.last_name  || profile.data?.last_name  || ''
   form.value.middle_name = sp.middle_name || ''
-  form.value.birth_date = sp.birth_date || ''
-  form.value.school = sp.school || ''
+  form.value.birth_date  = sp.birth_date  || ''
+  form.value.school      = sp.school || ''
   form.value.school_name = sp.school_name || ''
-  form.value.grade = sp.grade || ''
-  form.value.phone = sp.phone || ''
+  form.value.grade       = sp.grade || ''
+  form.value.phone       = sp.phone || ''
   form.value.email_private = sp.email_private || ''
-  form.value.telegram = sp.telegram || ''
-  form.value.exams = Array.isArray(sp.exams) ? [...sp.exams] : (sp.exams||[])
+  form.value.telegram    = sp.telegram || ''
+  form.value.exams       = Array.isArray(sp.exams) ? [...sp.exams] : (sp.exams||[])
   form.value.learn_subjects = Array.isArray(sp.learn_subjects) ? [...sp.learn_subjects] : (sp.learn_subjects||[])
-  form.value.interests = sp.interests || ''
-  form.value.about_me = sp.about_me || ''
-  form.value.dreams = sp.dreams || ''
+  form.value.interests   = sp.interests || ''
+  form.value.about_me    = sp.about_me || ''
+  form.value.dreams      = sp.dreams || ''
 }
+
 
 function toggleEdit(){
   editMode.value = !editMode.value
@@ -338,7 +355,7 @@ async function saveProfile(){
       // Сохраняем через save
       await createResource({
         url: 'frappe.client.save',
-        params: { doc: { ...schoolProfile.value, ...payload } }
+        params: { doc: { ...schoolProfile.data, ...payload } }
       }).submit()
     } else {
       // Вставка нового
