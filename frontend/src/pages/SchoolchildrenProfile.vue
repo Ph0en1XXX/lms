@@ -30,42 +30,42 @@
         <div v-if="!editMode" class="mt-4 space-y-3">
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <b>Фамилия:</b> {{ schoolProfile.value.last_name || '-' }}<br/>
-              <b>Имя:</b> {{ schoolProfile.value.first_name || '-' }}<br/>
-              <b>Отчество:</b> {{ schoolProfile.value.middle_name || '-' }}<br/>
-              <b>Дата рождения:</b> {{ formattedDate(schoolProfile.value.birth_date) || '-' }}
+              <b>Фамилия:</b> {{ schoolProfile.value?.last_name || '-' }}<br/>
+              <b>Имя:</b> {{ schoolProfile.value?.first_name || '-' }}<br/>
+              <b>Отчество:</b> {{ schoolProfile.value?.middle_name || '-' }}<br/>
+              <b>Дата рождения:</b> {{ formattedDate(schoolProfile.value?.birth_date) || '-' }}
             </div>
             <div>
-              <b>Школа:</b> {{ schoolProfile.value.school_name || schoolProfile.value.school || '-' }}<br/>
-              <b>Класс:</b> {{ schoolProfile.value.grade || '-' }}<br/>
-              <b>Телефон:</b> {{ maskPrivate(schoolProfile.value.phone) }}<br/>
-              <b>Email (приватный):</b> {{ maskPrivate(schoolProfile.value.email_private) }}<br/>
+              <b>Школа:</b> {{ schoolProfile.value?.school_name || schoolProfile.value?.school || '-' }}<br/>
+              <b>Класс:</b> {{ schoolProfile.value?.grade || '-' }}<br/>
+              <b>Телефон:</b> {{ maskPrivate(schoolProfile.value?.phone) }}<br/>
+              <b>Email (приватный):</b> {{ maskPrivate(schoolProfile.value?.email_private) }}<br/>
               <b>Telegram:</b>
-              <a v-if="schoolProfile.value.telegram" :href="formatTelegram(schoolProfile.value.telegram)" target="_blank">{{ schoolProfile.value.telegram }}</a>
+              <a v-if="schoolProfile.value?.telegram" :href="formatTelegram(schoolProfile.value.telegram)" target="_blank">{{ schoolProfile.value.telegram }}</a>
             </div>
           </div>
 
           <div>
-            <b>ЕГЭ, планируется:</b> {{ (schoolProfile.value.exams || []).join(', ') || '-' }}
+            <b>ЕГЭ, планируется:</b> {{ (schoolProfile.value?.exams || []).join(', ') || '-' }}
           </div>
 
           <div>
-            <b>Чему хочется научиться:</b> {{ (schoolProfile.value.learn_subjects || []).join(', ') || '-' }}
+            <b>Чему хочется научиться:</b> {{ (schoolProfile.value?.learn_subjects || []).join(', ') || '-' }}
           </div>
 
           <div>
             <b>Коротко о интересах:</b>
-            <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.value.interests || '-' }}</div>
+            <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.value?.interests || '-' }}</div>
           </div>
 
           <div class="grid md:grid-cols-2 gap-4">
             <div>
               <b>Коротко о себе:</b>
-              <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.value.about_me || '-' }}</div>
+              <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.value?.about_me || '-' }}</div>
             </div>
             <div>
               <b>Коротко о мечтах:</b>
-              <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.value.dreams || '-' }}</div>
+              <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.value?.dreams || '-' }}</div>
             </div>
           </div>
         </div>
