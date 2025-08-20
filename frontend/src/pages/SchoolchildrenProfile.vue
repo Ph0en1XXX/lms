@@ -8,17 +8,13 @@
       </header>
 
       <div class="mx-auto -mt-10 max-w-4xl px-5">
-        <div class="flex items-center min-h-[100px]">
-          <div class="ml-6">
-            <h2 class="mt-2 text-3xl font-semibold text-ink-gray-9">{{ displayName }}</h2>
-            <div class="mt-2 text-base text-ink-gray-7">{{ profile.data.headline || '' }}</div>
-          </div>
-          <div class="ml-auto">
-            <Button v-if="isSessionUser()" @click="toggleEdit()">
-              <template #prefix><Edit class="w-4 h-4 stroke-1.5 text-ink-gray-7" /></template>
-              {{ editMode ? 'Отмена' : 'Редактировать' }}
-            </Button>
-          </div>
+        <div class="ml-auto" v-if="$user.data && profile.data && isSessionUser()">
+          <Button @click="toggleEdit()">
+            <template #prefix>
+              <Edit class="w-4 h-4 stroke-1.5 text-ink-gray-7" />
+            </template>
+            {{ editMode ? 'Отмена' : 'Редактировать' }}
+          </Button>
         </div>
 
         <!-- Убрана кнопка About -->
@@ -260,8 +256,8 @@ function formatTelegram(t){
   return 'https://t.me/' + t.replace(/^@/, '')
 }
 
-function isSessionUser(){
-  return $user.data?.email === profile.data?.email || $user.data?.username === props.username
+function isSessionUser() {
+  return $user.data?.username === props.username
 }
 
 function fillFormFromProfile(){
