@@ -146,19 +146,17 @@
 </template>
 
 <script setup>
-import { ref, computed, inject, onMounted } from 'vue'
-import { Breadcrumbs, Button, Input, DatePicker, Select, Textarea, createResource } from 'frappe-ui'
+import { Breadcrumbs, createResource, Button, TabButtons } from 'frappe-ui'
+import { computed, inject, watch, ref, onMounted, watchEffect } from 'vue'
 import { sessionStore } from '@/stores/session'
-import NoPermission from '@/components/NoPermission.vue'
 import { Edit } from 'lucide-vue-next'
-import debounce from 'lodash/debounce'
+import NoPermission from '@/components/NoPermission.vue'
+import { convertToTitleCase, updateDocumentTitle } from '@/utils'
+
+//<!--=======================================-->
 
 const { user } = sessionStore()
 const $user = inject('$user')
-
-const props = defineProps({
-  username: { type: String, required: true }
-})
 
 const editMode = ref(false)
 const saving = ref(false)
@@ -173,36 +171,6 @@ const learnOptions = [
   'Программирование','Дизайн','Актерское мастерство','Риторика','Робототехника','Иностранные языки',
   'Математика углубленно','Физика углубленно'
 ]
-
-// Получаем профиль пользователя
-const profile = createResource({
-  url: 'frappe.client.get_value',
-  params: {
-    doctype: 'User',
-    filters: { name: props.username },
-    fieldname: [
-      'name', 'full_name', 'first_name', 'last_name', 'headline', 'email'
-    ]
-  },
-  auto: true
-})
-
-// Получаем профиль школьника
-const schoolProfile = createResource({
-  url: 'frappe.client.get_list',
-  params: {
-    doctype: 'Schoolchildren Profile',
-    filters: { user: props.username },
-    limit_page_length: 1
-  },
-  auto: true,
-  transform(data) {
-    let doc = data && data.length ? data[0] : {}
-    try { doc.exams = JSON.parse(doc.exams) } catch(e){ doc.exams = doc.exams ? doc.exams.split(',').map(s=>s.trim()) : [] }
-    try { doc.learn_subjects = JSON.parse(doc.learn_subjects) } catch(e){ doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.split(',').map(s=>s.trim()) : [] }
-    return doc
-  }
-})
 
 const form = ref({
   first_name: '',
@@ -222,23 +190,99 @@ const form = ref({
   dreams: ''
 })
 
-const breadcrumbs = computed(() => {
-  const items = [{ label: 'People' }]
-  if (props.username) {
-    items.push({
-      label: profile.data?.full_name || form.value.first_name || '',
-      route: { name: 'Profile', params: { username: props.username } }
-    })
-  } else {
-    items.push({
-      label: profile.data?.full_name || form.value.first_name || ''
-    })
+const props = defineProps({
+  username: {
+    type: String,
+    required: false,
+    default: () => $user.data?.username || '',
+  },
+});
+
+//<!--=======================================-->
+
+onMounted(() => {
+	if ($user.data) profile.reload()
+  if (schoolProfile.value && Object.keys(schoolProfile.value).length) {
+    fillFormFromProfile()
   }
-  return items
+  console.log('Props username:', props.username);
+  console.log('Имя пользователя сессии:', $user.data?.username);
+  console.log('Загруженный профиль:', profile.data);
 })
 
+const profile = createResource({
+	url: 'frappe.client.get',
+	makeParams(values) {
+		return {
+			doctype: 'User',
+			filters: {
+				username: props.username,
+			},
+		}
+	},
+})
 
-const displayName = computed(() => profile.data?.full_name || `${form.value.first_name || ''} ${form.value.last_name || ''}`)
+const schoolProfile = createResource({
+  url: 'frappe.client.get',
+  params: {
+    doctype: 'Schoolchildren Profile',
+    filters: { user: props.username || $user.data?.username || '' },
+  },
+  auto: false, // Не загружать автоматически, пока profile не готов
+  transform(data) {
+    let doc = data || {};
+    try { doc.exams = JSON.parse(doc.exams) } catch(e) { doc.exams = doc.exams ? doc.exams.split(',').map(s => s.trim()) : []; }
+    try { doc.learn_subjects = JSON.parse(doc.learn_subjects) } catch(e) { doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.split(',').map(s => s.trim()) : []; }
+    return doc;
+  }
+});
+
+watch(
+	() => props.username,
+	() => {
+		profile.reload()
+	},
+  () => {
+    if (profile.data) {
+      schoolProfile.reload();
+    }
+  }
+)
+
+const isSessionUser = () => {
+  return $user.data?.username && profile.data?.username && $user.data.username === (props.username || profile.data.username);
+};
+
+//<!--=======================================-->
+
+const breadcrumbs = computed(() => {
+	let crumbs = [
+		{
+			label: 'People',
+		},
+		{
+			label: profile.data?.full_name,
+			route: {
+				name: 'Profile',
+				params: {
+					username: $user.doc?.username,
+				},
+			},
+		},
+	]
+	return crumbs
+})
+
+const pageMeta = computed(() => {
+	return {
+		title: profile.data?.full_name,
+		description: profile.data?.headline,
+	}
+})
+
+updateDocumentTitle(pageMeta)
+
+//<!--=========Additional Functions==============================-->
 
 function formattedDate(d){
   if(!d) return ''
@@ -262,9 +306,7 @@ function formatTelegram(t){
   return 'https://t.me/' + t.replace(/^@/, '')
 }
 
-function isSessionUser() {
-  return $user.data?.username === props.username
-}
+//<!--============Form===========================-->
 
 function fillFormFromProfile(){
   const sp = schoolProfile.value
@@ -290,82 +332,8 @@ function toggleEdit(){
   if(editMode.value) fillFormFromProfile()
 }
 
-// Сохранение профиля
-async function saveProfile(){
-  saving.value = true
-  try {
-    // Обновление User (имя/фамилия)
-    if(form.value.first_name || form.value.last_name){
-      await createResource({
-        url: 'frappe.client.set_value',
-        params: {
-          doctype: 'User',
-          name: profile.data.name,
-          fieldname: 'full_name',
-          value: `${form.value.first_name || ''} ${form.value.last_name || ''}`.trim()
-        }
-      }).submit()
-    }
+//<!--=========School Functions==============================-->
 
-    // Проверяем, есть ли профиль школьника
-    let docname = schoolProfile.value.name
-    let payload = {
-      doctype: 'Schoolchildren Profile',
-      user: profile.data.name,
-      first_name: form.value.first_name,
-      last_name: form.value.last_name,
-      middle_name: form.value.middle_name,
-      birth_date: form.value.birth_date,
-      school: form.value.school || '',
-      school_name: form.value.school_name || '',
-      grade: form.value.grade,
-      phone: form.value.phone,
-      email_private: form.value.email_private,
-      telegram: form.value.telegram,
-      exams: JSON.stringify(form.value.exams || []),
-      learn_subjects: JSON.stringify(form.value.learn_subjects || []),
-      interests: form.value.interests,
-      about_me: form.value.about_me,
-      dreams: form.value.dreams,
-      last_updated: (new Date()).toISOString()
-    }
-
-    if(docname){
-      // Обновление существующего
-      await createResource({
-        url: 'frappe.client.set_value',
-        params: {
-          doctype: 'Schoolchildren Profile',
-          name: docname,
-          fieldname: Object.keys(payload),
-          value: undefined
-        }
-      }).submit().catch(()=>{})
-      // Сохраняем через save
-      await createResource({
-        url: 'frappe.client.save',
-        params: { doc: { ...schoolProfile.value, ...payload } }
-      }).submit()
-    } else {
-      // Вставка нового
-      await createResource({
-        url: 'frappe.client.insert',
-        params: { doc: payload }
-      }).submit()
-    }
-
-    await schoolProfile.reload()
-    editMode.value = false
-    if(window.frappe && window.frappe.msgprint) window.frappe.msgprint('Профиль сохранён')
-  } catch(e){
-    console.error(e)
-    if(window.frappe && window.frappe.msgprint) window.frappe.msgprint({ title: 'Ошибка', message: (e && e.message) || 'Ошибка при сохранении', indicator: 'red' })
-  } finally {
-    saving.value = false
-  }
-}
-
-// Поиск школы
 const schoolQuery = ref('')
 const schoolResults = ref([])
 
@@ -396,14 +364,4 @@ function selectSchool(s){
   schoolQuery.value = s.school_name
 }
 
-onMounted(() => {
-  // Если профиль найден — заполняем форму для редактирования
-  if (schoolProfile.value && Object.keys(schoolProfile.value).length) {
-    fillFormFromProfile()
-  }
-})
 </script>
-
-<style scoped>
-/* Небольшие правки стилей (можно добавить Tailwind кастомизации) */
-</style>
