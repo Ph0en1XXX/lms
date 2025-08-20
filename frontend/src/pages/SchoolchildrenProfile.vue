@@ -169,11 +169,10 @@ const learnOptions = [
 const resolvedUsername = computed(() => props.username || $user.data?.username || null)
 
 const profile = createResource({
-  url: 'frappe.client.get_value',
+  url: 'frappe.client.get',
   params: {
     doctype: 'User',
-    filters: { name: '' }, // заполним позже
-    fieldname: ['name','full_name','first_name','last_name','headline','email']
+    name: '' // сюда подставим username позже
   },
   auto: false
 })
@@ -199,12 +198,11 @@ const ready = ref(false)
 async function loadAll(u) {
   ready.value = false
   try {
-    // Подтягиваем User
+    // Подтягиваем User (через get)
     await profile.reload({
       params: {
         doctype: 'User',
-        filters: { name: u },
-        fieldname: ['name','full_name','first_name','last_name','headline','email']
+        name: u
       }
     })
 
@@ -217,7 +215,6 @@ async function loadAll(u) {
       }
     })
 
-    // Если есть запись — заполняем форму, иначе оставляем пустой
     if (schoolProfile.value && Object.keys(schoolProfile.value).length) {
       fillFormFromProfile()
     }
