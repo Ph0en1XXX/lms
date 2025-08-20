@@ -157,6 +157,9 @@ import { convertToTitleCase, updateDocumentTitle } from '@/utils'
 
 const { user } = sessionStore()
 const $user = inject('$user')
+console.log('Props username:', props.username);
+console.log('Имя пользователя сессии:', $user.data?.username);
+console.log('Загруженный профиль:', profile.data);
 
 const editMode = ref(false)
 const saving = ref(false)
