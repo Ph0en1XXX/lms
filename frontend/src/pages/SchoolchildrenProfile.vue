@@ -220,10 +220,21 @@ const form = ref({
   dreams: ''
 })
 
-const breadcrumbs = computed(() => [
-  { label: 'People' },
-  { label: profile.data?.full_name || form.value.first_name || '', route: { name: 'Profile', params: { username: props.username } } }
-])
+const breadcrumbs = computed(() => {
+  const items = [{ label: 'People' }]
+  if (props.username) {
+    items.push({
+      label: profile.data?.full_name || form.value.first_name || '',
+      route: { name: 'Profile', params: { username: props.username } }
+    })
+  } else {
+    items.push({
+      label: profile.data?.full_name || form.value.first_name || ''
+    })
+  }
+  return items
+})
+
 
 const displayName = computed(() => profile.data?.full_name || `${form.value.first_name || ''} ${form.value.last_name || ''}`)
 
