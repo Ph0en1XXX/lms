@@ -144,10 +144,9 @@
 </template>
 
 <script setup>
-import { ref, computed, inject } from 'vue'
-import { Breadcrumbs, Button, TabButtons, Input, DatePicker, Select, Textarea, createResource } from 'frappe-ui'
+import { ref, computed, inject, onMounted } from 'vue'
+import { Breadcrumbs, Button, Input, DatePicker, Select, Textarea, createResource } from 'frappe-ui'
 import { sessionStore } from '@/stores/session'
-import UserAvatar from '@/components/UserAvatar.vue'
 import NoPermission from '@/components/NoPermission.vue'
 import { Edit } from 'lucide-vue-next'
 import debounce from 'lodash/debounce'
@@ -159,38 +158,8 @@ const props = defineProps({
   username: { type: String, required: true }
 })
 
-const profile = ref({
-  data: {
-    full_name: 'Иван Иванов',
-    user_image: '',
-    headline: 'Тестовый заголовок',
-    email: 'test@example.com'
-  }
-})
-
-const schoolProfile = ref({
-  value: {
-    first_name: 'Иван',
-    last_name: 'Иванов',
-    middle_name: 'Иванович',
-    birth_date: '2005-01-01',
-    school: 'Школа №1',
-    school_name: 'Школа №1',
-    grade: '10',
-    phone: '+79991234567',
-    email_private: 'private@example.com',
-    telegram: '@testuser',
-    exams: ['Математика', 'Русский язык'],
-    learn_subjects: ['Программирование'],
-    interests: 'Интересы: спорт, музыка',
-    about_me: 'О себе: люблю учиться',
-    dreams: 'Мечтаю стать программистом'
-  }
-})
-
 const editMode = ref(false)
 const saving = ref(false)
-const activeTab = ref('About')
 
 const examOptions = [
   'Русский язык','Математика(базовый)','Математика(профильный)','Физика','Химия','Информатика',
@@ -203,14 +172,60 @@ const learnOptions = [
   'Математика углубленно','Физика углубленно'
 ]
 
-const form = ref({ ...schoolProfile.value })
+// Получаем профиль пользователя
+const profile = createResource({
+  url: 'frappe.client.get_value',
+  params: {
+    doctype: 'User',
+    filters: { name: props.username },
+    fieldname: [
+      'name', 'full_name', 'first_name', 'last_name', 'headline', 'email'
+    ]
+  },
+  auto: true
+})
+
+// Получаем профиль школьника
+const schoolProfile = createResource({
+  url: 'frappe.client.get_list',
+  params: {
+    doctype: 'Schoolchildren Profile',
+    filters: { user: props.username },
+    limit_page_length: 1
+  },
+  auto: true,
+  transform(data) {
+    let doc = data && data.length ? data[0] : {}
+    try { doc.exams = JSON.parse(doc.exams) } catch(e){ doc.exams = doc.exams ? doc.exams.split(',').map(s=>s.trim()) : [] }
+    try { doc.learn_subjects = JSON.parse(doc.learn_subjects) } catch(e){ doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.split(',').map(s=>s.trim()) : [] }
+    return doc
+  }
+})
+
+const form = ref({
+  first_name: '',
+  last_name: '',
+  middle_name: '',
+  birth_date: '',
+  school: '',
+  school_name: '',
+  grade: '',
+  phone: '',
+  email_private: '',
+  telegram: '',
+  exams: [],
+  learn_subjects: [],
+  interests: '',
+  about_me: '',
+  dreams: ''
+})
 
 const breadcrumbs = computed(() => [
   { label: 'People' },
-  { label: profile.value.data?.full_name || form.value.first_name || '', route: { name: 'Profile', params: { username: 'test' } } }
+  { label: profile.data?.full_name || form.value.first_name || '', route: { name: 'Profile', params: { username: props.username } } }
 ])
 
-const displayName = computed(() => profile.value.data?.full_name || `${form.value.first_name || ''} ${form.value.last_name || ''}`)
+const displayName = computed(() => profile.data?.full_name || `${form.value.first_name || ''} ${form.value.last_name || ''}`)
 
 function formattedDate(d){
   if(!d) return ''
@@ -235,11 +250,26 @@ function formatTelegram(t){
 }
 
 function isSessionUser(){
-  return true // всегда true для теста
+  return $user.data?.email === profile.data?.email || $user.data?.username === props.username
 }
 
 function fillFormFromProfile(){
-  form.value = { ...schoolProfile.value }
+  const sp = schoolProfile.value
+  form.value.first_name = sp.first_name || profile.data?.first_name || ''
+  form.value.last_name = sp.last_name || profile.data?.last_name || ''
+  form.value.middle_name = sp.middle_name || ''
+  form.value.birth_date = sp.birth_date || ''
+  form.value.school = sp.school || ''
+  form.value.school_name = sp.school_name || ''
+  form.value.grade = sp.grade || ''
+  form.value.phone = sp.phone || ''
+  form.value.email_private = sp.email_private || ''
+  form.value.telegram = sp.telegram || ''
+  form.value.exams = Array.isArray(sp.exams) ? [...sp.exams] : (sp.exams||[])
+  form.value.learn_subjects = Array.isArray(sp.learn_subjects) ? [...sp.learn_subjects] : (sp.learn_subjects||[])
+  form.value.interests = sp.interests || ''
+  form.value.about_me = sp.about_me || ''
+  form.value.dreams = sp.dreams || ''
 }
 
 function toggleEdit(){
@@ -247,27 +277,101 @@ function toggleEdit(){
   if(editMode.value) fillFormFromProfile()
 }
 
+// Сохранение профиля
 async function saveProfile(){
   saving.value = true
-  setTimeout(() => {
-    // Копируем данные из формы в schoolProfile (имитация сохранения)
-    schoolProfile.value = { ...form.value }
-    saving.value = false
+  try {
+    // Обновление User (имя/фамилия)
+    if(form.value.first_name || form.value.last_name){
+      await createResource({
+        url: 'frappe.client.set_value',
+        params: {
+          doctype: 'User',
+          name: profile.data.name,
+          fieldname: 'full_name',
+          value: `${form.value.first_name || ''} ${form.value.last_name || ''}`.trim()
+        }
+      }).submit()
+    }
+
+    // Проверяем, есть ли профиль школьника
+    let docname = schoolProfile.value.name
+    let payload = {
+      doctype: 'Schoolchildren Profile',
+      user: profile.data.name,
+      first_name: form.value.first_name,
+      last_name: form.value.last_name,
+      middle_name: form.value.middle_name,
+      birth_date: form.value.birth_date,
+      school: form.value.school || '',
+      school_name: form.value.school_name || '',
+      grade: form.value.grade,
+      phone: form.value.phone,
+      email_private: form.value.email_private,
+      telegram: form.value.telegram,
+      exams: JSON.stringify(form.value.exams || []),
+      learn_subjects: JSON.stringify(form.value.learn_subjects || []),
+      interests: form.value.interests,
+      about_me: form.value.about_me,
+      dreams: form.value.dreams,
+      last_updated: (new Date()).toISOString()
+    }
+
+    if(docname){
+      // Обновление существующего
+      await createResource({
+        url: 'frappe.client.set_value',
+        params: {
+          doctype: 'Schoolchildren Profile',
+          name: docname,
+          fieldname: Object.keys(payload),
+          value: undefined
+        }
+      }).submit().catch(()=>{})
+      // Сохраняем через save
+      await createResource({
+        url: 'frappe.client.save',
+        params: { doc: { ...schoolProfile.value, ...payload } }
+      }).submit()
+    } else {
+      // Вставка нового
+      await createResource({
+        url: 'frappe.client.insert',
+        params: { doc: payload }
+      }).submit()
+    }
+
+    await schoolProfile.reload()
     editMode.value = false
-    alert('Профиль сохранён (тестово, без бэка)')
-  }, 500)
+    if(window.frappe && window.frappe.msgprint) window.frappe.msgprint('Профиль сохранён')
+  } catch(e){
+    console.error(e)
+    if(window.frappe && window.frappe.msgprint) window.frappe.msgprint({ title: 'Ошибка', message: (e && e.message) || 'Ошибка при сохранении', indicator: 'red' })
+  } finally {
+    saving.value = false
+  }
 }
 
+// Поиск школы
 const schoolQuery = ref('')
 const schoolResults = ref([])
 
 async function searchSchool(q){
   if(!q) { schoolResults.value = []; return }
-  // тестовые школы
-  schoolResults.value = [
-    { name: 'school1', school_name: 'Школа №1', region: 'Москва', license_number: '12345' },
-    { name: 'school2', school_name: 'Школа №2', region: 'СПб', license_number: '67890' }
-  ]
+  try {
+    const res = await createResource({
+      url: 'frappe.client.get_list',
+      params: {
+        doctype: 'School List',
+        fields: ['name', 'school_name', 'license_number', 'region'],
+        filters: [['school_name', 'like', '%' + q + '%']],
+        limit_page_length: 20
+      }
+    }).submit()
+    schoolResults.value = res || []
+  } catch(e){
+    schoolResults.value = []
+  }
 }
 
 const debouncedSearchSchool = debounce(()=> searchSchool(schoolQuery.value), 300)
@@ -278,6 +382,13 @@ function selectSchool(s){
   schoolResults.value = []
   schoolQuery.value = s.school_name
 }
+
+onMounted(() => {
+  // Если профиль найден — заполняем форму для редактирования
+  if (schoolProfile.value && Object.keys(schoolProfile.value).length) {
+    fillFormFromProfile()
+  }
+})
 </script>
 
 <style scoped>
