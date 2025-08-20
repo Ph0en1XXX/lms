@@ -8,7 +8,7 @@
       </header>
 
       <div class="mx-auto -mt-10 max-w-4xl px-5">
-        <div class="ml-auto" v-if="$user.data && profile.data && isSessionUser()">
+        <div class="ml-auto" v-if="ready && $user.data && profile.data && isSessionUser()">
           <Button @click="toggleEdit()">
             <template #prefix><Edit class="w-4 h-4 stroke-1.5 text-ink-gray-7" /></template>
             {{ editMode ? 'Отмена' : 'Редактировать' }}
@@ -194,33 +194,48 @@ const schoolProfile = createResource({
   }
 })
 
-watch(resolvedUsername, async (u) => {
-  if (!u) return
+const ready = ref(false)
 
-  // грузим профиль User
-  await profile.reload({
-    url: 'frappe.client.get_value',
-    params: {
-      doctype: 'User',
-      filters: { name: u },
-      fieldname: ['name','full_name','first_name','last_name','headline','email']
+async function loadAll(u) {
+  ready.value = false
+  try {
+    // Подтягиваем User
+    await profile.reload({
+      params: {
+        doctype: 'User',
+        filters: { name: u },
+        fieldname: ['name','full_name','first_name','last_name','headline','email']
+      }
+    })
+
+    // Подтягиваем Schoolchildren Profile
+    await schoolProfile.reload({
+      params: {
+        doctype: 'Schoolchildren Profile',
+        filters: { user: u },
+        limit_page_length: 1
+      }
+    })
+
+    // Если есть запись — заполняем форму, иначе оставляем пустой
+    if (schoolProfile.value && Object.keys(schoolProfile.value).length) {
+      fillFormFromProfile()
     }
-  })
-
-  // грузим Schoolchildren Profile
-  await schoolProfile.reload({
-    url: 'frappe.client.get_list',
-    params: {
-      doctype: 'Schoolchildren Profile',
-      filters: { user: u },
-      limit_page_length: 1
-    }
-  })
-
-  if (schoolProfile.data && Object.keys(schoolProfile.data).length) {
-    fillFormFromProfile()
+  } finally {
+    ready.value = true
   }
-})
+}
+
+watch(
+  [() => props.username, () => $user.data && $user.data.username],
+  ([propU, sessU]) => {
+    const u = propU || sessU
+    if (!u) return
+    loadAll(u)
+  },
+  { immediate: true }
+)
+
 
 
 
@@ -283,9 +298,9 @@ function formatTelegram(t){
 }
 
 function isSessionUser() {
-  return $user.data?.username && ($user.data.username === (props.username || '')) ||
-         ($user.data?.username && !$user.data?.username && false) // просто защита от странных кейсов
+  return $user.data?.username === (props.username || $user.data?.username)
 }
+
 
 
 function fillFormFromProfile(){
@@ -318,16 +333,20 @@ async function saveProfile(){
   saving.value = true
   try {
     // Обновление User (имя/фамилия)
-    if(form.value.first_name || form.value.last_name){
-      await createResource({
-        url: 'frappe.client.set_value',
-        params: {
-          doctype: 'User',
-          name: profile.data.name,
-          fieldname: 'full_name',
-          value: `${form.value.first_name || ''} ${form.value.last_name || ''}`.trim()
-        }
-      }).submit()
+    if (form.value.first_name || form.value.last_name) {
+      if (!profile.data?.name) {
+        // если по какой-то причине name не подтянулся — выходим тихо
+      } else {
+        await createResource({
+          url: 'frappe.client.set_value',
+          params: {
+            doctype: 'User',
+            name: profile.data.name,
+            fieldname: 'full_name',
+            value: `${form.value.first_name || ''} ${form.value.last_name || ''}`.trim()
+          }
+        }).submit()
+      }
     }
 
     // Проверяем, есть ли профиль школьника
