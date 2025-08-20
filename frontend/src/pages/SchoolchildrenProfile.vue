@@ -196,20 +196,32 @@ const schoolProfile = createResource({
 
 watch(resolvedUsername, async (u) => {
   if (!u) return
-  // подставляем юзернейм и грузим данные
-  profile.params.filters = { name: u }
-  await profile.reload()
 
-  schoolProfile.params.filters = { user: u }
-  await schoolProfile.reload()
+  // грузим профиль User
+  await profile.reload({
+    url: 'frappe.client.get_value',
+    params: {
+      doctype: 'User',
+      filters: { name: u },
+      fieldname: ['name','full_name','first_name','last_name','headline','email']
+    }
+  })
 
-  // если профиль школьника нашёлся — заполним форму
+  // грузим Schoolchildren Profile
+  await schoolProfile.reload({
+    url: 'frappe.client.get_list',
+    params: {
+      doctype: 'Schoolchildren Profile',
+      filters: { user: u },
+      limit_page_length: 1
+    }
+  })
+
   if (schoolProfile.data && Object.keys(schoolProfile.data).length) {
     fillFormFromProfile()
-  } else {
-    // иначе форма остаётся пустой (как ты и хочешь)
   }
-}, { immediate: true })
+})
+
 
 
 const form = ref({
