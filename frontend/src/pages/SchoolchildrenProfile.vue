@@ -230,7 +230,7 @@ const schoolProfile = createResource({
   url: 'frappe.client.get',
   params: {
     doctype: 'Schoolchildren Profile',
-    filters: { user: effectiveUsername.value },
+    filters: { user:user },
   },
   auto: false,
   transform(data) {
