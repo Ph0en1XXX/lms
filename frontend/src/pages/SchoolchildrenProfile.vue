@@ -52,7 +52,7 @@
             </div>
 
             <div>
-              <b>ЕГЭ, планируется:</b> {{ (schoolProfile.data.exams) || '-' }}
+              <b>ЕГЭ, планируется:</b> {{ (schoolProfile.data.exams || []).join(', ') || '-' }}
             </div>
 
             <div>
@@ -431,14 +431,16 @@ async function saveProfile() {
       dreams: form.value.dreams,
       last_updated: new Date().toISOString(),
     };
-    console.log('[DEBUG] Сохранение Schoolchildren Profile:', { docname, payload });
+    console.log('[DEBUG] Сохранение Schoolchildren Profile (payload):', { docname, payload });
 
     if (docname) {
+      // Если запись существует, обновляем её
       await createResource({
         url: 'frappe.client.save',
-        params: { doc: { ...schoolProfile.value, ...payload } },
+        params: { doc: { name: docname, ...payload } },
       }).submit();
     } else {
+      // Если записи нет, создаём новую
       await createResource({
         url: 'frappe.client.insert',
         params: { doc: payload },
@@ -460,7 +462,6 @@ async function saveProfile() {
     saving.value = false;
   }
 }
-
 const schoolQuery = ref('');
 const schoolResults = ref([]);
 
