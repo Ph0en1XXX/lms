@@ -409,7 +409,7 @@ async function saveProfile() {
       }).submit();
     }
     console.log('[DEBUG] Schoolprofile:', { schoolProfile});
-    let docname = schoolProfile.value?.name;
+    let docname = schoolProfile.data?.name;
     let payload = {
       doctype: 'Schoolchildren Profile',
       user: profile.data?.name,
