@@ -521,7 +521,7 @@ watch(
 
 watch(
   () => profile.data,
-  (newData, oldData) {
+  (newData, oldData) => {
     console.log('[DEBUG] Изменение profile.data:', { old: oldData, new: newData });
     if (newData) {
       console.log('[DEBUG] Запуск schoolProfile.reload()');
@@ -532,7 +532,7 @@ watch(
 
 watch(
   () => schoolProfile.data,
-  (newData, oldData) {
+  (newData, oldData) => {
     console.log('[DEBUG] Изменение schoolProfile.data:', { old: oldData, new: newData });
     if (newData) {
       console.log('[DEBUG] Заполнение формы из schoolProfile');
