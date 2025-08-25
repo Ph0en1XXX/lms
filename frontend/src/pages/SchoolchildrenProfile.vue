@@ -350,23 +350,22 @@ function formatTelegram(t) {
 }
 
 function fillFormFromProfile() {
-  const sp = schoolProfile.value;
-  console.log('[DEBUG] Заполнение формы:', { schoolProfile: sp, profile: profile.data });
-  form.value.first_name = sp?.first_name || profile.data?.first_name || '';
-  form.value.last_name = sp?.last_name || profile.data?.last_name || '';
-  form.value.middle_name = sp?.middle_name || '';
-  form.value.birth_date = sp?.birth_date || '';
-  form.value.school = sp?.school || '';
-  form.value.school_name = sp?.school_name || '';
-  form.value.grade = sp?.grade || '';
-  form.value.phone = sp?.phone || '';
-  form.value.email_private = sp?.email_private || '';
-  form.value.telegram = sp?.telegram || '';
-  form.value.exams = sp?.exams ? sp.exams.map(e => e.exam_subject) : [];
-  form.value.learn_subjects = sp?.learn_subjects ? sp.learn_subjects.map(s => s.subject) : [];
-  form.value.interests = sp?.interests || '';
-  form.value.about_me = sp?.about_me || '';
-  form.value.dreams = sp?.dreams || '';
+  console.log('[DEBUG] Заполнение формы:', { schoolProfile: schoolProfile.data, profile: profile.data });
+  form.value.first_name = schoolProfile.data?.first_name || profile.data?.first_name || '';
+  form.value.last_name = schoolProfile.data?.last_name || profile.data?.last_name || '';
+  form.value.middle_name = schoolProfile.data?.middle_name || '';
+  form.value.birth_date = schoolProfile.data?.birth_date || '';
+  form.value.school = schoolProfile.data?.school || '';
+  form.value.school_name = schoolProfile.data?.school_name || '';
+  form.value.grade = schoolProfile.data?.grade || '';
+  form.value.phone = schoolProfile.data?.phone || '';
+  form.value.email_private = schoolProfile.data?.email_private || '';
+  form.value.telegram = schoolProfile.data?.telegram || '';
+  form.value.exams = schoolProfile.data?.exams ? schoolProfile.data?.exams.map(e => e.exam_subject) : [];
+  form.value.learn_subjects = schoolProfile.data?.learn_subjects ? schoolProfile.data?.learn_subjects.map(s => s.subject) : [];
+  form.value.interests = schoolProfile.data?.interests || '';
+  form.value.about_me = schoolProfile.data?.about_me || '';
+  form.value.dreams = schoolProfile.data?.dreams || '';
 }
 
 function toggleEdit() {
