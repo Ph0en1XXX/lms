@@ -4,7 +4,7 @@
     <div v-else-if="profile.error">
       <p class="text-red-500">Ошибка загрузки профиля: {{ profile.error.message }}</p>
     </div>
-    <div v-else-if="profile.data && schoolProfile.data">
+    <div v-else-if="profile.data">
       <header class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5">
         <Breadcrumbs class="h-7" :items="breadcrumbs" />
       </header>
@@ -27,45 +27,56 @@
 
         <!-- VIEW MODE -->
         <div v-if="!editMode" class="mt-4 space-y-3">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            <div>
-              <b>Фамилия:</b> {{ schoolProfile.value?.last_name || '-' }}<br/>
-              <b>Имя:</b> {{ schoolProfile.value?.first_name || '-' }}<br/>
-              <b>Отчество:</b> {{ schoolProfile.value?.middle_name || '-' }}<br/>
-              <b>Дата рождения:</b> {{ formattedDate(schoolProfile.value?.birth_date) || '-' }}
+          <div v-if="schoolProfile.loading">
+            <p>Загрузка данных профиля школьника...</p>
+          </div>
+          <div v-else-if="schoolProfile.error">
+            <p class="text-red-500">Ошибка загрузки данных школьника: {{ schoolProfile.error.message }}</p>
+          </div>
+          <div v-else-if="schoolProfile.data">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <b>Фамилия:</b> {{ schoolProfile.data.last_name || '-' }}<br/>
+                <b>Имя:</b> {{ schoolProfile.data.first_name || '-' }}<br/>
+                <b>Отчество:</b> {{ schoolProfile.data.middle_name || '-' }}<br/>
+                <b>Дата рождения:</b> {{ formattedDate(schoolProfile.data.birth_date) || '-' }}
+              </div>
+              <div>
+                <b>Школа:</b> {{ schoolProfile.data.school_name || schoolProfile.data.school || '-' }}<br/>
+                <b>Класс:</b> {{ schoolProfile.data.grade || '-' }}<br/>
+                <b>Телефон:</b> {{ maskPrivate(schoolProfile.data.phone) }}<br/>
+                <b>Email (приватный):</b> {{ maskPrivate(schoolProfile.data.email_private) }}<br/>
+                <b>Telegram:</b>
+                <a v-if="schoolProfile.data.telegram" :href="formatTelegram(schoolProfile.data.telegram)" target="_blank">{{ schoolProfile.data.telegram }}</a>
+              </div>
             </div>
+
             <div>
-              <b>Школа:</b> {{ schoolProfile.value?.school_name || schoolProfile.value?.school || '-' }}<br/>
-              <b>Класс:</b> {{ schoolProfile.value?.grade || '-' }}<br/>
-              <b>Телефон:</b> {{ maskPrivate(schoolProfile.value?.phone) }}<br/>
-              <b>Email (приватный):</b> {{ maskPrivate(schoolProfile.value?.email_private) }}<br/>
-              <b>Telegram:</b>
-              <a v-if="schoolProfile.value?.telegram" :href="formatTelegram(schoolProfile.value.telegram)" target="_blank">{{ schoolProfile.value.telegram }}</a>
+              <b>ЕГЭ, планируется:</b> {{ (schoolProfile.data.exams || []).map(e => e.exam_subject).join(', ') || '-' }}
+            </div>
+
+            <div>
+              <b>Чему хочется научиться:</b> {{ (schoolProfile.data.learn_subjects || []).map(s => s.subject).join(', ') || '-' }}
+            </div>
+
+            <div>
+              <b>Коротко о интересах:</b>
+              <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.data.interests || '-' }}</div>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-4">
+              <div>
+                <b>Коротко о себе:</b>
+                <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.data.about_me || '-' }}</div>
+              </div>
+              <div>
+                <b>Коротко о мечтах:</b>
+                <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.data.dreams || '-' }}</div>
+              </div>
             </div>
           </div>
-
-          <div>
-            <b>ЕГЭ, планируется:</b> {{ (schoolProfile.value?.exams || []).map(e => e.exam_subject).join(', ') || '-' }}
-          </div>
-
-          <div>
-            <b>Чему хочется научиться:</b> {{ (schoolProfile.value?.learn_subjects || []).map(s => s.subject).join(', ') || '-' }}
-          </div>
-
-          <div>
-            <b>Коротко о интересах:</b>
-            <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.value?.interests || '-' }}</div>
-          </div>
-
-          <div class="grid md:grid-cols-2 gap-4">
-            <div>
-              <b>Коротко о себе:</b>
-              <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.value?.about_me || '-' }}</div>
-            </div>
-            <div>
-              <b>Коротко о мечтах:</b>
-              <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.value?.dreams || '-' }}</div>
-            </div>
+          <div v-else>
+            <p>Данные профиля школьника не найдены.</p>
           </div>
         </div>
 
@@ -226,8 +237,8 @@ const schoolProfile = createResource({
     let doc = data || {};
     console.log('[DEBUG] Данные schoolProfile до трансформации:', doc);
     try {
-      doc.exams = doc.exams ? doc.exams.map(e => ({ exam_subject: e.exam_subject })) : [];
-      doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.map(s => ({ subject: s.subject })) : [];
+      doc.exams = doc.exams ? doc.exams.map(e => e.exam_subject) : [];
+      doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.map(s => s.subject) : [];
     } catch (e) {
       console.error('[DEBUG] Ошибка трансформации данных:', e);
       doc.exams = [];
@@ -378,12 +389,9 @@ async function saveProfile() {
   console.log('[DEBUG] Сохранение профиля:', { form: form.value });
   saving.value = true;
   try {
-    // Валидация exams
     if (!validateExams(form.value.exams)) {
       throw new Error('Выбранные предметы ЕГЭ не соответствуют допустимым значениям: ' + form.value.exams.join(', '));
     }
-
-    // Валидация learn_subjects
     if (!validateLearnSubjects(form.value.learn_subjects)) {
       throw new Error('Выбранные предметы для изучения не соответствуют допустимым значениям: ' + form.value.learn_subjects.join(', '));
     }
@@ -416,8 +424,8 @@ async function saveProfile() {
       phone: form.value.phone,
       email_private: form.value.email_private,
       telegram: form.value.telegram,
-      exams: form.value.exams.map(exam => ({ exam_subject: exam })), // Формат для Table MultiSelect
-      learn_subjects: form.value.learn_subjects.map(subject => ({ subject })), // Формат для Table MultiSelect
+      exams: form.value.exams.map(exam => ({ exam_subject: exam })),
+      learn_subjects: form.value.learn_subjects.map(subject => ({ subject })),
       interests: form.value.interests,
       about_me: form.value.about_me,
       dreams: form.value.dreams,
@@ -513,15 +521,22 @@ watch(
 
 watch(
   () => profile.data,
-  (newData) => {
-    console.log('[DEBUG] Изменение profile.data:', newData);
+  (newData, oldData) {
+    console.log('[DEBUG] Изменение profile.data:', { old: oldData, new: newData });
     if (newData) {
       console.log('[DEBUG] Запуск schoolProfile.reload()');
       schoolProfile.reload();
-      if (schoolProfile.value && Object.keys(schoolProfile.value).length) {
-        console.log('[DEBUG] Заполнение формы из schoolProfile');
-        fillFormFromProfile();
-      }
+    }
+  }
+);
+
+watch(
+  () => schoolProfile.data,
+  (newData, oldData) {
+    console.log('[DEBUG] Изменение schoolProfile.data:', { old: oldData, new: newData });
+    if (newData) {
+      console.log('[DEBUG] Заполнение формы из schoolProfile');
+      fillFormFromProfile();
     }
   }
 );
