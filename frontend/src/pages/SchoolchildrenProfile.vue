@@ -52,7 +52,7 @@
             </div>
 
             <div>
-              <b>ЕГЭ, планируется:</b> {{ (schoolProfile.data.exams || []).map(e => e.exam_subject).join(', ') || '-' }}
+              <b>ЕГЭ, планируется:</b> {{ (schoolProfile.data.exams) || '-' }}
             </div>
 
             <div>
