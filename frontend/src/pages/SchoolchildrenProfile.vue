@@ -1,7 +1,9 @@
 <template>
   <div>
     <NoPermission v-if="!$user.data" />
-
+    <div v-else-if="profile.error">
+      <p class="text-red-500">Ошибка загрузки профиля: {{ profile.error.message }}</p>
+    </div>
     <div v-else-if="profile.data">
       <header class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5">
         <Breadcrumbs class="h-7" :items="breadcrumbs" />
@@ -13,7 +15,7 @@
             <h2 class="mt-2 text-3xl font-semibold text-ink-gray-9">{{ displayName }}</h2>
             <div class="mt-2 text-base text-ink-gray-7">{{ profile.data.headline || '' }}</div>
           </div>
-          <div class="ml-auto" v-if="$user.data && profile.data && isSessionUser()">
+          <div class="ml-auto" v-if="$user.data && isSessionUser()">
             <Button @click="toggleEdit()">
               <template #prefix>
                 <Edit class="w-4 h-4 stroke-1.5 text-ink-gray-7" />
@@ -22,11 +24,6 @@
             </Button>
           </div>
         </div>
-
-        <!-- Убрана кнопка About -->
-        <!-- <div class="mt-6">
-          <TabButtons class="inline-block" :buttons="[{label:'About'}]" v-model="activeTab" />
-        </div> -->
 
         <!-- VIEW MODE -->
         <div v-if="!editMode" class="mt-4 space-y-3">
@@ -142,37 +139,106 @@
         </div>
       </div>
     </div>
+    <div v-else>
+      <p>Загрузка профиля...</p>
+    </div>
   </div>
 </template>
 
 <script setup>
-import { Breadcrumbs, createResource, Button, TabButtons } from 'frappe-ui'
-import { computed, inject, watch, ref, onMounted, watchEffect } from 'vue'
-import { sessionStore } from '@/stores/session'
-import { Edit } from 'lucide-vue-next'
+import { ref, computed, inject, watch, onMounted } from 'vue';
+import { Breadcrumbs, createResource, Button, Input, DatePicker, Select, Textarea } from 'frappe-ui';
+import { sessionStore } from '@/stores/session';
+import NoPermission from '@/components/NoPermission.vue';
+import { Edit } from 'lucide-vue-next';
+import { convertToTitleCase, updateDocumentTitle } from '@/utils';
 import debounce from 'lodash/debounce';
-import NoPermission from '@/components/NoPermission.vue'
-import { convertToTitleCase, updateDocumentTitle } from '@/utils'
 
-//<!--=======================================-->
+const { user } = sessionStore();
+const $user = inject('$user');
 
-const { user } = sessionStore()
-const $user = inject('$user')
-console.log('Имя пользователя сессии:', $user.data?.username);
+// Логирование инициализации
+console.log('[DEBUG] Инициализация компонента:', {
+  user: user,
+  $user: $user.data,
+  username: $user.data?.username,
+});
 
-const editMode = ref(false)
-const saving = ref(false)
+const props = defineProps({
+  username: {
+    type: String,
+    required: false,
+    default: () => {
+      console.log('[DEBUG] Установка props.username:', $user.data?.username || '');
+      return $user.data?.username || '';
+    },
+  },
+});
+
+const editMode = ref(false);
+const saving = ref(false);
 
 const examOptions = [
-  'Русский язык','Математика(базовый)','Математика(профильный)','Физика','Химия','Информатика',
-  'Биология','История','География','Английский язык','Немецкий язык','Французский язык','Испанский язык',
-  'Китайский язык','Обществознание','Литература'
-]
+  'Русский язык', 'Математика(базовый)', 'Математика(профильный)', 'Физика', 'Химия', 'Информатика',
+  'Биология', 'История', 'География', 'Английский язык', 'Немецкий язык', 'Французский язык', 'Испанский язык',
+  'Китайский язык', 'Обществознание', 'Литература'
+];
 
 const learnOptions = [
-  'Программирование','Дизайн','Актерское мастерство','Риторика','Робототехника','Иностранные языки',
-  'Математика углубленно','Физика углубленно'
-]
+  'Программирование', 'Дизайн', 'Актерское мастерство', 'Риторика', 'Робототехника', 'Иностранные языки',
+  'Математика углубленно', 'Физика углубленно'
+];
+
+const profile = createResource({
+  url: 'frappe.client.get',
+  makeParams(values) {
+    const username = props.username || $user.data?.username || '';
+    console.log('[DEBUG] Запрос profile:', { doctype: 'User', filters: { username } });
+    return {
+      doctype: 'User',
+      filters: { username },
+    };
+  },
+  onSuccess(data) {
+    console.log('[DEBUG] Профиль загружен:', data);
+  },
+  onError(error) {
+    console.error('[DEBUG] Ошибка загрузки профиля:', error);
+    window.frappe?.msgprint({
+      title: 'Ошибка',
+      message: 'Не удалось загрузить профиль пользователя: ' + (error.message || 'Неизвестная ошибка'),
+      indicator: 'red',
+    });
+  },
+});
+
+const schoolProfile = createResource({
+  url: 'frappe.client.get',
+  params: {
+    doctype: 'Schoolchildren Profile',
+    filters: { user: props.username || $user.data?.username || '' },
+  },
+  auto: false,
+  transform(data) {
+    let doc = data || {};
+    console.log('[DEBUG] Данные schoolProfile до трансформации:', doc);
+    try { doc.exams = JSON.parse(doc.exams) } catch(e) { doc.exams = doc.exams ? doc.exams.split(',').map(s => s.trim()) : []; }
+    try { doc.learn_subjects = JSON.parse(doc.learn_subjects) } catch(e) { doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.split(',').map(s => s.trim()) : []; }
+    console.log('[DEBUG] Данные schoolProfile после трансформации:', doc);
+    return doc;
+  },
+  onSuccess(data) {
+    console.log('[DEBUG] Профиль школьника загружен:', data);
+  },
+  onError(error) {
+    console.error('[DEBUG] Ошибка загрузки профиля школьника:', error);
+    window.frappe?.msgprint({
+      title: 'Ошибка',
+      message: 'Не удалось загрузить профиль школьника: ' + (error.message || 'Неизвестная ошибка'),
+      indicator: 'red',
+    });
+  },
+});
 
 const form = ref({
   first_name: '',
@@ -190,200 +256,252 @@ const form = ref({
   interests: '',
   about_me: '',
   dreams: ''
-})
-
-const props = defineProps({
-  username: {
-    type: String,
-    required: false,
-    default: () => $user.data?.username || '',
-  },
 });
-
-//<!--=======================================-->
-
-onMounted(() => {
-	if ($user.data) profile.reload()
-  if (schoolProfile.value && Object.keys(schoolProfile.value).length) {
-    fillFormFromProfile()
-  }
-  console.log('Props username:', props.username);
-  console.log('Имя пользователя сессии:', $user.data?.username);
-  console.log('Загруженный профиль:', profile.data);
-})
-
-const profile = createResource({
-	url: 'frappe.client.get',
-	makeParams(values) {
-		return {
-			doctype: 'User',
-			filters: {
-        username: props.username || $user.data?.username || '',
-      }
-		}
-	},
-  onError(error) {
-    console.error('Ошибка загрузки:', error);
-    window.frappe?.msgprint({
-      title: 'Ошибка',
-      message: 'Не удалось загрузить данные',
-      indicator: 'red',
-    });
-  },
-});
-
-const schoolProfile = createResource({
-  url: 'frappe.client.get',
-  params: {
-    doctype: 'Schoolchildren Profile',
-    filters: { user: props.username || $user.data?.username || '' },
-  },
-  auto: false, // Не загружать автоматически, пока profile не готов
-  transform(data) {
-    let doc = data || {};
-    try { doc.exams = JSON.parse(doc.exams) } catch(e) { doc.exams = doc.exams ? doc.exams.split(',').map(s => s.trim()) : []; }
-    try { doc.learn_subjects = JSON.parse(doc.learn_subjects) } catch(e) { doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.split(',').map(s => s.trim()) : []; }
-    return doc;
-  },
-  onError(error) {
-    console.error('Ошибка загрузки:', error);
-    window.frappe?.msgprint({
-      title: 'Ошибка',
-      message: 'Не удалось загрузить данные',
-      indicator: 'red',
-    });
-  },
-});
-
-watch(
-  () => props.username,
-  () => {
-    profile.reload();
-  }
-);
-
-watch(
-  () => profile.data,
-  () => {
-    if (profile.data) {
-      schoolProfile.reload();
-    }
-  }
-);
-
-const isSessionUser = () => {
-  return $user.data?.username === (props.username || $user.data?.username);
-};
-
-//<!--=======================================-->
 
 const breadcrumbs = computed(() => {
-	let crumbs = [
-		{
-			label: 'People',
-		},
-		{
-			label: profile.data?.full_name,
-			route: {
-				name: 'Profile',
+  const crumbs = [
+    {
+      label: 'People',
+      route: { name: 'People' },
+    },
+    {
+      label: profile.data?.full_name || 'Профиль',
+      route: {
+        name: 'Profile',
         params: {
           username: props.username || $user.data?.username || '',
-        }
-			},
-		},
-	]
-	return crumbs
-})
+        },
+      },
+    },
+  ];
+  console.log('[DEBUG] Хлебные крошки:', crumbs);
+  return crumbs;
+});
 
 const pageMeta = computed(() => {
-	return {
-		title: profile.data?.full_name,
-		description: profile.data?.headline,
-	}
-})
+  const meta = {
+    title: profile.data?.full_name || 'Профиль',
+    description: profile.data?.headline || '',
+  };
+  console.log('[DEBUG] Мета-данные страницы:', meta);
+  return meta;
+});
 
-updateDocumentTitle(pageMeta)
+const displayName = computed(() => {
+  const name = profile.data?.full_name || `${form.value.first_name || ''} ${form.value.last_name || ''}`;
+  console.log('[DEBUG] Отображаемое имя:', name);
+  return name;
+});
 
-//<!--=========Additional Functions==============================-->
+const isSessionUser = () => {
+  const sessionUser = $user.data?.username;
+  const profileUser = props.username || profile.data?.username;
+  const isSession = sessionUser === profileUser;
+  console.log('[DEBUG] Проверка isSessionUser:', { sessionUser, profileUser, isSession });
+  return isSession;
+};
 
-function formattedDate(d){
-  if(!d) return ''
-  try{
-    return new Date(d).toLocaleDateString('ru-RU')
-  }catch(e){ return d }
-}
-
-function maskPrivate(val){
-  if(!val) return '-'
-  if(val.includes('@')){
-    const parts = val.split('@')
-    return parts[0].slice(0,1) + '***@' + parts[1]
-  }
-  return val.slice(0,3) + '***' + val.slice(-2)
-}
-
-function formatTelegram(t){
-  if(!t) return ''
-  if(t.startsWith('t.me/') || t.startsWith('https://t.me/')) return (t.startsWith('http')? t : 'https://' + t)
-  return 'https://t.me/' + t.replace(/^@/, '')
-}
-
-//<!--============Form===========================-->
-
-function fillFormFromProfile(){
-  const sp = schoolProfile.value
-  form.value.first_name = sp.first_name || profile.data?.first_name || ''
-  form.value.last_name = sp.last_name || profile.data?.last_name || ''
-  form.value.middle_name = sp.middle_name || ''
-  form.value.birth_date = sp.birth_date || ''
-  form.value.school = sp.school || ''
-  form.value.school_name = sp.school_name || ''
-  form.value.grade = sp.grade || ''
-  form.value.phone = sp.phone || ''
-  form.value.email_private = sp.email_private || ''
-  form.value.telegram = sp.telegram || ''
-  form.value.exams = Array.isArray(sp.exams) ? [...sp.exams] : (sp.exams||[])
-  form.value.learn_subjects = Array.isArray(sp.learn_subjects) ? [...sp.learn_subjects] : (sp.learn_subjects||[])
-  form.value.interests = sp.interests || ''
-  form.value.about_me = sp.about_me || ''
-  form.value.dreams = sp.dreams || ''
-}
-
-function toggleEdit(){
-  editMode.value = !editMode.value
-  if(editMode.value) fillFormFromProfile()
-}
-
-//<!--=========School Functions==============================-->
-
-const schoolQuery = ref('')
-const schoolResults = ref([])
-
-async function searchSchool(q){
-  if(!q) { schoolResults.value = []; return }
+function formattedDate(d) {
+  if (!d) return '';
   try {
+    return new Date(d).toLocaleDateString('ru-RU');
+  } catch (e) {
+    console.error('[DEBUG] Ошибка форматирования даты:', e, { date: d });
+    return d;
+  }
+}
+
+function maskPrivate(val) {
+  if (!val) return '-';
+  if (val.includes('@')) {
+    const parts = val.split('@');
+    return parts[0].slice(0, 1) + '***@' + parts[1];
+  }
+  return val.slice(0, 3) + '***' + val.slice(-2);
+}
+
+function formatTelegram(t) {
+  if (!t) return '';
+  if (t.startsWith('t.me/') || t.startsWith('https://t.me/')) return (t.startsWith('http') ? t : 'https://' + t);
+  return 'https://t.me/' + t.replace(/^@/, '');
+}
+
+function fillFormFromProfile() {
+  const sp = schoolProfile.value;
+  console.log('[DEBUG] Заполнение формы:', { schoolProfile: sp, profile: profile.data });
+  form.value.first_name = sp.first_name || profile.data?.first_name || '';
+  form.value.last_name = sp.last_name || profile.data?.last_name || '';
+  form.value.middle_name = sp.middle_name || '';
+  form.value.birth_date = sp.birth_date || '';
+  form.value.school = sp.school || '';
+  form.value.school_name = sp.school_name || '';
+  form.value.grade = sp.grade || '';
+  form.value.phone = sp.phone || '';
+  form.value.email_private = sp.email_private || '';
+  form.value.telegram = sp.telegram || '';
+  form.value.exams = Array.isArray(sp.exams) ? [...sp.exams] : (sp.exams || []);
+  form.value.learn_subjects = Array.isArray(sp.learn_subjects) ? [...sp.learn_subjects] : (sp.learn_subjects || []);
+  form.value.interests = sp.interests || '';
+  form.value.about_me = sp.about_me || '';
+  form.value.dreams = sp.dreams || '';
+}
+
+function toggleEdit() {
+  editMode.value = !editMode.value;
+  if (editMode.value) fillFormFromProfile();
+  console.log('[DEBUG] Переключение режима редактирования:', { editMode: editMode.value });
+}
+
+async function saveProfile() {
+  console.log('[DEBUG] Сохранение профиля:', { form: form.value });
+  saving.value = true;
+  try {
+    if (form.value.first_name || form.value.last_name) {
+      const fullName = `${form.value.first_name || ''} ${form.value.last_name || ''}`.trim();
+      console.log('[DEBUG] Обновление User.full_name:', { name: profile.data.name, fullName });
+      await createResource({
+        url: 'frappe.client.set_value',
+        params: {
+          doctype: 'User',
+          name: profile.data.name,
+          fieldname: 'full_name',
+          value: fullName,
+        },
+      }).submit();
+    }
+
+    let docname = schoolProfile.value?.name;
+    let payload = {
+      doctype: 'Schoolchildren Profile',
+      user: profile.data.name,
+      first_name: form.value.first_name,
+      last_name: form.value.last_name,
+      middle_name: form.value.middle_name,
+      birth_date: form.value.birth_date,
+      school: form.value.school || '',
+      school_name: form.value.school_name || '',
+      grade: form.value.grade,
+      phone: form.value.phone,
+      email_private: form.value.email_private,
+      telegram: form.value.telegram,
+      exams: JSON.stringify(form.value.exams || []),
+      learn_subjects: JSON.stringify(form.value.learn_subjects || []),
+      interests: form.value.interests,
+      about_me: form.value.about_me,
+      dreams: form.value.dreams,
+      last_updated: new Date().toISOString(),
+    };
+    console.log('[DEBUG] Сохранение Schoolchildren Profile:', { docname, payload });
+
+    if (docname) {
+      await createResource({
+        url: 'frappe.client.set_value',
+        params: {
+          doctype: 'Schoolchildren Profile',
+          name: docname,
+          fieldname: Object.keys(payload),
+          value: undefined,
+        },
+      }).submit().catch((e) => {
+        console.error('[DEBUG] Ошибка set_value для Schoolchildren Profile:', e);
+      });
+      await createResource({
+        url: 'frappe.client.save',
+        params: { doc: { ...schoolProfile.value, ...payload } },
+      }).submit();
+    } else {
+      await createResource({
+        url: 'frappe.client.insert',
+        params: { doc: payload },
+      }).submit();
+    }
+
+    await schoolProfile.reload();
+    editMode.value = false;
+    if (window.frappe && window.frappe.msgprint) window.frappe.msgprint('Профиль сохранён');
+    console.log('[DEBUG] Профиль успешно сохранён');
+  } catch (e) {
+    console.error('[DEBUG] Ошибка при сохранении профиля:', e);
+    if (window.frappe && window.frappe.msgprint) window.frappe.msgprint({
+      title: 'Ошибка',
+      message: (e && e.message) || 'Ошибка при сохранении',
+      indicator: 'red',
+    });
+  } finally {
+    saving.value = false;
+  }
+}
+
+const schoolQuery = ref('');
+const schoolResults = ref([]);
+
+async function searchSchool(q) {
+  if (!q) {
+    schoolResults.value = [];
+    return;
+  }
+  try {
+    console.log('[DEBUG] Поиск школы:', { query: q });
     const res = await createResource({
       url: 'frappe.client.get_list',
       params: {
         doctype: 'School List',
         fields: ['name', 'school_name', 'license_number', 'region'],
         filters: [['school_name', 'like', '%' + q + '%']],
-        limit_page_length: 20
-      }
-    }).submit()
-    schoolResults.value = res || []
-  } catch(e){
-    schoolResults.value = []
+        limit_page_length: 20,
+      },
+    }).submit();
+    schoolResults.value = res || [];
+    console.log('[DEBUG] Результаты поиска школы:', schoolResults.value);
+  } catch (e) {
+    schoolResults.value = [];
+    console.error('[DEBUG] Ошибка поиска школы:', e);
   }
 }
 
-const debouncedSearchSchool = debounce(()=> searchSchool(schoolQuery.value), 300)
+const debouncedSearchSchool = debounce(() => searchSchool(schoolQuery.value), 300);
 
-function selectSchool(s){
-  form.value.school = s.name
-  form.value.school_name = s.school_name
-  schoolResults.value = []
-  schoolQuery.value = s.school_name
+function selectSchool(s) {
+  form.value.school = s.name;
+  form.value.school_name = s.school_name;
+  schoolResults.value = [];
+  schoolQuery.value = s.school_name;
+  console.log('[DEBUG] Выбрана школа:', { school: s });
 }
 
+onMounted(() => {
+  console.log('[DEBUG] Компонент смонтирован:', {
+    propsUsername: props.username,
+    sessionUsername: $user.data?.username,
+    user: user,
+    $user: $user.data,
+  });
+  if ($user.data) {
+    console.log('[DEBUG] Запуск profile.reload()');
+    profile.reload();
+  }
+});
+
+watch(
+  () => props.username,
+  (newUsername, oldUsername) => {
+    console.log('[DEBUG] Изменение props.username:', { old: oldUsername, new: newUsername });
+    profile.reload();
+  }
+);
+
+watch(
+  () => profile.data,
+  (newData) => {
+    console.log('[DEBUG] Изменение profile.data:', newData);
+    if (newData) {
+      console.log('[DEBUG] Запуск schoolProfile.reload()');
+      schoolProfile.reload();
+      if (schoolProfile.value && Object.keys(schoolProfile.value).length) {
+        console.log('[DEBUG] Заполнение формы из schoolProfile');
+        fillFormFromProfile();
+      }
+    }
+  }
+);
 </script>
