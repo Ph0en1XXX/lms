@@ -388,12 +388,12 @@ async function saveProfile() {
   console.log('[DEBUG] Сохранение профиля:', { form: form.value });
   saving.value = true;
   try {
-    if (!validateExams(form.value.exams)) {
-      throw new Error('Выбранные предметы ЕГЭ не соответствуют допустимым значениям: ' + form.value.exams.join(', '));
-    }
-    if (!validateLearnSubjects(form.value.learn_subjects)) {
-      throw new Error('Выбранные предметы для изучения не соответствуют допустимым значениям: ' + form.value.learn_subjects.join(', '));
-    }
+    //if (!validateExams(form.value.exams)) {
+      //throw new Error('Выбранные предметы ЕГЭ не соответствуют допустимым значениям: ' + form.value.exams.join(', '));
+    //}
+    //if (!validateLearnSubjects(form.value.learn_subjects)) {
+      //throw new Error('Выбранные предметы для изучения не соответствуют допустимым значениям: ' + form.value.learn_subjects.join(', '));
+    //}
 
     if (form.value.first_name || form.value.last_name) {
       const fullName = `${form.value.first_name || ''} ${form.value.last_name || ''}`.trim();
