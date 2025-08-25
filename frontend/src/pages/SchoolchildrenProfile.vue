@@ -4,7 +4,7 @@
     <div v-else-if="profile.error">
       <p class="text-red-500">Ошибка загрузки профиля: {{ profile.error.message }}</p>
     </div>
-    <div v-else-if="profile.data">
+    <div v-else-if="profile.data && schoolProfile.data">
       <header class="sticky top-0 z-10 flex items-center justify-between border-b bg-surface-white px-3 py-2.5">
         <Breadcrumbs class="h-7" :items="breadcrumbs" />
       </header>
