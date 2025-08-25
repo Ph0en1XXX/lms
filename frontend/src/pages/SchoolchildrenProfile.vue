@@ -408,6 +408,8 @@ async function saveProfile() {
         },
       }).submit();
     }
+    console.log('[DEBUG] Синхронизация schoolProfile перед сохранением');
+    await schoolProfile.reload();
     console.log('[DEBUG] Schoolprofile:', { schoolProfile});
     let docname = schoolProfile.data?.name;
     let payload = {
