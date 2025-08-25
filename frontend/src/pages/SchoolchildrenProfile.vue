@@ -150,6 +150,7 @@ import { Breadcrumbs, createResource, Button, TabButtons } from 'frappe-ui'
 import { computed, inject, watch, ref, onMounted, watchEffect } from 'vue'
 import { sessionStore } from '@/stores/session'
 import { Edit } from 'lucide-vue-next'
+import debounce from 'lodash/debounce';
 import NoPermission from '@/components/NoPermission.vue'
 import { convertToTitleCase, updateDocumentTitle } from '@/utils'
 
@@ -157,9 +158,7 @@ import { convertToTitleCase, updateDocumentTitle } from '@/utils'
 
 const { user } = sessionStore()
 const $user = inject('$user')
-console.log('Props username:', props.username);
 console.log('Имя пользователя сессии:', $user.data?.username);
-console.log('Загруженный профиль:', profile.data);
 
 const editMode = ref(false)
 const saving = ref(false)
@@ -219,11 +218,19 @@ const profile = createResource({
 		return {
 			doctype: 'User',
 			filters: {
-				username: props.username,
-			},
+        username: props.username || $user.data?.username || '',
+      }
 		}
 	},
-})
+  onError(error) {
+    console.error('Ошибка загрузки:', error);
+    window.frappe?.msgprint({
+      title: 'Ошибка',
+      message: 'Не удалось загрузить данные',
+      indicator: 'red',
+    });
+  },
+});
 
 const schoolProfile = createResource({
   url: 'frappe.client.get',
@@ -237,23 +244,35 @@ const schoolProfile = createResource({
     try { doc.exams = JSON.parse(doc.exams) } catch(e) { doc.exams = doc.exams ? doc.exams.split(',').map(s => s.trim()) : []; }
     try { doc.learn_subjects = JSON.parse(doc.learn_subjects) } catch(e) { doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.split(',').map(s => s.trim()) : []; }
     return doc;
-  }
+  },
+  onError(error) {
+    console.error('Ошибка загрузки:', error);
+    window.frappe?.msgprint({
+      title: 'Ошибка',
+      message: 'Не удалось загрузить данные',
+      indicator: 'red',
+    });
+  },
 });
 
 watch(
-	() => props.username,
-	() => {
-		profile.reload()
-	},
+  () => props.username,
+  () => {
+    profile.reload();
+  }
+);
+
+watch(
+  () => profile.data,
   () => {
     if (profile.data) {
       schoolProfile.reload();
     }
   }
-)
+);
 
 const isSessionUser = () => {
-  return $user.data?.username && profile.data?.username && $user.data.username === (props.username || profile.data.username);
+  return $user.data?.username === (props.username || $user.data?.username);
 };
 
 //<!--=======================================-->
@@ -267,9 +286,9 @@ const breadcrumbs = computed(() => {
 			label: profile.data?.full_name,
 			route: {
 				name: 'Profile',
-				params: {
-					username: $user.doc?.username,
-				},
+        params: {
+          username: props.username || $user.data?.username || '',
+        }
 			},
 		},
 	]
