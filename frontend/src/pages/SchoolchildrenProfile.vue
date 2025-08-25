@@ -388,8 +388,8 @@ async function saveProfile() {
       phone: form.value.phone,
       email_private: form.value.email_private,
       telegram: form.value.telegram,
-      exams: JSON.stringify(form.value.exams || []),
-      learn_subjects: JSON.stringify(form.value.learn_subjects || []),
+      exams: (form.value.exams || []).join(', '), // Преобразуем массив в строку
+      learn_subjects: (form.value.learn_subjects || []).join(', '), // Преобразуем массив в строку
       interests: form.value.interests,
       about_me: form.value.about_me,
       dreams: form.value.dreams,
@@ -398,17 +398,6 @@ async function saveProfile() {
     console.log('[DEBUG] Сохранение Schoolchildren Profile:', { docname, payload });
 
     if (docname) {
-      await createResource({
-        url: 'frappe.client.set_value',
-        params: {
-          doctype: 'Schoolchildren Profile',
-          name: docname,
-          fieldname: Object.keys(payload),
-          value: undefined,
-        },
-      }).submit().catch((e) => {
-        console.error('[DEBUG] Ошибка set_value для Schoolchildren Profile:', e);
-      });
       await createResource({
         url: 'frappe.client.save',
         params: { doc: { ...schoolProfile.value, ...payload } },
