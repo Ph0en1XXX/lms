@@ -168,11 +168,15 @@ const props = defineProps({
   username: {
     type: String,
     required: false,
-    default: () => {
-      console.log('[DEBUG] Установка props.username:', $user.data?.username || '');
-      return $user.data?.username || '';
-    },
+    default: '',
   },
+});
+
+// Computed для определения username с учетом сессии
+const effectiveUsername = computed(() => {
+  const username = props.username || $user.data?.username || '';
+  console.log('[DEBUG] Вычисление effectiveUsername:', { propsUsername: props.username, sessionUsername: $user.data?.username, result: username });
+  return username;
 });
 
 const editMode = ref(false);
@@ -192,7 +196,7 @@ const learnOptions = [
 const profile = createResource({
   url: 'frappe.client.get',
   makeParams(values) {
-    const username = props.username || $user.data?.username || '';
+    const username = effectiveUsername.value;
     console.log('[DEBUG] Запрос profile:', { doctype: 'User', filters: { username } });
     return {
       doctype: 'User',
@@ -216,7 +220,7 @@ const schoolProfile = createResource({
   url: 'frappe.client.get',
   params: {
     doctype: 'Schoolchildren Profile',
-    filters: { user: props.username || $user.data?.username || '' },
+    filters: { user: effectiveUsername.value },
   },
   auto: false,
   transform(data) {
@@ -269,7 +273,7 @@ const breadcrumbs = computed(() => {
       route: {
         name: 'Profile',
         params: {
-          username: props.username || $user.data?.username || '',
+          username: effectiveUsername.value,
         },
       },
     },
@@ -295,7 +299,7 @@ const displayName = computed(() => {
 
 const isSessionUser = () => {
   const sessionUser = $user.data?.username;
-  const profileUser = props.username || profile.data?.username;
+  const profileUser = effectiveUsername.value;
   const isSession = sessionUser === profileUser;
   console.log('[DEBUG] Проверка isSessionUser:', { sessionUser, profileUser, isSession });
   return isSession;
@@ -502,6 +506,20 @@ watch(
         fillFormFromProfile();
       }
     }
+  }
+);
+
+// Обновление фильтров schoolProfile при изменении effectiveUsername
+watch(
+  () => effectiveUsername.value,
+  (newUsername) => {
+    console.log('[DEBUG] Изменение effectiveUsername для schoolProfile:', newUsername);
+    schoolProfile.update({
+      params: {
+        doctype: 'Schoolchildren Profile',
+        filters: { user: newUsername },
+      },
+    });
   }
 );
 </script>
