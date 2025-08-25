@@ -45,11 +45,11 @@
           </div>
 
           <div>
-            <b>ЕГЭ, планируется:</b> {{ (schoolProfile.value?.exams || []).join(', ') || '-' }}
+            <b>ЕГЭ, планируется:</b> {{ (schoolProfile.value?.exams || []).map(e => e.exam_subject).join(', ') || '-' }}
           </div>
 
           <div>
-            <b>Чему хочется научиться:</b> {{ (schoolProfile.value?.learn_subjects || []).join(', ') || '-' }}
+            <b>Чему хочется научиться:</b> {{ (schoolProfile.value?.learn_subjects || []).map(s => s.subject).join(', ') || '-' }}
           </div>
 
           <div>
@@ -172,7 +172,6 @@ const props = defineProps({
   },
 });
 
-// Computed для определения username с учетом сессии
 const effectiveUsername = computed(() => {
   const username = props.username || $user.data?.username || '';
   console.log('[DEBUG] Вычисление effectiveUsername:', { propsUsername: props.username, sessionUsername: $user.data?.username, result: username });
@@ -226,8 +225,14 @@ const schoolProfile = createResource({
   transform(data) {
     let doc = data || {};
     console.log('[DEBUG] Данные schoolProfile до трансформации:', doc);
-    try { doc.exams = JSON.parse(doc.exams) } catch(e) { doc.exams = doc.exams ? doc.exams.split(',').map(s => s.trim()) : []; }
-    try { doc.learn_subjects = JSON.parse(doc.learn_subjects) } catch(e) { doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.split(',').map(s => s.trim()) : []; }
+    try {
+      doc.exams = doc.exams ? doc.exams.map(e => ({ exam_subject: e.exam_subject })) : [];
+      doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.map(s => ({ subject: s.subject })) : [];
+    } catch (e) {
+      console.error('[DEBUG] Ошибка трансформации данных:', e);
+      doc.exams = [];
+      doc.learn_subjects = [];
+    }
     console.log('[DEBUG] Данные schoolProfile после трансформации:', doc);
     return doc;
   },
@@ -263,6 +268,7 @@ const form = ref({
 });
 
 const breadcrumbs = computed(() => {
+  const username = effectiveUsername.value;
   const crumbs = [
     {
       label: 'People',
@@ -270,12 +276,10 @@ const breadcrumbs = computed(() => {
     },
     {
       label: profile.data?.full_name || 'Профиль',
-      route: {
+      route: username ? {
         name: 'Profile',
-        params: {
-          username: effectiveUsername.value,
-        },
-      },
+        params: { username },
+      } : undefined,
     },
   ];
   console.log('[DEBUG] Хлебные крошки:', crumbs);
@@ -292,7 +296,11 @@ const pageMeta = computed(() => {
 });
 
 const displayName = computed(() => {
-  const name = profile.data?.full_name || `${form.value.first_name || ''} ${form.value.last_name || ''}`;
+  if (!profile.data) {
+    console.log('[DEBUG] displayName: profile.data не загружен');
+    return 'Загрузка...';
+  }
+  const name = profile.data?.full_name || `${form.value.first_name || ''} ${form.value.last_name || ''}`.trim();
   console.log('[DEBUG] Отображаемое имя:', name);
   return name;
 });
@@ -333,21 +341,21 @@ function formatTelegram(t) {
 function fillFormFromProfile() {
   const sp = schoolProfile.value;
   console.log('[DEBUG] Заполнение формы:', { schoolProfile: sp, profile: profile.data });
-  form.value.first_name = sp.first_name || profile.data?.first_name || '';
-  form.value.last_name = sp.last_name || profile.data?.last_name || '';
-  form.value.middle_name = sp.middle_name || '';
-  form.value.birth_date = sp.birth_date || '';
-  form.value.school = sp.school || '';
-  form.value.school_name = sp.school_name || '';
-  form.value.grade = sp.grade || '';
-  form.value.phone = sp.phone || '';
-  form.value.email_private = sp.email_private || '';
-  form.value.telegram = sp.telegram || '';
-  form.value.exams = Array.isArray(sp.exams) ? [...sp.exams] : (sp.exams || []);
-  form.value.learn_subjects = Array.isArray(sp.learn_subjects) ? [...sp.learn_subjects] : (sp.learn_subjects || []);
-  form.value.interests = sp.interests || '';
-  form.value.about_me = sp.about_me || '';
-  form.value.dreams = sp.dreams || '';
+  form.value.first_name = sp?.first_name || profile.data?.first_name || '';
+  form.value.last_name = sp?.last_name || profile.data?.last_name || '';
+  form.value.middle_name = sp?.middle_name || '';
+  form.value.birth_date = sp?.birth_date || '';
+  form.value.school = sp?.school || '';
+  form.value.school_name = sp?.school_name || '';
+  form.value.grade = sp?.grade || '';
+  form.value.phone = sp?.phone || '';
+  form.value.email_private = sp?.email_private || '';
+  form.value.telegram = sp?.telegram || '';
+  form.value.exams = sp?.exams ? sp.exams.map(e => e.exam_subject) : [];
+  form.value.learn_subjects = sp?.learn_subjects ? sp.learn_subjects.map(s => s.subject) : [];
+  form.value.interests = sp?.interests || '';
+  form.value.about_me = sp?.about_me || '';
+  form.value.dreams = sp?.dreams || '';
 }
 
 function toggleEdit() {
@@ -356,18 +364,38 @@ function toggleEdit() {
   console.log('[DEBUG] Переключение режима редактирования:', { editMode: editMode.value });
 }
 
+function validateExams(exams) {
+  console.log('[DEBUG] Валидация exams:', { exams, validOptions: examOptions });
+  return exams.every(exam => examOptions.includes(exam));
+}
+
+function validateLearnSubjects(subjects) {
+  console.log('[DEBUG] Валидация learn_subjects:', { subjects, validOptions: learnOptions });
+  return subjects.every(subject => learnOptions.includes(subject));
+}
+
 async function saveProfile() {
   console.log('[DEBUG] Сохранение профиля:', { form: form.value });
   saving.value = true;
   try {
+    // Валидация exams
+    if (!validateExams(form.value.exams)) {
+      throw new Error('Выбранные предметы ЕГЭ не соответствуют допустимым значениям: ' + form.value.exams.join(', '));
+    }
+
+    // Валидация learn_subjects
+    if (!validateLearnSubjects(form.value.learn_subjects)) {
+      throw new Error('Выбранные предметы для изучения не соответствуют допустимым значениям: ' + form.value.learn_subjects.join(', '));
+    }
+
     if (form.value.first_name || form.value.last_name) {
       const fullName = `${form.value.first_name || ''} ${form.value.last_name || ''}`.trim();
-      console.log('[DEBUG] Обновление User.full_name:', { name: profile.data.name, fullName });
+      console.log('[DEBUG] Обновление User.full_name:', { name: profile.data?.name, fullName });
       await createResource({
         url: 'frappe.client.set_value',
         params: {
           doctype: 'User',
-          name: profile.data.name,
+          name: profile.data?.name,
           fieldname: 'full_name',
           value: fullName,
         },
@@ -377,7 +405,7 @@ async function saveProfile() {
     let docname = schoolProfile.value?.name;
     let payload = {
       doctype: 'Schoolchildren Profile',
-      user: profile.data.name,
+      user: profile.data?.name,
       first_name: form.value.first_name,
       last_name: form.value.last_name,
       middle_name: form.value.middle_name,
@@ -388,8 +416,8 @@ async function saveProfile() {
       phone: form.value.phone,
       email_private: form.value.email_private,
       telegram: form.value.telegram,
-      exams: (form.value.exams || []).join(', '), // Преобразуем массив в строку
-      learn_subjects: (form.value.learn_subjects || []).join(', '), // Преобразуем массив в строку
+      exams: form.value.exams.map(exam => ({ exam_subject: exam })), // Формат для Table MultiSelect
+      learn_subjects: form.value.learn_subjects.map(subject => ({ subject })), // Формат для Table MultiSelect
       interests: form.value.interests,
       about_me: form.value.about_me,
       dreams: form.value.dreams,
@@ -498,7 +526,6 @@ watch(
   }
 );
 
-// Обновление фильтров schoolProfile при изменении effectiveUsername
 watch(
   () => effectiveUsername.value,
   (newUsername) => {
