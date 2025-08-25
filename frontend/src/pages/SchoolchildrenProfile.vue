@@ -430,7 +430,7 @@ async function saveProfile() {
       interests: form.value.interests,
       about_me: form.value.about_me,
       dreams: form.value.dreams,
-      last_updated: new Date().toISOString(),
+      modified: new Date().toISOString(),
     };
     console.log('[DEBUG] Сохранение Schoolchildren Profile (payload):', { docname, payload });
 
