@@ -445,7 +445,7 @@ async function saveProfile() {
     if (docname) {
       // Если запись существует, обновляем её
       await createResource({
-        url: 'frappe.client.save',
+        url: 'frappe.client.update',
         params: { doc: { name: docname, ...payload } },
       }).submit();
     } else {
