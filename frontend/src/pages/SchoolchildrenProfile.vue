@@ -409,16 +409,17 @@ async function saveProfile() {
       }).submit();
     }
     console.log('[DEBUG] Синхронизация schoolProfile перед сохранением');
+    let docname = '';
 
     try {
         await schoolProfile.reload();
         console.log('[DEBUG] Schoolprofile:', { schoolProfile });
+        docname = schoolProfile?.data?.name
+        console.log('[DEBUG] Выбранное имя документа:', docname);
     } catch (error) {
         console.log('[DEBUG] Ошибка загрузки schoolProfile, продолжаем с profile:', error.message);
     }
-    
-    let docname = schoolProfile?.data?.name || profile?.data?.name;
-    console.log('[DEBUG] Выбранное имя документа:', docname);
+
     let payload = {
       doctype: 'Schoolchildren Profile',
       user: profile.data?.name,
