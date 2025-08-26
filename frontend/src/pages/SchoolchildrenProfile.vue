@@ -99,7 +99,7 @@
               <div v-if="schoolResults.length" class="border rounded mt-1 max-h-44 overflow-auto bg-white">
                 <div
                   v-for="s in schoolResults"
-                  :key="s.name"
+                  :key="s.school"
                   class="p-2 cursor-pointer hover:bg-surface-gray-2"
                   @click="selectSchool(s)"
                 >
