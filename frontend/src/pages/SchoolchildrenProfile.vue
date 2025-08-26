@@ -42,7 +42,7 @@
                 <b>Дата рождения:</b> {{ formattedDate(schoolProfile.data.birth_date) || '-' }}
               </div>
               <div>
-                <b>Школа:</b> {{ schoolProfile.data.school_name || schoolProfile.data.school || '-' }}<br/>
+                <b>Школа:</b> {{ schoolProfile.data.school || '-' }}<br/>
                 <b>Класс:</b> {{ schoolProfile.data.grade || '-' }}<br/>
                 <b>Телефон:</b> {{ maskPrivate(schoolProfile.data.phone) }}<br/>
                 <b>Email (приватный):</b> {{ maskPrivate(schoolProfile.data.email_private) }}<br/>
@@ -266,7 +266,7 @@ const form = ref({
   middle_name: '',
   birth_date: '',
   school: '',
-  school_name: '',
+  //school_name: '',
   grade: '',
   phone: '',
   email_private: '',
@@ -356,7 +356,7 @@ function fillFormFromProfile() {
   form.value.middle_name = schoolProfile.data?.middle_name || '';
   form.value.birth_date = schoolProfile.data?.birth_date || '';
   form.value.school = schoolProfile.data?.school || '';
-  form.value.school_name = schoolProfile.data?.school_name || '';
+  //form.value.school_name = schoolProfile.data?.school_name || '';
   form.value.grade = schoolProfile.data?.grade || '';
   form.value.phone = schoolProfile.data?.phone || '';
   form.value.email_private = schoolProfile.data?.email_private || '';
@@ -420,7 +420,7 @@ async function saveProfile() {
       middle_name: form.value.middle_name,
       birth_date: form.value.birth_date,
       school: form.value.school || '',
-      school_name: form.value.school_name || '',
+      //school_name: form.value.school_name || '',
       grade: form.value.grade,
       phone: form.value.phone,
       email_private: form.value.email_private,
@@ -494,9 +494,9 @@ const debouncedSearchSchool = debounce(() => searchSchool(schoolQuery.value), 30
 
 function selectSchool(s) {
   form.value.school = s.name;
-  form.value.school_name = s.school_name;
+  //form.value.school_name = s.school_name;
   schoolResults.value = [];
-  schoolQuery.value = s.school_name;
+  schoolQuery.value = s.school;
   console.log('[DEBUG] Выбрана школа:', { school: s });
 }
 
