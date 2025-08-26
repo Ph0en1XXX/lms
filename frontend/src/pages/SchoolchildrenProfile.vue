@@ -445,8 +445,11 @@ async function saveProfile() {
     if (docname) {
       // Если запись существует, обновляем её
       await createResource({
-        url: 'frappe.client.set_value',
-        params: { doc: { name: docname, ...payload } },
+        url: 'frappe.client.save',
+        params: { doc: { 
+          ...schoolProfile.data, // берём актуальный документ
+          ...payload             // перезаписываем нужные поля
+        }},
       }).submit();
     } else {
       // Если записи нет, создаём новую
