@@ -411,7 +411,7 @@ async function saveProfile() {
     console.log('[DEBUG] Синхронизация schoolProfile перед сохранением');
     await schoolProfile.reload();
     console.log('[DEBUG] Schoolprofile:', { schoolProfile});
-    let docname = schoolProfile.data?.name;
+    let docname = schoolProfile.data?.name || profile.data?.name;
     let payload = {
       doctype: 'Schoolchildren Profile',
       user: profile.data?.name,
