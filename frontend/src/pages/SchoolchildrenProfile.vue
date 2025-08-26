@@ -56,7 +56,7 @@
             </div>
 
             <div>
-              <b>Чему хочется научиться:</b> {{ (schoolProfile.data.learn_subjects || []).join(', ') || '-' }}
+              <b>Чему хочется научиться:</b> {{ schoolProfile.data.learn_subjects}}
             </div>
 
             <div>
@@ -476,9 +476,9 @@ async function searchSchool(q) {
     const res = await createResource({
       url: 'frappe.client.get_list',
       params: {
-        doctype: 'School List',
-        fields: ['name', 'school_name', 'license_number', 'region'],
-        filters: [['school_name', 'like', '%' + q + '%']],
+        doctype: 'Schools',
+        fields: ['school', 'address'],
+        filters: [['school', 'like', '%' + q + '%']],
         limit_page_length: 20,
       },
     }).submit();
