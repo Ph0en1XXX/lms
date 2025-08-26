@@ -56,7 +56,7 @@
             </div>
 
             <div>
-              <b>Чему хочется научиться:</b> {{ (schoolProfile.data.learn_subjects || []).map(s => s.subject).join(', ') || '-' }}
+              <b>Чему хочется научиться:</b> {{ (schoolProfile.data.learn_subjects || []).join(', ') || '-' }}
             </div>
 
             <div>
