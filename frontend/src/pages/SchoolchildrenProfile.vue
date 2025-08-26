@@ -408,14 +408,13 @@ async function saveProfile() {
         },
       }).submit();
     }
-    
     console.log('[DEBUG] Синхронизация schoolProfile перед сохранением');
     let docname = '';
 
     try {
         await schoolProfile.reload();
         console.log('[DEBUG] Schoolprofile:', { schoolProfile });
-        docname = schoolProfile?.data?.name;
+        docname = schoolProfile?.data?.name
         console.log('[DEBUG] Выбранное имя документа:', docname);
     } catch (error) {
         console.log('[DEBUG] Ошибка загрузки schoolProfile, продолжаем с profile:', error.message);
@@ -429,6 +428,7 @@ async function saveProfile() {
       middle_name: form.value.middle_name,
       birth_date: form.value.birth_date,
       school: form.value.school || '',
+      //school_name: form.value.school_name || '',
       grade: form.value.grade,
       phone: form.value.phone,
       email_private: form.value.email_private,
@@ -440,26 +440,23 @@ async function saveProfile() {
       dreams: form.value.dreams,
       last_updated: new Date().toISOString(),
     };
-
     console.log('[DEBUG] Сохранение Schoolchildren Profile (payload):', { docname, payload });
 
     if (docname) {
-      // ВАЖНО: Добавляем текущий timestamp документа
-      payload.modified = schoolProfile.data?.modified;
-      payload.doctype = 'Schoolchildren Profile';
-      
+      // Если запись существует, обновляем её
       await createResource({
         url: 'frappe.client.save',
         params: { doc: { name: docname, ...payload } },
       }).submit();
     } else {
+      // Если записи нет, создаём новую
       await createResource({
         url: 'frappe.client.insert',
         params: { doc: payload },
       }).submit();
     }
 
-    await schoolProfile.reload();
+    
     editMode.value = false;
     if (window.frappe && window.frappe.msgprint) window.frappe.msgprint('Профиль сохранён');
     console.log('[DEBUG] Профиль успешно сохранён');
@@ -473,8 +470,8 @@ async function saveProfile() {
   } finally {
     saving.value = false;
   }
+  await schoolProfile.reload();
 }
-
 const schoolQuery = ref('');
 const schoolResults = ref([]);
 
