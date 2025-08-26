@@ -103,8 +103,8 @@
                   class="p-2 cursor-pointer hover:bg-surface-gray-2"
                   @click="selectSchool(s)"
                 >
-                  <div class="font-medium">{{ s.school_name }}</div>
-                  <div class="text-xs text-ink-gray-6">{{ s.region }} {{ s.license_number ? '• лиц: ' + s.license_number : '' }}</div>
+                  <div class="font-medium">{{ s.school}}</div>
+                  <div class="text-xs text-ink-gray-6">{{ s.adress }}</div>
                 </div>
               </div>
               <div v-if="form.school_name && !schoolResults.length" class="text-xs text-ink-gray-6 mt-1">
