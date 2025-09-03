@@ -420,7 +420,7 @@ async function saveProfile() {
     } catch (error) {
         console.log('[DEBUG] Ошибка загрузки schoolProfile, продолжаем с profile:', error.message);
     }
-
+    console.log('[DEBUG] Форма перед payload:', { form: form.value });
     let payload = {
       doctype: 'Schoolchildren Profile',
       user: profile.data?.name,
