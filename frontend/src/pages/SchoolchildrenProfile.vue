@@ -350,24 +350,28 @@ function formatTelegram(t) {
 }
 
 function fillFormFromProfile() {
-  console.log('[DEBUG] Заполнение формы:', { schoolProfile: schoolProfile.data, profile: profile.data });
+  console.log('[DEBUG] Заполнение формы:', {
+    schoolProfile: schoolProfile.data,
+    profile: profile.data,
+    currentForm: JSON.stringify(form.value, null, 2),
+  });
   form.value.first_name = schoolProfile.data?.first_name || profile.data?.first_name || '';
   form.value.last_name = schoolProfile.data?.last_name || profile.data?.last_name || '';
   form.value.middle_name = schoolProfile.data?.middle_name || '';
   form.value.birth_date = schoolProfile.data?.birth_date || '';
   form.value.school = schoolProfile.data?.school || '';
-  //form.value.school_name = schoolProfile.data?.school_name || '';
   form.value.grade = schoolProfile.data?.grade || '';
   form.value.phone = schoolProfile.data?.phone || '';
   form.value.email_private = schoolProfile.data?.email_private || '';
   form.value.telegram = schoolProfile.data?.telegram || '';
-  form.value.exams = schoolProfile.data?.exams ? schoolProfile.data?.exams.map(e => e.exam_subject) : [];
-  form.value.learn_subjects = schoolProfile.data?.learn_subjects ? schoolProfile.data?.learn_subjects.map(s => s.subject) : [];
+  form.value.exams = schoolProfile.data?.exams ? schoolProfile.data.exams : [];
+  form.value.learn_subjects = schoolProfile.data?.learn_subjects ? schoolProfile.data.learn_subjects : [];
   form.value.interests = schoolProfile.data?.interests || '';
   form.value.about_me = schoolProfile.data?.about_me || '';
   form.value.dreams = schoolProfile.data?.dreams || '';
-  console.log('[DEBUG] Форма:', { form: form.value });
+  console.log('[DEBUG] Форма после заполнения:', JSON.stringify(form.value, null, 2));
 }
+
 
 function toggleEdit() {
   editMode.value = !editMode.value;
@@ -389,15 +393,13 @@ async function saveProfile() {
   console.log('[DEBUG] Сохранение профиля:', { form: form.value });
   saving.value = true;
   try {
-    //if (!validateExams(form.value.exams)) {
-      //throw new Error('Выбранные предметы ЕГЭ не соответствуют допустимым значениям: ' + form.value.exams.join(', '));
-    //}
-    //if (!validateLearnSubjects(form.value.learn_subjects)) {
-      //throw new Error('Выбранные предметы для изучения не соответствуют допустимым значениям: ' + form.value.learn_subjects.join(', '));
-    //}
+    // Создаём копию данных формы
+    const formData = { ...form.value };
+    console.log('[DEBUG] Копия formData:', JSON.stringify(formData, null, 2));
 
-    if (form.value.first_name || form.value.last_name) {
-      const fullName = `${form.value.first_name || ''} ${form.value.last_name || ''}`.trim();
+    // Обновление full_name в User, если нужно
+    if (formData.first_name || formData.last_name) {
+      const fullName = `${formData.first_name || ''} ${formData.last_name || ''}`.trim();
       console.log('[DEBUG] Обновление User.full_name:', { name: profile.data?.name, fullName });
       await createResource({
         url: 'frappe.client.set_value',
@@ -409,58 +411,53 @@ async function saveProfile() {
         },
       }).submit();
     }
-    console.log('[DEBUG] Синхронизация schoolProfile перед сохранением');
-    let docname = '';
 
+    // Получаем docname
+    let docname = '';
     try {
-        await schoolProfile.reload();
-        console.log('[DEBUG] Schoolprofile:', { schoolProfile });
-        docname = schoolProfile?.data?.name
-        console.log('[DEBUG] Выбранное имя документа:', docname);
+      await schoolProfile.reload();
+      console.log('[DEBUG] Schoolprofile:', { schoolProfile });
+      docname = schoolProfile?.data?.name;
+      console.log('[DEBUG] Выбранное имя документа:', docname);
     } catch (error) {
-        console.log('[DEBUG] Ошибка загрузки schoolProfile, продолжаем с profile:', error.message);
+      console.log('[DEBUG] Ошибка загрузки schoolProfile, продолжаем с profile:', error.message);
     }
-    console.log('[DEBUG] Форма перед payload:', { form: form.value });
+
+    // Формируем payload из копии данных формы
     let payload = {
       doctype: 'Schoolchildren Profile',
       user: profile.data?.name,
-      first_name: form.value.first_name,
-      last_name: form.value.last_name,
-      middle_name: form.value.middle_name,
-      birth_date: form.value.birth_date,
-      school: form.value.school || '',
-      //school_name: form.value.school_name || '',
-      grade: form.value.grade,
-      phone: form.value.phone,
-      email_private: form.value.email_private,
-      telegram: form.value.telegram,
-      exams: form.value.exams.map(exam => ({ exam_subject: exam })),
-      learn_subjects: form.value.learn_subjects.map(subject => ({ subject })),
-      interests: form.value.interests,
-      about_me: form.value.about_me,
-      dreams: form.value.dreams,
+      first_name: formData.first_name,
+      last_name: formData.last_name,
+      middle_name: formData.middle_name,
+      birth_date: formData.birth_date,
+      school: formData.school || '',
+      grade: formData.grade,
+      phone: formData.phone,
+      email_private: formData.email_private,
+      telegram: formData.telegram,
+      exams: Array.isArray(formData.exams) ? formData.exams.map(exam => ({ exam_subject: exam })) : [],
+      learn_subjects: Array.isArray(formData.learn_subjects) ? formData.learn_subjects.map(subject => ({ subject })) : [],
+      interests: formData.interests,
+      about_me: formData.about_me,
+      dreams: formData.dreams,
       last_updated: new Date().toISOString(),
     };
     console.log('[DEBUG] Сохранение Schoolchildren Profile (payload):', { docname, payload });
 
+    // Сохранение или создание документа
     if (docname) {
-      // Если запись существует, обновляем её
       await createResource({
         url: 'frappe.client.save',
-        params: { doc: { 
-          ...schoolProfile.data, // берём актуальный документ
-          ...payload             // перезаписываем нужные поля
-        }},
+        params: { doc: { ...schoolProfile.data, ...payload } },
       }).submit();
     } else {
-      // Если записи нет, создаём новую
       await createResource({
         url: 'frappe.client.insert',
         params: { doc: payload },
       }).submit();
     }
 
-    
     editMode.value = false;
     if (window.frappe && window.frappe.msgprint) window.frappe.msgprint('Профиль сохранён');
     console.log('[DEBUG] Профиль успешно сохранён');
@@ -476,6 +473,7 @@ async function saveProfile() {
   }
   await schoolProfile.reload();
 }
+
 const schoolQuery = ref('');
 const schoolResults = ref([]);
 
@@ -549,7 +547,7 @@ watch(
   () => schoolProfile.data,
   (newData, oldData) => {
     console.log('[DEBUG] Изменение schoolProfile.data:', { old: oldData, new: newData });
-    if (newData) {
+    if (newData && !editMode.value) {
       console.log('[DEBUG] Заполнение формы из schoolProfile');
       fillFormFromProfile();
     }
