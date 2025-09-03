@@ -509,6 +509,7 @@ function selectSchool(s) {
   schoolResults.value = [];
   schoolQuery.value = s.school;
   console.log('[DEBUG] Выбрана школа:', { school: s });
+  console.log('[DEBUG] Форма после заполнения:', JSON.stringify(form.value, null, 2));
 }
 
 onMounted(() => {
