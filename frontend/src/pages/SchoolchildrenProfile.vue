@@ -437,7 +437,7 @@ async function saveProfile() {
       email_private: formData.email_private,
       telegram: formData.telegram,
       exams: Array.isArray(formData.exams) ? formData.exams.map(exam => ({ exam_subject: exam })) : [],
-      learn_subjects: Array.isArray(formData.learn_subjects) ? formData.learn_subjects.map(subject => ({ subject })) : [],
+      learn_subjects: Array.isArray(formData.learn_subjects) ? formData.learn_subjects.map(subject => ({ learn_subject: subject })) : [],
       interests: formData.interests,
       about_me: formData.about_me,
       dreams: formData.dreams,
