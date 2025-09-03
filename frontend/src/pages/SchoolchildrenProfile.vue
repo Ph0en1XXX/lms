@@ -366,6 +366,7 @@ function fillFormFromProfile() {
   form.value.interests = schoolProfile.data?.interests || '';
   form.value.about_me = schoolProfile.data?.about_me || '';
   form.value.dreams = schoolProfile.data?.dreams || '';
+  console.log('[DEBUG] Форма:', { form });
 }
 
 function toggleEdit() {
