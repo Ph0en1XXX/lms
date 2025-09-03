@@ -504,7 +504,7 @@ async function searchSchool(q) {
 const debouncedSearchSchool = debounce(() => searchSchool(schoolQuery.value), 300);
 
 function selectSchool(s) {
-  form.value.school = s.name;
+  form.value.school = s.school;
   //form.value.school_name = s.school_name;
   schoolResults.value = [];
   schoolQuery.value = s.school;
