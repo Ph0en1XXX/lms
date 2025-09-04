@@ -228,20 +228,6 @@ const schoolProfile = createResource({
     filters: { user:user },
   },
   auto: false,
-  transform(data) {
-    let doc = data || {};
-    console.log('[DEBUG] Данные schoolProfile до трансформации:', doc);
-    try {
-      doc.exams = doc.exams ? doc.exams.map(e => e.exam_subject) : [];
-      doc.learn_subjects = doc.learn_subjects ? doc.learn_subjects.map(s => s.subject) : [];
-    } catch (e) {
-      console.error('[DEBUG] Ошибка трансформации данных:', e);
-      doc.exams = [];
-      doc.learn_subjects = [];
-    }
-    console.log('[DEBUG] Данные schoolProfile после трансформации:', doc);
-    return doc;
-  },
   onSuccess(data) {
     console.log('[DEBUG] Профиль школьника загружен:', data);
   },
@@ -539,7 +525,7 @@ async function searchMajor(q) {
   }
 }
 
-const debouncedSearchMajor = debounce(() => searchSchool(majorQuery.value), 300);
+const debouncedSearchMajor = debounce(() => searchMajor(majorQuery.value), 300);
 
 function selectMajor(m) {
   form.value.major = m.major_name;
