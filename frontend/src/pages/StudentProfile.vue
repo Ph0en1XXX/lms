@@ -540,7 +540,7 @@ async function searchMajor(q) {
 
 const debouncedSearchMajor = debounce(() => searchSchool(majorQuery.value), 300);
 
-function selectSchool(m) {
+function selectMajor(m) {
   form.value.major = m.major_name;
   //form.value.school_name = s.school_name;
   majorResults.value = [];
