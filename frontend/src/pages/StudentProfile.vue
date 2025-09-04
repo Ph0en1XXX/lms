@@ -361,9 +361,9 @@ function fillFormFromProfile() {
   form.value.school = schoolProfile.data?.school || '';
   form.value.education_level = schoolProfile.data?.education_level || '';
   form.value.major = schoolProfile.data?.major || '';
-  form.value.program = schoolProfile.data?.interests || '';
-  form.value.course = schoolProfile.data?.about_me || '';
-  form.value.group_leader = schoolProfile.data?.dreams || '';
+  form.value.program = schoolProfile.data?.program || '';
+  form.value.course = schoolProfile.data?.course || '';
+  form.value.group_leader = schoolProfile.data?.group_leader || '';
   form.value.interests = schoolProfile.data?.interests || '';
   form.value.about_me = schoolProfile.data?.about_me || '';
   form.value.dreams = schoolProfile.data?.dreams || '';
