@@ -129,7 +129,7 @@
                   class="p-2 cursor-pointer hover:bg-surface-gray-2"
                   @click="selectMajor(m)"
                 >
-                  <div class="font-medium">{{ m.major}}</div>
+                  <div class="font-medium">{{ m.major_name}}</div>
                 </div>
               </div>
               <div v-if="form.major_name && !majorResults.length" class="text-xs text-ink-gray-6 mt-1">
