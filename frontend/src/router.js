@@ -22,6 +22,11 @@ const routes = [
 		name: 'StudentProfile',
 		component: () => import('@/pages/StudentProfile.vue'),
 	},
+		{
+		path: '/coursecreator',
+		name: 'CourseCreatorProfile',
+		component: () => import('@/pages/CourseCreatorProfile.vue'),
+	},
 	{
 		path: '/courses',
 		name: 'Courses',

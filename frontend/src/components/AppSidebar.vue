@@ -268,9 +268,9 @@ const addProfile = () => {
 		})
 	} else if (roles.includes('Course Creator')) {
 		sidebarLinks.value.push({
-			label: __('Schoolchildren Profile'),
+			label: __('Course Creator Profile'),
 			icon: 'Home',
-			to: 'SchoolchildrenProfile',
+			to: 'CourseCreatorProfile',
 			activeFor: [],
 		})
 	} else {
