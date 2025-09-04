@@ -254,9 +254,9 @@ const addProfile = () => {
 	const roles = userResource.data?.roles || []
 	if (roles.includes('LMS Student')) {
 		sidebarLinks.value.push({
-			label: __('Schoolchildren Profile'),
+			label: __('Student Profile'),
 			icon: 'Home',
-			to: 'SchoolchildrenProfile',
+			to: 'StudentProfile',
 			activeFor: [],
 		})
 	} else if (roles.includes('LMS Schoolchild')) {

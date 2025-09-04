@@ -18,6 +18,11 @@ const routes = [
 		component: () => import('@/pages/SchoolchildrenProfile.vue'),
 	},
 	{
+		path: '/student',
+		name: 'StudentProfile',
+		component: () => import('@/pages/StudentProfile.vue'),
+	},
+	{
 		path: '/courses',
 		name: 'Courses',
 		component: () => import('@/pages/Courses.vue'),
