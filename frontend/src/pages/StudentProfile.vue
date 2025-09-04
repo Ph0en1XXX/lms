@@ -438,6 +438,7 @@ async function saveProfile() {
       program: formData.program,
       course: formData.course,
       group_leader: formData.group_leader,
+      interests: formData.interests,
       about_me: formData.about_me,
       dreams: formData.dreams,
       last_updated: new Date().toISOString(),
