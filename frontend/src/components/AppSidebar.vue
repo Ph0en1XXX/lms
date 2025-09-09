@@ -275,9 +275,9 @@ const addProfile = () => {
 		})
 	} else {
 		sidebarLinks.value.push({
-			label: __('Schoolchildren Profile'),
+			label: __('Parent Profile'),
 			icon: 'Home',
-			to: 'SchoolchildrenProfile',
+			to: 'ParentProfile',
 			activeFor: [],
 		})
 	}
