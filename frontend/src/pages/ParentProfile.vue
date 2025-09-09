@@ -61,8 +61,10 @@
             <Input v-model="form.last_name" label="Фамилия" />
             <Input v-model="form.first_name" label="Имя" />
             <Input v-model="form.middle_name" label="Отчество" />
-            <label class="block text-sm font-medium text-ink-gray-7 mb-1">Дата рождения</label>
-            <DatePicker v-model="form.birth_date" label="Дата рождения" />
+            <div>
+              <label class="block text-sm font-medium text-ink-gray-7 mb-1">Дата рождения</label>
+              <DatePicker v-model="form.birth_date" label="Дата рождения" />
+            </div>
             <Input v-model="form.phone" label="Телефон (не публиковать)" />
             <Input v-model="form.email_private" label="Email (не публиковать)" />
             <Input v-model="form.telegram" label="Telegram (например t.me/username)" />
