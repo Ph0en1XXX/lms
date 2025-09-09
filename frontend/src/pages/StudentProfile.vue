@@ -82,6 +82,7 @@
             <Input v-model="form.last_name" label="Фамилия" />
             <Input v-model="form.first_name" label="Имя" />
             <Input v-model="form.middle_name" label="Отчество" />
+            <label class="block text-sm font-medium text-ink-gray-7 mb-1">Дата рождения</label>
             <DatePicker v-model="form.birth_date" label="Дата рождения" />
             <Input v-model="form.phone" label="Телефон (не публиковать)" />
             <Input v-model="form.email_private" label="Email (не публиковать)" />
@@ -110,6 +111,7 @@
                 Выбрана: {{ form.school }}
               </div>
             </div>
+            <label class="block text-sm font-medium text-ink-gray-7 mb-1">Уровень образования</label>
             <Select v-model="form.education_level" :options="['Бакалавриат','Магистратура','Аспирантура','Базовое высшее образование',
             'Специализированное высшее образование','Профессиональная переподготовка','Повышение квалификации']" label="Уровень образования" />
 
@@ -138,7 +140,9 @@
             </div>
 
             <Input v-model="form.program" label="Образовательная программа" />
+            <label class="block text-sm font-medium text-ink-gray-7 mb-1">Курс</label>
             <Select v-model="form.course" :options="['1','2','3','4','5','6']" label="Курс" />
+            <label class="block text-sm font-medium text-ink-gray-7 mb-1">Староста в группе или нет?</label>
             <Select v-model="form.group_leader" :options="['Да','Нет']" label="Староста в группе или нет?" />
 
           </div>

@@ -28,10 +28,10 @@
         <!-- VIEW MODE -->
         <div v-if="!editMode" class="mt-4 space-y-3">
           <div v-if="schoolProfile.loading">
-            <p>Загрузка данных профиля репетитора/эксперта...</p>
+            <p>Загрузка данных профиля родителя...</p>
           </div>
           <div v-else-if="schoolProfile.error">
-            <p class="text-red-500">Ошибка загрузки данных репетитора/эксперта: {{ schoolProfile.error.message }}</p>
+            <p class="text-red-500">Ошибка загрузки данных родителя: {{ schoolProfile.error.message }}</p>
           </div>
           <div v-else-if="schoolProfile.data">
             <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -46,31 +46,12 @@
                 <a v-if="schoolProfile.data.telegram" :href="formatTelegram(schoolProfile.data.telegram)" target="_blank">{{ schoolProfile.data.telegram }}</a>
               </div>
               <div>
-                <b>Университет:</b> {{ schoolProfile.data.school || '-' }}<br/>
-                <b>Уровень образования:</b> {{ schoolProfile.data.education_level || '-' }}<br/>
-                <b>Направление подготовки:</b> {{ schoolProfile.data.major || '-' }}<br/>
-                <b>Образовательная программа:</b> {{ schoolProfile.data.program || '-' }}<br/>
-                <b>Год окончания:</b> {{ schoolProfile.data.graduation_year || '-' }}<br/>
-              </div>
-            </div>
 
-            <div class="grid md:grid-cols-2 gap-4">
-              <div>
-                <b>Коротко о себе:</b>
-                <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.data.about_me || '-' }}</div>
-              </div>
-              <div>
-                <b>Опыт работы:</b>
-                <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.data.experience || '-' }}</div>
-              </div>
-              <div>
-                <b>Достижения:</b>
-                <div class="mt-1 p-3 bg-surface-gray-1 rounded">{{ schoolProfile.data.achievement || '-' }}</div>
               </div>
             </div>
           </div>
           <div v-else>
-            <p>Данные профиля репетитора/эксперта не найдены.</p>
+            <p>Данные профиля родителя не найдены.</p>
           </div>
         </div>
 
@@ -85,67 +66,6 @@
             <Input v-model="form.phone" label="Телефон (не публиковать)" />
             <Input v-model="form.email_private" label="Email (не публиковать)" />
             <Input v-model="form.telegram" label="Telegram (например t.me/username)" />
-            <div>
-              <label class="block text-sm font-medium text-ink-gray-7 mb-1">Университет</label>
-              <input
-                type="text"
-                v-model="schoolQuery"
-                @input="debouncedSearchSchool"
-                class="w-full border rounded p-2"
-                placeholder="Начните вводить название университета"
-              />
-              <div v-if="schoolResults.length" class="border rounded mt-1 max-h-44 overflow-auto bg-white">
-                <div
-                  v-for="s in schoolResults"
-                  :key="s.school"
-                  class="p-2 cursor-pointer hover:bg-surface-gray-2"
-                  @click="selectSchool(s)"
-                >
-                  <div class="font-medium">{{ s.school}}</div>
-                  <div class="text-xs text-ink-gray-6">{{ s.adress }}</div>
-                </div>
-              </div>
-              <div v-if="form.school_name && !schoolResults.length" class="text-xs text-ink-gray-6 mt-1">
-                Выбрана: {{ form.school }}
-              </div>
-            </div>
-            <label class="block text-sm font-medium text-ink-gray-7 mb-1">Уровень образования</label>
-            <Select v-model="form.education_level" :options="['Бакалавриат','Магистратура','Аспирантура','Базовое высшее образование',
-            'Специализированное высшее образование','Профессиональная переподготовка','Повышение квалификации']" label="Уровень образования" />
-
-            <div>
-              <label class="block text-sm font-medium text-ink-gray-7 mb-1">Направление подготовки</label>
-              <input
-                type="text"
-                v-model="majorQuery"
-                @input="debouncedSearchMajor"
-                class="w-full border rounded p-2"
-                placeholder="Начните вводить название направления"
-              />
-              <div v-if="majorResults.length" class="border rounded mt-1 max-h-44 overflow-auto bg-white">
-                <div
-                  v-for="m in majorResults"
-                  :key="m.major"
-                  class="p-2 cursor-pointer hover:bg-surface-gray-2"
-                  @click="selectMajor(m)"
-                >
-                  <div class="font-medium">{{ m.major_name}}</div>
-                </div>
-              </div>
-              <div v-if="form.major_name && !majorResults.length" class="text-xs text-ink-gray-6 mt-1">
-                Выбрано: {{ form.major_name }}
-              </div>
-            </div>
-
-            <Input v-model="form.program" label="Образовательная программа" />
-            <Input v-model="form.graduation_year" label="Год окончания" />
-
-          </div>
-
-          <div class="mt-4 grid md:grid-cols-2 gap-4">
-            <Textarea v-model="form.about_me" label="Коротко о себе" />
-            <Textarea v-model="form.experience" label="Опыт работы" />
-            <Textarea v-model="form.achievement" label="Достижения" />
           </div>
 
           <div class="mt-4 flex space-x-2">
@@ -248,14 +168,7 @@ const form = ref({
   phone: '',
   email_private: '',
   telegram: '',
-  school: '',
-  education_level: '',
-  major: '',
-  program: '',
-  graduation_year: '',
-  experience: '',
-  achievement: '',
-  about_me: ''
+
 });
 
 const breadcrumbs = computed(() => {
@@ -342,14 +255,7 @@ function fillFormFromProfile() {
   form.value.phone = schoolProfile.data?.phone || '';
   form.value.email_private = schoolProfile.data?.email_private || '';
   form.value.telegram = schoolProfile.data?.telegram || '';
-  form.value.school = schoolProfile.data?.school || '';
-  form.value.education_level = schoolProfile.data?.education_level || '';
-  form.value.major = schoolProfile.data?.major || '';
-  form.value.program = schoolProfile.data?.program || '';
-  form.value.graduation_year = schoolProfile.data?.graduation_year || '';
-  form.value.experience = schoolProfile.data?.experience || '';
-  form.value.achievement = schoolProfile.data?.achievement || '';
-  form.value.about_me = schoolProfile.data?.about_me || '';
+
   console.log('[DEBUG] Форма после заполнения:', JSON.stringify(form.value, null, 2));
 }
 
@@ -415,14 +321,7 @@ async function saveProfile() {
       phone: formData.phone,
       email_private: formData.email_private,
       telegram: formData.telegram,
-      school: formData.school || '',
-      education_level: formData.education_level,
-      major: formData.major || '',
-      program: formData.program,
-      graduation_year: formData.graduation_year,
-      experience: formData.experience,
-      achievement: formData.achievement,
-      about_me: formData.about_me,
+
       last_updated: new Date().toISOString(),
     };
     console.log('[DEBUG] Сохранение Schoolchildren Profile (payload):', { docname, payload });
@@ -454,82 +353,6 @@ async function saveProfile() {
     saving.value = false;
   }
   await schoolProfile.reload();
-}
-
-const schoolQuery = ref('');
-const schoolResults = ref([]);
-
-async function searchSchool(q) {
-  if (!q) {
-    schoolResults.value = [];
-    return;
-  }
-  try {
-    console.log('[DEBUG] Поиск школы:', { query: q });
-    const res = await createResource({
-      url: 'frappe.client.get_list',
-      params: {
-        doctype: 'Schools',
-        fields: ['school', 'address'],
-        filters: [['school', 'like', '%' + q + '%']],
-        limit_page_length: 20,
-      },
-    }).submit();
-    schoolResults.value = res || [];
-    console.log('[DEBUG] Результаты поиска школы:', schoolResults.value);
-  } catch (e) {
-    schoolResults.value = [];
-    console.error('[DEBUG] Ошибка поиска школы:', e);
-  }
-}
-
-const debouncedSearchSchool = debounce(() => searchSchool(schoolQuery.value), 300);
-
-function selectSchool(s) {
-  form.value.school = s.school;
-  //form.value.school_name = s.school_name;
-  schoolResults.value = [];
-  schoolQuery.value = s.school;
-  console.log('[DEBUG] Выбрана школа:', { school: s });
-  console.log('[DEBUG] Форма после заполнения:', JSON.stringify(form.value, null, 2));
-}
-
-const majorQuery = ref('');
-const majorResults = ref([]);
-
-async function searchMajor(q) {
-  if (!q) {
-    majorResults.value = [];
-    return;
-  }
-  try {
-    console.log('[DEBUG] Поиск направления:', { query: q });
-    const res = await createResource({
-      url: 'frappe.client.get_list',
-      params: {
-        doctype: 'Majors',
-        fields: ['code', 'major_name'],
-        filters: [['major_name', 'like', '%' + q + '%']],
-        limit_page_length: 20,
-      },
-    }).submit();
-    majorResults.value = res || [];
-    console.log('[DEBUG] Результаты поиска направления:', majorResults.value);
-  } catch (e) {
-    majorResults.value = [];
-    console.error('[DEBUG] Ошибка поиска направления:', e);
-  }
-}
-
-const debouncedSearchMajor = debounce(() => searchMajor(majorQuery.value), 300);
-
-function selectMajor(m) {
-  form.value.major = m.major_name;
-  //form.value.school_name = s.school_name;
-  majorResults.value = [];
-  majorQuery.value = m.major_name;
-  console.log('[DEBUG] Выбрана школа:', { major: m });
-  console.log('[DEBUG] Форма после заполнения:', JSON.stringify(form.value, null, 2));
 }
 
 onMounted(() => {

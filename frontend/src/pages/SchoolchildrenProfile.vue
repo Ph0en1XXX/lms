@@ -86,6 +86,7 @@
             <Input v-model="form.last_name" label="Фамилия" />
             <Input v-model="form.first_name" label="Имя" />
             <Input v-model="form.middle_name" label="Отчество" />
+            <label class="block text-sm font-medium text-ink-gray-7 mb-1">Дата рождения</label>
             <DatePicker v-model="form.birth_date" label="Дата рождения" />
             <div>
               <label class="block text-sm font-medium text-ink-gray-7 mb-1">Школа</label>
@@ -110,7 +111,8 @@
               <div v-if="form.school_name && !schoolResults.length" class="text-xs text-ink-gray-6 mt-1">
                 Выбрана: {{ form.school_name }}
               </div>
-            </div>
+            </div>            
+            <label class="block text-sm font-medium text-ink-gray-7 mb-1">Класс</label>
             <Select v-model="form.grade" :options="['10','11']" label="Класс" />
             <Input v-model="form.phone" label="Телефон (не публиковать)" />
             <Input v-model="form.email_private" label="Email (не публиковать)" />
