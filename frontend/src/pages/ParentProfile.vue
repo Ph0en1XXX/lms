@@ -46,7 +46,10 @@
                 <a v-if="schoolProfile.data.telegram" :href="formatTelegram(schoolProfile.data.telegram)" target="_blank">{{ schoolProfile.data.telegram }}</a>
               </div>
               <div>
-
+                <b>ФИО ребёнка:</b> {{ schoolProfile.data.child_name || '-' }}<br/>
+                <b>Телефон ребёнка:</b> {{ maskPrivate(schoolProfile.data.child_phone) || '-' }}<br/>
+                <b>Email ребёнка:</b> {{ maskPrivate(schoolProfile.data.child_email) || '-' }}<br/>
+                <b>Какие цели Вы ставите своему ребёнку?</b> {{ schoolProfile.data.goals || '-' }}<br/>
               </div>
             </div>
           </div>
@@ -68,6 +71,12 @@
             <Input v-model="form.phone" label="Телефон (не публиковать)" />
             <Input v-model="form.email_private" label="Email (не публиковать)" />
             <Input v-model="form.telegram" label="Telegram (например t.me/username)" />
+          </div>
+          <div class="mt-4 grid md:grid-cols-2 gap-4">
+            <Input v-model="form.child_name" label="ФИО ребёнка" />
+            <Input v-model="form.child_phone" label="Телефон ребёнка" />
+            <Input v-model="form.child_email" label="Email ребёнка" />
+            <Textarea v-model="form.goals" label="Какие цели Вы ставите своему ребёнку?" />
           </div>
 
           <div class="mt-4 flex space-x-2">
@@ -170,6 +179,10 @@ const form = ref({
   phone: '',
   email_private: '',
   telegram: '',
+  child_name: '',
+  child_phone: '',
+  child_email: '',
+  goals: '',
 
 });
 
@@ -257,6 +270,10 @@ function fillFormFromProfile() {
   form.value.phone = schoolProfile.data?.phone || '';
   form.value.email_private = schoolProfile.data?.email_private || '';
   form.value.telegram = schoolProfile.data?.telegram || '';
+  form.value.child_name = schoolProfile.data?.child_name || '';
+  form.value.child_phone = schoolProfile.data?.child_phone || '';
+  form.value.child_email = schoolProfile.data?.child_email || '';
+  form.value.goals = schoolProfile.data?.goals || '';
 
   console.log('[DEBUG] Форма после заполнения:', JSON.stringify(form.value, null, 2));
 }
@@ -323,6 +340,10 @@ async function saveProfile() {
       phone: formData.phone,
       email_private: formData.email_private,
       telegram: formData.telegram,
+      child_name: formData.child_name,
+      child_phone: formData.child_phone,
+      child_email: formData.child_email,
+      goals: formData.goals,
 
       last_updated: new Date().toISOString(),
     };
