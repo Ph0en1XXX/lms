@@ -199,7 +199,7 @@ const updateTabFilter = () => {
 	delete filters.value['published_on']
 	delete filters.value['upcoming']
 
-	if (currentTab.value == 'Enrolled' && user.data?.is_student) {
+	if ((currentTab.value == 'Enrolled' && user.data?.is_student) || (currentTab.value == 'Зачислен' && user.data?.is_student)) {
 		filters.value['enrolled'] = 1
 		delete filters.value['published']
 	} else {
@@ -210,23 +210,23 @@ const updateTabFilter = () => {
 			filters.value['published'] = 1
 			filters.value['upcoming'] = 0
 			filters.value['live'] = 1
-		} else if (currentTab.value == 'Upcoming') {
+		} else if (currentTab.value == 'Upcoming' || currentTab.value == 'Предстоящие') {
 			filters.value['upcoming'] = 1
 			filters.value['published'] = 1
-		} else if (currentTab.value == 'New') {
+		} else if (currentTab.value == 'New' || currentTab.value == 'Новый') {
 			filters.value['published'] = 1
 			filters.value['published_on'] = [
 				'>=',
 				dayjs().add(-3, 'month').format('YYYY-MM-DD'),
 			]
-		} else if (currentTab.value == 'Created') {
+		} else if (currentTab.value == 'Created' || currentTab.value == 'Создано') {
 			filters.value['created'] = 1
 		}
 	}
 }
 
 const updateStudentFilter = () => {
-	if (!user.data || (user.data?.is_student && currentTab.value != 'Enrolled')) {
+	if (!user.data || (user.data?.is_student && currentTab.value != 'Enrolled') || (currentTab.value != 'Зачислен' && user.data?.is_student)) {
 		filters.value['published'] = 1
 	}
 }
