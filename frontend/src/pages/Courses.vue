@@ -4,7 +4,7 @@
 	>
 		<Breadcrumbs :items="breadcrumbs" />
 		<router-link
-			v-if="user.data?.is_moderator || user.data?.is_course_creator"
+			v-if="user.data?.is_moderator || user.data?.roles?.includes('Course Creator')"
 			:to="{
 				name: 'CourseForm',
 				params: { courseName: 'new' },
