@@ -161,6 +161,7 @@ const questionData = createResource({
 	},
 	auto: false,
 	onSuccess(data) {
+		console.log(data)
 		let counter = 1
 		editMode.value = true
 		Object.keys(data).forEach((key) => {
