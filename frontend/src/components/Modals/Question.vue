@@ -266,6 +266,7 @@ const addQuestionRow = (question, close) => {
 				show.value = false
 				updateOnboardingStep('create_first_quiz')
 				showToast(__('Success'), __('Question added successfully'), 'check')
+				console.log('quiz before reload:', quiz.value)
 				quiz.value.reload()
 				close()
 			},
