@@ -2333,10 +2333,6 @@ msgstr "ID"
 msgid "Icon"
 msgstr "Иконка"
 
-#: frontend/src/components/LessonHelp.vue:11
-msgid "If Include in Preview is enabled for a lesson then the lesson will also be accessible to non logged in users."
-msgstr ""
-
 #: lms/templates/emails/mentor_request_creation_email.html:5
 msgid "If you are not any more interested to mentor the course"
 msgstr "Если вы больше не заинтересованы в руководстве курсом"
@@ -6201,6 +6197,22 @@ msgstr "Нет пройденных курсов"
 #: frontend/src/pages/LessonForm.vue:429
 msgid "Урок успешно создан"
 msgstr "Нет пройденных курсов"
+
+#: frontend/src/pages/LessonForm.vue:453
+msgid "Create Lesson"
+msgstr "Создать урок"
+
+#: frontend/src/pages/LessonForm.vue:453
+msgid "Edit Lesson"
+msgstr "Редактировать урок"
+
+#: frontend/src/pages/LessonForm.vue:28
+msgid "Include in Preview"
+msgstr "Включить в предварительный просмотр"
+
+#: frontend/src/pages/LessonForm.vue:21
+msgid "Title"
+msgstr "Название"
 
 #: frontend/src/pages/LessonForm.vue:453
 msgid "Lesson updated successfully"
