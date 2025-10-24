@@ -258,7 +258,7 @@ const lessonReference = createResource({
 
 const convertToJSON = (lessonData) => {
 	let blocks = [];
-	
+
 	// Обработка YouTube
 	if (lessonData.youtube) {
 		let youtubeID = lessonData.youtube.split('/').pop();
@@ -425,7 +425,7 @@ const createNewLesson = () => {
 					{
 						onSuccess() {
 							capture('lesson_created')
-							updateOnboardingStep('create_first_lesson')
+							//updateOnboardingStep('create_first_lesson')
 							showToast('Success', 'Lesson created successfully', 'check')
 							lessonDetails.reload()
 						},
