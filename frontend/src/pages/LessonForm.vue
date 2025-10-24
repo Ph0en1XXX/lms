@@ -18,14 +18,14 @@
 					<div class="w-5/6 mx-auto">
 						<FormControl
 							v-model="lesson.title"
-							label="__('Title')"
+							:label="__('Title')"
 							class="mb-4"
 							:required="true"
 						/>
 						<FormControl
 							v-model="lesson.include_in_preview"
 							type="checkbox"
-							label="__('Include in Preview')"
+							:label="__('Include in Preview')"
 						/>
 					</div>
 					<div class="border-t mt-4">
