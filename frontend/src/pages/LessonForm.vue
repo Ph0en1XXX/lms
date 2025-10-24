@@ -426,14 +426,14 @@ const createNewLesson = () => {
 						onSuccess() {
 							capture('lesson_created')
 							//updateOnboardingStep('create_first_lesson')
-							showToast('Success', 'Lesson created successfully', 'check')
+							showToast(__('Success'), __('Lesson created successfully'), 'check')
 							lessonDetails.reload()
 						},
 					}
 				)
 			},
 			onError(err) {
-				showToast('Error', err.message, 'x')
+				showToast(__('Error'), err.message, 'x')
 			},
 		}
 	)
@@ -450,11 +450,11 @@ const editCurrentLesson = () => {
 			},
 			onSuccess() {
 				showSuccessMessage
-					? showToast('Success', 'Lesson updated successfully', 'check')
+					? showToast(__('Success'), __('Lesson updated successfully'), 'check')
 					: ''
 			},
 			onError(err) {
-				showToast('Error', err.message, 'x')
+				showToast(__('Error'), err.message, 'x')
 			},
 		}
 	)
@@ -462,10 +462,10 @@ const editCurrentLesson = () => {
 
 const validateLesson = () => {
 	if (!lesson.title) {
-		return 'Title is required'
+		return __('Title is required')
 	}
 	if (!lesson.content) {
-		return 'Content is required'
+		return __('Content is required')
 	}
 }
 

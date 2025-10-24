@@ -434,10 +434,10 @@ const submitCourse = () => {
 			},
 			{
 				onSuccess() {
-					showToast('Success', 'Course updated successfully', 'check')
+					showToast(__('Success'), __('Course updated successfully'), 'check')
 				},
 				onError(err) {
-					showToast('Error', err.messages?.[0] || err, 'x')
+					showToast(__('Error'), err.messages?.[0] || err, 'x')
 				},
 			}
 		)
@@ -445,7 +445,7 @@ const submitCourse = () => {
 		courseCreationResource.submit(course, {
 			onSuccess(data) {
 				capture('course_created')
-				showToast('Success', 'Course created successfully', 'check')
+				showToast(__('Success'), __('Course created successfully'), 'check')
 				//updateOnboardingStep('create_first_course', true, false, () => {
 					//localStorage.setItem('firstCourse', data.name)
 				//})
@@ -455,7 +455,7 @@ const submitCourse = () => {
 				})
 			},
 			onError(err) {
-				showToast('Error', err.messages?.[0] || err, 'x')
+				showToast(__('Error'), err.messages?.[0] || err, 'x')
 			},
 		})
 	}
