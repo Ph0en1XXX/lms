@@ -446,9 +446,9 @@ const submitCourse = () => {
 			onSuccess(data) {
 				capture('course_created')
 				showToast('Success', 'Course created successfully', 'check')
-				updateOnboardingStep('create_first_course', true, false, () => {
-					localStorage.setItem('firstCourse', data.name)
-				})
+				//updateOnboardingStep('create_first_course', true, false, () => {
+					//localStorage.setItem('firstCourse', data.name)
+				//})
 				router.push({
 					name: 'CourseForm',
 					params: { courseName: data.name },
