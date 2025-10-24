@@ -140,7 +140,7 @@ const addChapter = async (close) => {
 			},
 			onSuccess: (data) => {
 				capture('chapter_created')
-				updateOnboardingStep('create_first_chapter')
+				//updateOnboardingStep('create_first_chapter')
 				chapterReference.submit(
 					{ name: data.name },
 					{
