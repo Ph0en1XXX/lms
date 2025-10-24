@@ -66,7 +66,7 @@
 			<div class="text-xs text-ink-gray-5 mb-1 leading-5">
 				{{
 					__(
-						'Copy the URL of the video from YouTube and paste it in the editor.'
+						'Copy the URL of the video from YouTube/RuTube and paste it in the editor.'
 					)
 				}}
 			</div>
@@ -85,7 +85,7 @@ const title = ref(null)
 const contentMap = {
 	quiz: 'How to add a Quiz?',
 	upload: 'How to upload content from your system?',
-	youtube: 'How to add a YouTube Video?',
+	youtube: 'How to add a YouTube Video/RuTube?',
 }
 
 const openHelpDialog = (contentType) => {

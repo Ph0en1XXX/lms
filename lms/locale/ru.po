@@ -910,7 +910,7 @@ msgstr "Чётко определённая роль"
 
 #: frontend/src/components/LessonHelp.vue:30
 msgid "Click on the add icon in the editor and select Quiz from the menu. It opens up a dialog, where you can either select a quiz from the list or create a new quiz. When you select the Create New option it redirects you to the quiz creation page."
-msgstr "Нажмите на значок добавления в редакторе и выберите Quiz в меню. Это открывает диалоговое окно, в котором вы можете выбрать тест из списка или создать новый тест. При выборе опции Create New он перенаправляет вас на страницу создания теста."
+msgstr "Нажмите на значок добавления в редакторе и выберите Тест в меню. Это открывает диалоговое окно, в котором вы можете выбрать тест из списка или создать новый тест. При выборе опции Создать новый он перенаправляет вас на страницу создания теста."
 
 #. Label of the client_id (Data) field in DocType 'Zoom Settings'
 #: lms/lms/doctype/zoom_settings/zoom_settings.json
@@ -6197,3 +6197,36 @@ msgstr "Завершенно"
 #: frontend/src/pages/ProfileAbout.vue:79
 msgid "No completed courses yet"
 msgstr "Нет пройденных курсов"
+
+#: frontend/src/pages/LessonForm.vue:429
+msgid "Урок успешно создан"
+msgstr "Нет пройденных курсов"
+
+#: frontend/src/pages/LessonForm.vue:453
+msgid "Lesson updated successfully"
+msgstr "Урок успешно обновлён"
+
+#: frontend/src/pages/CourseForm.vue:448
+msgid "Course created successfully"
+msgstr "Курс успешно создан"
+
+#: frontend/src/pages/CourseForm.vue:437
+msgid "Course updated successfully"
+msgstr "Курс успешно обновлён"
+
+#: frontend/src/components/LessonHelp.vue:12
+msgid "If Include in Preview is enabled for a lesson then the lesson will also be accessible to non logged in users."
+msgstr "Если для урока включено включение в предварительный просмотр, то урок также будет доступен для пользователей, не вошедших в систему."
+
+#: frontend/src/components/LessonHelp.vue:43
+msgid "How to upload content from your system?"
+msgstr "Как загрузить контент из вашей системы?"
+
+#: frontend/src/components/LessonHelp.vue:62
+msgid "How to add a YouTube Video/RuTube?"
+msgstr "Как добавить видео с YouTube/RuTube?"
+
+#: frontend/src/components/LessonHelp.vue:69
+msgid "Copy the URL of the video from YouTube/RuTube and paste it in the editor."
+msgstr "Скопируйте URL-адрес видео с YouTube/RuTube и вставьте его в редактор."
+
