@@ -77,7 +77,7 @@ msgstr "Краткое описание курса в одну строку, к�
 
 #: frontend/src/pages/ProfileAbout.vue:4
 msgid "About"
-msgstr "О"
+msgstr "Обо мне"
 
 #: frontend/src/pages/Batch.vue:100
 msgid "About this batch"
