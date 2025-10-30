@@ -6257,3 +6257,19 @@ msgstr "Сохранить"
 #: frontend/src/pages/ProfileAbout.vue:203
 msgid "People"
 msgstr "Люди"
+
+#: frontend/src/pages/Profile.vue:149
+msgid "Schedule"
+msgstr "Расписание"
+
+#: frontend/src/pages/Profile.vue:149
+msgid "Slots"
+msgstr "Слоты"
+
+#: frontend/src/pages/Profile.vue:149
+msgid "Roles"
+msgstr "Роли"
+
+#: frontend/src/pages/Profile.vue:149
+msgid "Certificates"
+msgstr "Сертификаты"
