@@ -9,20 +9,32 @@
 			:class="{ 'default-image': !course.image }"
 			:style="{ backgroundImage: 'url(\'' + encodeURI(course.image) + '\')' }"
 		>
-			<div
-				class="flex items-center flex-wrap space-x-1 relative top-4 px-2 w-fit"
-			>
-				<Badge v-if="course.featured" variant="subtle" theme="green" size="md">
-					{{ __('Featured') }}
-				</Badge>
+		<div
+			class="flex items-center flex-wrap space-x-3 relative top-4 px-2 w-fit"
+		>
+			<Badge v-if="course.featured" variant="subtle" theme="green" size="md">
+				{{ __('Featured') }}
+			</Badge>
+
+			<template v-if="course.tags">
+				<!-- Первые 3 тега -->
 				<div
-					v-if="course.tags"
-					v-for="tag in course.tags?.split(', ')"
+					v-for="(tag, index) in course.tags.split(', ').slice(0, 3)"
+					:key="index"
 					class="text-xs bg-white text-gray-800 px-2 py-0.5 rounded-md"
 				>
 					{{ tag }}
 				</div>
-			</div>
+
+				<!-- Бейдж с количеством оставшихся тегов -->
+				<div
+					v-if="course.tags.split(', ').length > 3"
+					class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md"
+				>
+					+{{ course.tags.split(', ').length - 3 }} еще
+				</div>
+			</template>
+		</div>
 			<div v-if="!course.image" class="image-placeholder">
 				{{ course.title[0] }}
 			</div>
