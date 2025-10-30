@@ -10,7 +10,7 @@
 			:style="{ backgroundImage: 'url(\'' + encodeURI(course.image) + '\')' }"
 		>
 		<div
-			class="flex items-center flex-wrap space-x-3 relative top-4 px-2 w-fit"
+			class="flex items-center flex-wrap gap-1 relative top-4 px-2 w-fit"
 		>
 			<Badge v-if="course.featured" variant="subtle" theme="green" size="md">
 				{{ __('Featured') }}
