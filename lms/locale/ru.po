@@ -6253,3 +6253,7 @@ msgstr "Измените свой профиль"
 #: frontend/src/components/Modals/EditProfile.vue:8
 msgid "Save"
 msgstr "Сохранить"
+
+#: frontend/src/pages/ProfileAbout.vue:203
+msgid "People"
+msgstr "Люди"

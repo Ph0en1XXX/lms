@@ -184,7 +184,7 @@ const isSessionUser = () => {
 }
 
 const getTabButtons = () => {
-	let buttons = [{ label: 'About' }, { label: 'Certificates' }]
+	let buttons = [{ label: __('About') }, { label: 'Certificates' }]
 	if ($user.data?.is_moderator) buttons.push({ label: 'Roles' })
 	if (
 		isSessionUser() &&
@@ -200,7 +200,7 @@ const getTabButtons = () => {
 const breadcrumbs = computed(() => {
 	let crumbs = [
 		{
-			label: 'People',
+			label: __('People'),
 		},
 		{
 			label: profile.data?.full_name,
