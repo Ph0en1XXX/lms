@@ -31,7 +31,7 @@
 					v-if="course.tags.split(', ').length > 3"
 					class="text-xs bg-gray-100 text-gray-600 px-2 py-0.5 rounded-md"
 				>
-					+{{ course.tags.split(', ').length - 3 }} еще
+					+{{ course.tags.split(', ').length - 3 }} {{ __('more') }}
 				</div>
 			</template>
 		</div>

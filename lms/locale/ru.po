@@ -6242,3 +6242,6 @@ msgstr "Как добавить видео с YouTube/RuTube?"
 msgid "Copy the URL of the video from YouTube/RuTube and paste it in the editor."
 msgstr "Скопируйте URL-адрес видео с YouTube/RuTube и вставьте его в редактор."
 
+#: frontend/src/components/CourseCard.vue:69
+msgid "more"
+msgstr "ещё"
