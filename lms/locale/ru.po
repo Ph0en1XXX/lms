@@ -6245,3 +6245,11 @@ msgstr "Скопируйте URL-адрес видео с YouTube/RuTube и вс
 #: frontend/src/components/CourseCard.vue:69
 msgid "more"
 msgstr "ещё"
+
+#: frontend/src/components/Modals/EditProfile.vue:4
+msgid "Edit your profile"
+msgstr "Измените свой профиль"
+
+#: frontend/src/components/Modals/EditProfile.vue:8
+msgid "Save"
+msgstr "Сохранить"
